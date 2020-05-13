@@ -1,0 +1,7 @@
+XXX 'xxx'
+YYY 'yyy'
+%
+<s>    ::= <a>
+<a>    **= <b>
+<b>:B1 ::= XXX
+<b>:B2 ::= YYY

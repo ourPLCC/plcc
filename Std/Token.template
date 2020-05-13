@@ -1,0 +1,45 @@
+import java.util.*;
+
+// Token class without patterns
+public class Token {
+
+    public enum Val {
+%%Vals%%
+    }
+
+    public Val val;          // the token value
+    public String str;       // the token string matched
+    public int lno;	     // the line number where the token occurred
+    public StringBuffer buf; // used to collect the token's lexeme
+    
+    public Token() {
+	val = null;
+	str = null;
+	lno = 0;
+        buf = new StringBuffer();
+    }
+    
+    public Token(Val val, String str, int lno) {
+        this.val = val;
+        this.str = str;
+	this.lno = lno;
+    }
+
+    public Token(Val val, String str) {
+	this(val, str, 0);
+    }
+
+    public String toString() {
+        if (str == null)
+            str = buf.toString();
+        return str;
+    }
+
+    public static void main(String [] args) {
+	for (Val v : Val.values())
+	    System.out.println(v);
+    }
+
+//Token//
+
+}

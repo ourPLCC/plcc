@@ -1,0 +1,4 @@
+skip WHITESPACE '\s'
+token FOO 'foo'
+token BAR 'bar'
+token ID '[A-Za-z]\w*'

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+[ -d Java ] || {
+    echo "Java directory missing" >&2
+    exit 1
+}
+
+[ -f Java/Scan.class ] || {
+    echo "Java/Scan.class missing" >&2
+    exit 2
+}
+
+(cd ./Java ; java Scan)
