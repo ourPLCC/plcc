@@ -24,7 +24,7 @@ RUN apk add --no-cache bash
 
 # Create separate users for PLCC and the developer.
 RUN addgroup -S plcc && adduser -S plcc -G plcc
-RUN addgroup -S me && adduser -S me -G me
+RUN addgroup -S my && adduser -S my -G my
 
 
 # Install PLCC
@@ -33,6 +33,6 @@ ENV PATH="/plcc/Bash:${PATH}" LIBPLCC="/plcc"
 
 
 # Change user to dev.
-USER me:me
-WORKDIR /home/me
+USER my:my
+WORKDIR /home/my/work
 CMD ["/bin/bash"]
