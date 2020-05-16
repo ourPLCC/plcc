@@ -27,13 +27,13 @@ values that make sense in your context.
 
 ```bash
 # 2. Clone your fork (first time only; replace the URL with your fork's URL).
-git clone https://github.com/StoneyJackson/plcc.git
+git clone https://github.com/StoneyJackson/PROJECT.git
 
 # 3. Change into the root of the project.
-cd plcc
+cd PROJECT
 
 # 4. Create a remote pointing to the original project (first time only).
-git remote add upstream https://github.com/ourPLCC/plcc.git
+git remote add upstream https://github.com/ourPLCC/PROJECT.git
 
 # 5. Make sure you are on master.
 git checkout master
@@ -69,7 +69,6 @@ git checkout master
 15. In the pull-request, request a review by placing @ourPLCC/core in a
     comment.
 
-
 ## Contributing with write privileges
 
 If you have write privileges, you can contribute using the fork proceedure
@@ -87,4 +86,55 @@ described above, or modify the fork proceedure as follows:
 
 - Short overview <https://seesparkbox.com/foundry/semantic_commit_messages>
 - Full specification <https://www.conventionalcommits.org/en/v1.0.0/>
+
+## Updating a pull-request using a fork
+
+We try to keep our git graph linear so that it is more easily understood.  If
+someone else's pull-request is merged before yours, you will likely be asked to
+update your pull-request. This section describes how you do that.
+
+Let's assume that your pull-request is associated with the feature branch
+`sj-fix-typo-in-readme`. Let's also assume that you are working in a fork,
+and you have a remote named `upstream` that refers to the original project.
+If you followed the "Contributing with a fork" proceedure above, then you
+should be ready to follow these instructions. If you followed the "
+
+```bash
+git checkout master
+git pull upstream master
+git checkout sj-fix-typo-in-readme
+git merge master
+```
+
+The last command tries to merge the changes from master into your feature
+branch (the currently checked out branch).  Your changes may not be compatible
+with the new changes in master. If Git detects a lexical conflict, it will stop
+the process and will expect you to resolve the conflicts. Checkout GitHub's
+documentation on [Resolving a merge conflict using the command
+line](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/resolving-a-merge-conflict-using-the-command-line).
+
+Even if Git does not detect a conflict and finished rebasing "successfully",
+there may be a logical conflict. The only way to detect logical conflicts is
+through testing (e.g., manual inspection, running automated tests, manual
+testing, etc.). Perform suitable tests and make and commit any necessary fixes.
+
+Once you are satisfied, update your pull-request by pushing your changes to the
+associated feature branch in your fork.
+
+```
+git push origin sj-fix-typo-in-readme
+```
+
+This will automatically update the pull-request. Return to the pull-request on
+GitHub and request a review from @ourPLCC/core.
+
+## Updating a pull-request with write privileges
+
+Same as "Updating a pull-request using a fork", except pull changes from origin
+instead of upstream:
+
+```bash
+git checkout master
+git pull origin master
+```
 
