@@ -10,7 +10,7 @@
 
 ## Contributing with a fork
 
-The proceedure does not require any special privileges to contribute changes.
+This proceedure does not require any special privileges to contribute changes.
 
 In the example below, I'll be fixing a typo in the README.md of this project.
 Below are values that are unique to this example. You could replace them with
