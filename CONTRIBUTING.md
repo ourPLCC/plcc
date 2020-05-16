@@ -8,6 +8,13 @@
 - Contribute changes by publishing your feature branch and issueing a
   pull-request to master in the original repository.
 
+There are several ways to contribute. Below I describe two common ways.  The
+first assumes you do not have write privileges to the repository, the second
+are for those who do have write privileges. Anyone can use the first. Only
+those who have been granted write privileges can use the second. If you would
+like to apply for write privileges, please open an issue requesting access, and
+explain why.
+
 ## Contributing with a fork
 
 This proceedure does not require any special privileges to contribute changes.
