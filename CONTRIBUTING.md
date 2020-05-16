@@ -20,13 +20,13 @@ values that make sense in your context.
 
 ```bash
 # 2. Clone your fork (first time only; replace the URL with your fork's URL).
-git clone https://github.com/StoneyJackson/course.git
+git clone https://github.com/StoneyJackson/plcc.git
 
 # 3. Change into the root of the project.
-cd course
+cd plcc
 
 # 4. Create a remote pointing to the original project (first time only).
-git remote add upstream https://github.com/ourPLCC/course.git
+git remote add upstream https://github.com/ourPLCC/plcc.git
 
 # 5. Make sure you are on master.
 git checkout master
