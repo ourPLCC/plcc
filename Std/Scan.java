@@ -5,16 +5,19 @@ import java.io.*;
 public class Scan implements IScan {
 
     private BufferedReader rdr;  // get input from here, line by line
-    private String s;   // current string being scanned
-    public int lno;     // current line number
-    private int start;  // starting position in the string to scan
-    private int end;    // ending position
+    private String s;            // current string being scanned
+    private int start;           // starting position in the string to scan
+    private int end;             // ending position
+
+    public int lno;              // current line number
+    public Token tok;            // this is persistent across all calls to cur()
 
     // create a scanner object on a buffered reader
     public Scan(BufferedReader rdr) {
         this.rdr = rdr;
 	this.lno = 0;
         s = null;
+	tok = null;
     }
 
     // create a scanner object on a string
@@ -22,12 +25,10 @@ public class Scan implements IScan {
         this(new BufferedReader(new StringReader(s)));
     }
 
-    public Token tok; // this is persistent across all calls to token()
-
     public void reset() {
         // force the scanner to process the next line
-        tok = null;
         s = null;
+        tok = null;
     }
 
     // fill the string buffer from the reader if it's exhausted or null)
@@ -60,8 +61,10 @@ public class Scan implements IScan {
         LOOP:
         while (true) {
             fillString(); // get another line if necessary
-            if (s == null)
-                return new Token(Token.Val.$EOF, "EOF", lno); // EOF
+            if (s == null) {
+		tok = new Token(Token.Val.$EOF, "EOF", lno); // EOF
+		return tok;
+            }
             // s cannot be null here
             int matchEnd = start; // current end of match
             for (Token.Val val : Token.Val.values()) {
