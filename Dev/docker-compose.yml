@@ -41,4 +41,3 @@ services:
       - EMAIL
     volumes:
       - "..:/app"
-
