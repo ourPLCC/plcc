@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+
+  release:
+    # Configure
+    #
+    #   Create a .env in the root of the project and define the following variables.
+    # 
+    #     GIT_AUTHOR_NAME=Your Name
+    #     EMAIL=Your@Email
+    #
+    # Running from the root of the project
+    #
+    #     docker-compose -f Dev/docker-compose.yml run --rm release > Dev/publish-release.bash
+    #
+    # Review the contents of Dev/publish-release.bash
+    # When ready to publish the release run
+    #
+    #     Dev/publish-release.yml
+    #
+    
+    build:
+      context: ./Release
+
+    environment:
+      # Space delimited list of tags that reference images in your
+      # local Docker environment to be released. These tags must encode
+      # the repository where the referenced image will ultimately be
+      # published.
+      # e.g., registry/user/image:build registry/user/image2:build .
+      - IMAGES_TO_RELEASE=ourplcc/plcc:build
+
+      # Create a .env file in the root of the project (it is not saved in the repository
+      # because it contains individual information). Set the following two variables in .env.
+      # GIT_AUTHOR_NAME=Your Name
+      # EMAIL=Your@Email
+      #
+      # Leave these blank; they are set in .env; we just need to pass them through
+      - GIT_AUTHOR_NAME
+      - EMAIL
+    volumes:
+      - "..:/app"
