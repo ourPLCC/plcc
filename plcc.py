@@ -96,6 +96,16 @@ def main():
             argv = argv[1:]
         else:
             break
+    
+    # Handle --version option.
+    if 'version' in flags and flags['version']:
+        from pathlib import Path
+        version_file = Path(__file__).resolve().parent / 'VERSION'
+        with open(version_file, 'r') as f:
+            contents = f.read()
+            print("PLCC " + contents.strip())
+        sys.exit(0)
+
     nxt = nextLine()     # nxt is the next line generator
     lex(nxt)    # lexical analyzer generation
     par(nxt)    # LL(1) check and parser generation
