@@ -146,9 +146,6 @@ public class Scan implements IScan {
             Token t = next();
             String s;
             switch(t.val) {
-            case $EOF:
-                s = String.format("EOF");
-                break;
             case $ERROR:
                 s = String.format("ERROR '%s'", t.str);
                 break;
