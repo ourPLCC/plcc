@@ -10,4 +10,4 @@
     exit 2
 }
 
-(cd ./Java ; java Rep -t)
+java -cp ./Java Rep -t

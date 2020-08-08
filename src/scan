@@ -10,4 +10,4 @@
     exit 2
 }
 
-(cd ./Java ; java Scan)
+java -cp ./Java Scan

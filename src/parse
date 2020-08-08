@@ -10,4 +10,4 @@
     exit 2
 }
 
-(cd ./Java ; java Parser)
+java -cp ./Java Parser

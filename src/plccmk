@@ -1,12 +1,12 @@
 #!/bin/bash
 
-LIB=${LIBPLCC:-/usr/local/pub/plcc/PLCC}
+LIB="${LIBPLCC:-/usr/local/pub/plcc/PLCC}"
 PYTHON3=python3
-PLCC=$LIB/plcc.py
+PLCC="$LIB/plcc.py"
 
 if [ "$1" = "-c" ];
 then
-        rm Java/*.java Java/*.class &>/dev/null
+        rm Java/*.java Java/*.class 2> /dev/null
         shift
 fi
 
@@ -22,7 +22,7 @@ fi
 	exit 1
 }
 
-$PYTHON3 $PLCC $FILES || {
+$PYTHON3 "$PLCC" $FILES || {
 	echo "cannot compile $FILES" >&2
 	exit 4
 }
@@ -32,4 +32,4 @@ $PYTHON3 $PLCC $FILES || {
 	exit 5
 }
 
-(cd ./Java ; javac *.java)
+(cd Java ; javac *.java)
