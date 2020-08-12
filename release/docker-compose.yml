@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  release:
+    build: .
+    environment:
+      # Space delimited list of image tags to retag with version numbers.
+      # Leave blank for no images.
+      - IMAGES_TO_RELEASE=
+      
+      # Leave these blank; they are set in .env; we just need to pass them through
+      - GIT_AUTHOR_NAME
+      - EMAIL
+    volumes:
+      - "$PWD:/app"
