@@ -5,6 +5,4 @@ IF NOT EXIST Java\Scan.class (
     EXIT /B 1
 )
 
-pushd Java
-java Scan
-popd
+java -cp .\Java Scan

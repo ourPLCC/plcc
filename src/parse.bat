@@ -5,6 +5,4 @@ IF NOT EXIST Java\Parser.class (
     EXIT /B 1
 )
 
-pushd Java
-java Parser %*
-popd
+java -cp .\Java Parser %*

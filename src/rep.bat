@@ -5,6 +5,4 @@ IF NOT EXIST Java\Rep.class (
     EXIT /B 1
 )
 
-pushd Java
-java Rep
-popd
+java -cp .\Java Rep %1 %2 %3 %4 %5 %6 %7 %8 %9

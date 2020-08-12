@@ -1,7 +1,7 @@
 {
   "bumpFiles": [
     {
-      "filename": "VERSION",
+      "filename": "src/VERSION",
       "type": "plain-text"
     }
   ]
