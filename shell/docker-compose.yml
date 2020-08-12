@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  shell:
+    build:
+      context: ..
+      dockerfile: ./shell/Dockerfile
+    image: plcc-shell:build
+    volumes:
+      - "${PWD}:/workdir"
