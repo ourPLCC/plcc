@@ -6,21 +6,21 @@ public class Trace implements ITrace {
     public PrintStream out;
 
     public Trace(PrintStream out, String indent) {
-	this.out = out;
+        this.out = out;
         this.indent = indent;
     }
 
     public Trace(PrintStream out) {
-	this(out, "");
+        this(out, "");
     }
 
     public Trace() {
-	this(System.err); // output defaults to System.err
+        this(System.err); // output defaults to System.err
     }
 
     public void print(String s, int lno) {
-	if (out != null)
-	    out.printf("%4d: %s\n", lno, indent + s);
+        if (out != null)
+            out.printf("%4d: %s\n", lno, indent + s);
     }
 
     public void print(Token t) {
@@ -33,7 +33,7 @@ public class Trace implements ITrace {
     }
 
     public void reset() {
-	indent = "";
+        indent = "";
     }
 
 }

@@ -15,9 +15,9 @@ public class Scan implements IScan {
     // create a scanner object on a buffered reader
     public Scan(BufferedReader rdr) {
         this.rdr = rdr;
-	this.lno = 0;
+        this.lno = 0;
         s = null;
-	tok = null;
+        tok = null;
     }
 
     // create a scanner object on a string
@@ -39,7 +39,7 @@ public class Scan implements IScan {
                 s = rdr.readLine();
                 if (s == null)
                     return; // end of file
-		lno++;
+                lno++;
                 s += "\n";
                 start = 0;
                 end = s.length();
@@ -49,21 +49,21 @@ public class Scan implements IScan {
             // System.err.print("s=" + s);
         }
     }
-        
+
     public Token cur() {
         // lazy
         if (tok != null)
             return tok; // don't get a new token if we already have one
 
         String matchString = "";
-	Token.Val valFound = null;
+        Token.Val valFound = null;
 
         LOOP:
         while (true) {
             fillString(); // get another line if necessary
             if (s == null) {
-		tok = new Token(Token.Val.$EOF, "EOF", lno); // EOF
-		return tok;
+                tok = new Token(Token.Val.$EOF, "EOF", lno); // EOF
+                return tok;
             }
             // s cannot be null here
             int matchEnd = start; // current end of match
@@ -106,8 +106,8 @@ public class Scan implements IScan {
             }
             start = matchEnd; // start of next token match
             // matchString is the matching string
-	    tok = new Token(valFound, matchString, lno); // persistent value
-	    return tok;
+            tok = new Token(valFound, matchString, lno); // persistent value
+            return tok;
         }
     }
 
@@ -120,7 +120,7 @@ public class Scan implements IScan {
     }
 
     public void put(Token t) {
-	throw new RuntimeException("Scan class: put not implemented");
+        throw new RuntimeException("Scan class: put not implemented");
     }
 
     public Token match(Token.Val v, Trace trace) {
@@ -128,7 +128,7 @@ public class Scan implements IScan {
         Token.Val vv = t.val;
         if (v == vv) {
             if (trace != null)
-		trace.print(t);
+            trace.print(t);
             adv();
         } else {
             throw new RuntimeException

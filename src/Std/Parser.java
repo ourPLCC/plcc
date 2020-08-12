@@ -19,11 +19,11 @@ public class Parser {
             System.out.println("Premature end of input");
         } catch (Exception e) {
             System.out.println(e);
-        } 
+        }
     }
 
     public static void main(String [] args) {
-	Trace trace = null;
+        Trace trace = null;
         int start = 0;
         if (args.length > 0 && args[0].equals("-t")) {
             trace = new Trace();
@@ -41,7 +41,7 @@ public class Parser {
             String s = args[i];
             Scan scn = new Scan(new BufferedReader(new StringReader(s)));
             if (trace != null) {
-	        trace.reset();
+                trace.reset();
                 System.out.println();
             }
             System.out.print(s + " -> ");
