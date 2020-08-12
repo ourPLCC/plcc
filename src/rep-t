@@ -1,0 +1,13 @@
+#!/bin/bash
+
+[ -d Java ] || {
+    echo "Java directory missing" >&2
+    exit 1
+}
+
+[ -f Java/Rep.class ] || {
+    echo "Java/Rep.class missing" >&2
+    exit 2
+}
+
+java -cp ./Java Rep -t

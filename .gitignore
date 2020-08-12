@@ -1,3 +1,6 @@
+# PLCC places generated Java files in directories named Java. Ignore them.
+Java/
+
 # Created by Docker environment
 .bash_history
 

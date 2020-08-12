@@ -5,9 +5,9 @@
     exit 1
 }
 
-[ -f Java/Rep.class ] || {
-    echo "Java/Rep.class missing" >&2
+[ -f Java/Parser.class ] || {
+    echo "Java/Parser.class missing" >&2
     exit 2
 }
 
-(cd ./Java ; java Rep -t)
+java -cp ./Java Parser
