@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.1](https://github.com/ourPLCC/plcc/compare/v2.0.0...v2.0.1) (2020-09-08)
+
+
+### Bug Fixes
+
+* **plcc.py:** Enforce uppercase token names ([1be4531](https://github.com/ourPLCC/plcc/commit/1be4531b2b75e0f31a3912d1817cb262a94ea07c))
+
 ## [2.0.0](https://github.com/ourPLCC/plcc/compare/v1.0.1...v2.0.0) (2020-08-12)
 
 
