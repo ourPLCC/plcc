@@ -7,6 +7,9 @@ ARG ALPINE_BASH_PACKAGE=bash~=5.0
 ARG ALPINE_PYTHON_PACKAGE=python3~=3.8
 ARG ALPINE_JAVA_PACKAGE=openjdk11~=11.0
 
+# Bash unit testing framework
+ARG ALPINE_BATS_PACKAGE=bats~=1.2
+
 FROM ${ALPINE_IMAGE}
 COPY . /plcc
 
@@ -30,6 +33,10 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 # Install bash.
 ARG ALPINE_BASH_PACKAGE
 RUN apk add --no-cache ${ALPINE_BASH_PACKAGE}
+
+# Install bash
+ARG ALPINE_BATS_PACKAGE
+RUN apk add --no-cache ${ALPINE_BATS_PACKAGE}
   
 # Create separate users for PLCC and the developer.
 RUN addgroup -S plcc && adduser -S plcc -G plcc
