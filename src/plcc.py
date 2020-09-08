@@ -191,8 +191,10 @@ def lex(nxt):
             result = ['token'] + result # defaults to a token
         what = result[0]  # 'skip' or 'token'
         name = result[1]  # the term/skip name
+        if not isTerm(name):
+            deathLNO(name + ': illegal token name')
         if name in term:
-            death(name + ': duplicate token/skip name')
+            deathLNO(name + ': duplicate token/skip name')
         term.update({name})
         if what == 'skip':
             skip = ', true'   # Java boolean constant
@@ -629,6 +631,8 @@ def makeAbstractStub(base):
     global cases
     caseList = []    # a list of strings, either 'case XXX:' or '    return Cls.parse(...);'
     for cls in derives[base]:
+        if len(cases[cls]) == 0:
+            death('class {} is unreachable'.format(cls))
         for tok in cases[cls]:
             caseList.append('case {}:'.format(tok))
         caseList.append('    return {}.parse(scn$,trace$);'.format(cls))
@@ -798,6 +802,8 @@ def makeArbnoParse(cls, rhs, sep):
         fieldVars.append((field, fieldType))
         inits.append('{} {} = new ArrayList<{}>();'.format(fieldType, field, baseType))
     switchCases = []
+    if len(cases[cls]) == 0:
+        death('class {} is unreachable'.format(cls))
     for item in cases[cls]:
         switchCases.append('case {}:'.format(item))
     returnItem = 'return new {}({});'.format(cls, ', '.join(args))
