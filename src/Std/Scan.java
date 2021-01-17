@@ -49,7 +49,7 @@ public class Scan implements IScan {
             // System.err.print("s=" + s);
         }
     }
-
+        
     public Token cur() {
         // lazy
         if (tok != null)
@@ -62,7 +62,7 @@ public class Scan implements IScan {
         while (true) {
             fillString(); // get another line if necessary
             if (s == null) {
-                tok = new Token(Token.Val.$EOF, "EOF", lno); // EOF
+                tok = new Token(Token.Val.$EOF, "!EOF", lno); // EOF
                 return tok;
             }
             // s cannot be null here
@@ -94,14 +94,14 @@ public class Scan implements IScan {
                     }
                 }
             }
-            if (valFound == null) { // nothing matches!!
+            if (valFound == null) { // got to $ERROR, so nothing matches!!
                 char ch = s.charAt(start++); // grab the char and advance
                 String sch;
                 if (ch >= ' ' && ch <= '~')
-                    sch = String.format("%c", ch);
+                    sch = String.format("\"%c\"", ch);
                 else
                     sch = String.format("\\u%04x", (int)ch);
-                tok = new Token(Token.Val.$ERROR, sch, lno);
+                tok = new Token(Token.Val.$ERROR, "!ERROR("+sch+")", lno);
                 return tok;
             }
             start = matchEnd; // start of next token match
@@ -120,7 +120,7 @@ public class Scan implements IScan {
     }
 
     public void put(Token t) {
-        throw new RuntimeException("Scan class: put not implemented");
+            throw new RuntimeException("\n>>> Scan class: put not implemented");
     }
 
     public Token match(Token.Val v, Trace trace) {
@@ -128,11 +128,16 @@ public class Scan implements IScan {
         Token.Val vv = t.val;
         if (v == vv) {
             if (trace != null)
-            trace.print(t);
+                trace.print(t);
             adv();
         } else {
+            String str;
+            if (vv == Token.Val.$ERROR)
+                str = t.toString();
+            else
+                str = vv.toString();
             throw new RuntimeException
-                ("match failure: expected token " + v + ", got " + t);
+                ("\n>>> match failure: expected token " + v + ", got " + str);
         }
         return t;
     }
@@ -147,7 +152,7 @@ public class Scan implements IScan {
             String s;
             switch(t.val) {
             case $ERROR:
-                s = String.format("ERROR '%s'", t.str);
+                s = t.str;
                 break;
             default:
                 s = String.format("%s '%s'", t.val.toString(), t.str);

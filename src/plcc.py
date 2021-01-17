@@ -96,16 +96,6 @@ def main():
             argv = argv[1:]
         else:
             break
-    
-    # Handle --version option.
-    if 'version' in flags and flags['version']:
-        from pathlib import Path
-        version_file = Path(__file__).resolve().parent / 'VERSION'
-        with open(version_file, 'r') as f:
-            contents = f.read()
-            print("PLCC " + contents.strip())
-        sys.exit(0)
-
     nxt = nextLine()     # nxt is the next line generator
     lex(nxt)    # lexical analyzer generation
     par(nxt)    # LL(1) check and parser generation
@@ -333,7 +323,7 @@ def parFinishUp():
     # print the nonterminals
     print('Nonterminals (* indicates start symbol):')
     for nt in sorted(nonterms):
-        if re.search('_$', nt):
+        if nt[-1] == '#':
             continue           # ignore automatically generated arbno names
         if nt == startSymbol:
             ss = ' *<{}>'.format(nt)
@@ -387,7 +377,8 @@ def processRule(line, rno):
     if base == cls:
         deathLNO('base class and derived class names cannot be the same!')
     ruleType = tnt.pop(0)  # either '**=' or '::='
-    rhs = tnt              # a list of all the items to the right of the ::= or **= on the line
+    rhs = tnt              # a list of all the items to the right
+                           # of the ::= or **= on the line
     if ruleType == '**=':  # this is an arbno rule
         if cls:
             deathLNO('arbno rule cannot specify a non base class name')
@@ -397,31 +388,30 @@ def processRule(line, rno):
             deathLNO('arbno rules cannot be empty')
         debug('[processRule] arbno: ' + line)
         sep = rhs[-1] # get the last entry in the line
-        if re.match('\+', sep):
+        if sep[0] == '+':
             # must be a separated list
             sep = sep[1:] # remove the leading '+' from the separator
             if not isTerm(sep):
                 deathLNO('final separator in an arbno rule must be a Terminal')
-            rhs.pop()     # remove separator from the rhs list
+            rhs.pop()       # remove separator from the rhs list
         else:
             sep = None
         # arbno rule has no derived classes, so it's just a base class
-        # saveFields(base, lhs, rhs) # check for duplicate classes; then map the base to its (lhs, rhs) pair
-        arbno[base] = sep   # mark base as an arbno class with separator sep (possibly None)
+        # saveFields(base, lhs, rhs) # check for duplicate classes,
+        # then map the base to its (lhs, rhs) pair
+        arbno[base] = sep   # mark base as an arbno class with separator sep
+                            # (possibly None)
         # next add non-arbno rules to the rule set to simulate arbno rules
         rhsString = ' '.join(rhs)
-        ntaux = nt + '_aux_'
         if sep:
-            ntsep = nt + '_sep_'
+            ntsep = nt+'#'  # 'normal' nonterms cannot have '#' symbols
             processRule('<{}>      ::= {} <{}>'.format(nt, rhsString, ntsep), None)
             processRule('<{}>:void ::='.format(nt), None)
-            processRule('<{}>:void ::= {} <{}>'.format(ntaux, rhsString, ntsep), None)
-            processRule('<{}>:void ::= {} <{}>'.format(ntsep, sep, ntaux), None)
+            processRule('<{}>:void ::= {} {} <{}>'.format(ntsep, sep, rhsString, ntsep), None)
             processRule('<{}>:void ::='.format(ntsep), None)
         else:
-            processRule('<{}>      ::= {} <{}>'.format(nt, rhsString, ntaux), None)
+            processRule('<{}>      ::= {} <{}>'.format(nt, rhsString, nt), None)
             processRule('<{}>:void ::='.format(nt), None)
-            processRule('<{}>:void ::= <{}>'.format(ntaux, nt), None)
         return
     elif not ruleType == '::=':
         deathLNO('illegal grammar rule syntax')
@@ -429,7 +419,8 @@ def processRule(line, rno):
     debug('[processRule] so far: {} ::= {}'.format(lhs, rhs))
     nonterms.update({nt}) # add nt to the set of LHS nonterms
     if cls == 'void':
-        # this rule is *generated* by an arbno rule, so there are no further class-related actions to do
+        # this rule is *generated* by an arbno rule,
+        # so there are no further class-related actions to do
         saveRule(nt, lhs, None, rhs)
         return
     if startSymbol == '':
@@ -478,7 +469,8 @@ def saveRule(nt, lhs, cls, rhs):
 def partitionLHS(lhs):
     # split the lhs string <xxx>[:yyy] and return xxx, yyy
     # if :yyy is missing, return xxx, None
-    # xxx must be a legal nonterm name, and yyy (if present) must be either 'void' or a legal class name
+    # xxx must be a legal nonterm name,
+    # and yyy (if present) must be either 'void' or a legal class name
     nt, c, cls = lhs.partition(':')
     if c == '':
         cls = None   # :yyy part is not present
@@ -594,7 +586,7 @@ def checkLL1():
             if s:
                 death('''\
 not LL(1):
-terms {} appear in first sets for more than one rule starting with nonterm {} 
+term(s) {} appears in first sets for more than one rule starting with nonterm {} 
 '''.format(' '.join(fst), nt))
             else:
                 allTerms.update(fst)
@@ -653,7 +645,7 @@ public abstract class {base} {{
         switch(v$) {{
 {cases}
         default:
-            throw new RuntimeException("{base} cannot begin with " + t$);
+            throw new RuntimeException("{base} cannot begin with " + v$);
         }}
     }}
 
@@ -1082,14 +1074,15 @@ def defangg(item):
     <pqr>stu         (pqr, stu)
     <PQR>stu         (PQR, stu)
                      death in any other cases
-    pqr is a nonterm and PQR is a term (token).
+    pqr is a nonterm (possibly ending with '#') and PQR is a term (token).
     The first item in the returned tuple is either a Nonterm or a Term
-    The second item in the tuple is either None or an identifier starting in lowercase
+    The second item in the tuple is either None or an identifier
+    starting in lowercase
     """
     tnt = None
     field = None
     debug('[defangg] item={}'.format(item))
-    m = re.match(r'<(\w+)>(.*)$', item)
+    m = re.match(r'<([^>]*)>(.*)$', item)
     if m:
         tnt = m.group(1)
         field = m.group(2)
@@ -1099,7 +1092,7 @@ def defangg(item):
             else:
                 field = tnt
     else:
-        m = re.match('\w+$', item)
+        m = re.match('\w+#?$', item)
         if m:
             tnt = item
             field = None
@@ -1118,13 +1111,13 @@ def defangg(item):
     return (tnt, field)
 
 def isID(item):
-    return re.match('[a-z]\w*$', item)
+    return re.match('[a-z]\w*#?$', item)
 
 def isNonterm(nt):
     debug('[isNonterm] nt={}'.format(nt))
     if nt == 'void' or len(nt) == 0:
         return False
-    return re.match('[a-z]\w*$', nt)
+    return re.match('[a-z]\w*#?$', nt)
 
 def isClass(cls):
     return cls == 'void' or re.match('[A-Z][\$\w]*$', cls)
