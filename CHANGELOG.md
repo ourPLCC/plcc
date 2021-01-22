@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/ourPLCC/plcc/compare/v2.0.1...v2.1.0) (2021-01-22)
+
+
+### Features
+
+* **feat(Scan.java): fix(plcc.py): refactor(plcc.py):** ([#23](https://github.com/ourPLCC/plcc/issues/23)) ([2013bf2](https://github.com/ourPLCC/plcc/commit/2013bf2c68aa36602dbe9727453b743eaa299dff))
+
 ### [2.0.1](https://github.com/ourPLCC/plcc/compare/v2.0.0...v2.0.1) (2020-09-08)
 
 
