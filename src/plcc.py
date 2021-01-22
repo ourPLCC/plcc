@@ -96,7 +96,7 @@ def main():
             argv = argv[1:]
         else:
             break
-    
+
     # Handle --version option.
     if 'version' in flags and flags['version']:
         from pathlib import Path
@@ -123,7 +123,7 @@ def plccInit():
     for fname in STD:
         flags[fname] = fname
     flags['libplcc'] = LIBPLCC()
-    flags['Token'] = True         
+    flags['Token'] = True
     # behavior-related flags
     flags['PP'] = ''              # preprocessor cmd (e.g., 'cpp -P')
     flags['debug'] = 0            # default debug value
@@ -133,7 +133,7 @@ def plccInit():
     flags['parser'] = True        # create a parser
     flags['semantics'] = True     # create semantics routines
     flags['nowrite'] = False      # when True, produce *no* file output
-    
+
 def lex(nxt):
     # print('=== lexical specification')
     for line in nxt:
@@ -237,7 +237,7 @@ def lexFinishUp():
     except FileExistsError:
         pass
     except:
-        death(std + ': cannot access directory') 
+        death(std + ': cannot access directory')
     fname = '{}/{}'.format(dst, 'Token.java')
     try:
         tokenFile = open(fname, 'w')
@@ -333,7 +333,7 @@ def parFinishUp():
     # print the nonterminals
     print('Nonterminals (* indicates start symbol):')
     for nt in sorted(nonterms):
-        if re.search('_$', nt):
+        if nt[-1] == '#':
             continue           # ignore automatically generated arbno names
         if nt == startSymbol:
             ss = ' *<{}>'.format(nt)
@@ -353,7 +353,7 @@ def parFinishUp():
 
     if getFlag('nowrite'):
         return
-    # copy the Std parser-related files 
+    # copy the Std parser-related files
     dst = getFlag('destdir')
     libplcc = getFlag('libplcc')
     std = libplcc + '/Std'
@@ -364,7 +364,7 @@ def parFinishUp():
                 shutil.copy('{}/{}.java'.format(std, fname), '{}/{}.java'.format(dst, fname))
             except:
                 death('Failure copying {} from {} to {}'.format(fname, std, dst))
-    
+
     # build parser stub classes
     buildStubs()
     # build the PLCC$Start.java file from the start symbol
@@ -387,7 +387,8 @@ def processRule(line, rno):
     if base == cls:
         deathLNO('base class and derived class names cannot be the same!')
     ruleType = tnt.pop(0)  # either '**=' or '::='
-    rhs = tnt              # a list of all the items to the right of the ::= or **= on the line
+    rhs = tnt              # a list of all the items to the right
+                           # of the ::= or **= on the line
     if ruleType == '**=':  # this is an arbno rule
         if cls:
             deathLNO('arbno rule cannot specify a non base class name')
@@ -397,31 +398,30 @@ def processRule(line, rno):
             deathLNO('arbno rules cannot be empty')
         debug('[processRule] arbno: ' + line)
         sep = rhs[-1] # get the last entry in the line
-        if re.match('\+', sep):
+        if sep[0] == '+':
             # must be a separated list
             sep = sep[1:] # remove the leading '+' from the separator
             if not isTerm(sep):
                 deathLNO('final separator in an arbno rule must be a Terminal')
-            rhs.pop()     # remove separator from the rhs list
+            rhs.pop()       # remove separator from the rhs list
         else:
             sep = None
         # arbno rule has no derived classes, so it's just a base class
-        # saveFields(base, lhs, rhs) # check for duplicate classes; then map the base to its (lhs, rhs) pair
-        arbno[base] = sep   # mark base as an arbno class with separator sep (possibly None)
+        # saveFields(base, lhs, rhs) # check for duplicate classes,
+        # then map the base to its (lhs, rhs) pair
+        arbno[base] = sep   # mark base as an arbno class with separator sep
+                            # (possibly None)
         # next add non-arbno rules to the rule set to simulate arbno rules
         rhsString = ' '.join(rhs)
-        ntaux = nt + '_aux_'
         if sep:
-            ntsep = nt + '_sep_'
+            ntsep = nt+'#'  # 'normal' nonterms cannot have '#' symbols
             processRule('<{}>      ::= {} <{}>'.format(nt, rhsString, ntsep), None)
             processRule('<{}>:void ::='.format(nt), None)
-            processRule('<{}>:void ::= {} <{}>'.format(ntaux, rhsString, ntsep), None)
-            processRule('<{}>:void ::= {} <{}>'.format(ntsep, sep, ntaux), None)
+            processRule('<{}>:void ::= {} {} <{}>'.format(ntsep, sep, rhsString, ntsep), None)
             processRule('<{}>:void ::='.format(ntsep), None)
         else:
-            processRule('<{}>      ::= {} <{}>'.format(nt, rhsString, ntaux), None)
+            processRule('<{}>      ::= {} <{}>'.format(nt, rhsString, nt), None)
             processRule('<{}>:void ::='.format(nt), None)
-            processRule('<{}>:void ::= <{}>'.format(ntaux, nt), None)
         return
     elif not ruleType == '::=':
         deathLNO('illegal grammar rule syntax')
@@ -429,7 +429,8 @@ def processRule(line, rno):
     debug('[processRule] so far: {} ::= {}'.format(lhs, rhs))
     nonterms.update({nt}) # add nt to the set of LHS nonterms
     if cls == 'void':
-        # this rule is *generated* by an arbno rule, so there are no further class-related actions to do
+        # this rule is *generated* by an arbno rule,
+        # so there are no further class-related actions to do
         saveRule(nt, lhs, None, rhs)
         return
     if startSymbol == '':
@@ -478,7 +479,8 @@ def saveRule(nt, lhs, cls, rhs):
 def partitionLHS(lhs):
     # split the lhs string <xxx>[:yyy] and return xxx, yyy
     # if :yyy is missing, return xxx, None
-    # xxx must be a legal nonterm name, and yyy (if present) must be either 'void' or a legal class name
+    # xxx must be a legal nonterm name,
+    # and yyy (if present) must be either 'void' or a legal class name
     nt, c, cls = lhs.partition(':')
     if c == '':
         cls = None   # :yyy part is not present
@@ -512,7 +514,7 @@ def checkLL1():
         if len(form) == 0:         # the form is empty, so it only derives Null
             return {'Null'}
         tnt = form[0]              # get the item at the start of the sentential form
-        if isTerm(tnt): 
+        if isTerm(tnt):
             return {tnt}           # the form starts with a terminal, which is clearly its only first set item
         # tnt must be a nonterm -- get the first set for this and add it to our current set
         f = first[tnt]             # get the current first set for tnt (=form[0])
@@ -584,7 +586,7 @@ def checkLL1():
     if debug('[checkLL1] nonterm switch sets:'):
         for nt in switch:
             debug('[checkLL1] {} => {}'.format(nt, switch[nt]))
-    
+
     # finally check for LL(1)
     for nt in switch:
         allTerms = set()
@@ -594,7 +596,7 @@ def checkLL1():
             if s:
                 death('''\
 not LL(1):
-terms {} appear in first sets for more than one rule starting with nonterm {} 
+term(s) {} appears in first sets for more than one rule starting with nonterm {}
 '''.format(' '.join(fst), nt))
             else:
                 allTerms.update(fst)
@@ -653,7 +655,7 @@ public abstract class {base} {{
         switch(v$) {{
 {cases}
         default:
-            throw new RuntimeException("{base} cannot begin with " + t$);
+            throw new RuntimeException("{base} cannot begin with " + v$);
         }}
     }}
 
@@ -741,7 +743,7 @@ def indent(n, iList):
         newList.append('{}{}'.format(indentString, item))
     # print('### str={}'.format(str))
     return newList
-    
+
 def makeParse(cls, rhs):
     args = []
     parseList = []
@@ -984,7 +986,7 @@ def done(msg=''):
 
 def nextLine():
     # create a generator to get the next line in the current input file
-    global Lno, Fname, Line 
+    global Lno, Fname, Line
     for Fname in argv:
         # open the next input file
         f = None # the current open file
@@ -1082,14 +1084,15 @@ def defangg(item):
     <pqr>stu         (pqr, stu)
     <PQR>stu         (PQR, stu)
                      death in any other cases
-    pqr is a nonterm and PQR is a term (token).
+    pqr is a nonterm (possibly ending with '#') and PQR is a term (token).
     The first item in the returned tuple is either a Nonterm or a Term
-    The second item in the tuple is either None or an identifier starting in lowercase
+    The second item in the tuple is either None or an identifier
+    starting in lowercase
     """
     tnt = None
     field = None
     debug('[defangg] item={}'.format(item))
-    m = re.match(r'<(\w+)>(.*)$', item)
+    m = re.match(r'<([^>]*)>(.*)$', item)
     if m:
         tnt = m.group(1)
         field = m.group(2)
@@ -1099,7 +1102,7 @@ def defangg(item):
             else:
                 field = tnt
     else:
-        m = re.match('\w+$', item)
+        m = re.match('\w+#?$', item)
         if m:
             tnt = item
             field = None
@@ -1118,13 +1121,13 @@ def defangg(item):
     return (tnt, field)
 
 def isID(item):
-    return re.match('[a-z]\w*$', item)
+    return re.match('[a-z]\w*#?$', item)
 
 def isNonterm(nt):
     debug('[isNonterm] nt={}'.format(nt))
     if nt == 'void' or len(nt) == 0:
         return False
-    return re.match('[a-z]\w*$', nt)
+    return re.match('[a-z]\w*#?$', nt)
 
 def isClass(cls):
     return cls == 'void' or re.match('[A-Z][\$\w]*$', cls)
