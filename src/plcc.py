@@ -387,8 +387,7 @@ def processRule(line, rno):
     if base == cls:
         deathLNO('base class and derived class names cannot be the same!')
     ruleType = tnt.pop(0)  # either '**=' or '::='
-    rhs = tnt              # a list of all the items to the right
-                           # of the ::= or **= on the line
+    rhs = tnt              # a list of all the items to the right of the ::= or **= on the line
     if ruleType == '**=':  # this is an arbno rule
         if cls:
             deathLNO('arbno rule cannot specify a non base class name')
@@ -403,14 +402,12 @@ def processRule(line, rno):
             sep = sep[1:] # remove the leading '+' from the separator
             if not isTerm(sep):
                 deathLNO('final separator in an arbno rule must be a Terminal')
-            rhs.pop()       # remove separator from the rhs list
+            rhs.pop()     # remove separator from the rhs list
         else:
             sep = None
         # arbno rule has no derived classes, so it's just a base class
-        # saveFields(base, lhs, rhs) # check for duplicate classes,
-        # then map the base to its (lhs, rhs) pair
-        arbno[base] = sep   # mark base as an arbno class with separator sep
-                            # (possibly None)
+        # saveFields(base, lhs, rhs) # check for duplicate classes, then map the base to its (lhs, rhs) pair
+        arbno[base] = sep   # mark base as an arbno class with separator sep (possibly None)
         # next add non-arbno rules to the rule set to simulate arbno rules
         rhsString = ' '.join(rhs)
         if sep:
