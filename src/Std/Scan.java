@@ -49,7 +49,7 @@ public class Scan implements IScan {
             // System.err.print("s=" + s);
         }
     }
-
+        
     public Token cur() {
         // lazy
         if (tok != null)
@@ -120,7 +120,7 @@ public class Scan implements IScan {
     }
 
     public void put(Token t) {
-        throw new RuntimeException("\n>>> Scan class: put not implemented");
+            throw new RuntimeException("\n>>> Scan class: put not implemented");
     }
 
     public Token match(Token.Val v, Trace trace) {
