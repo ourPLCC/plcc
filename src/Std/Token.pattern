@@ -6,9 +6,9 @@ public class Token {
 
     // this is set to an error message string
     // if there are pattern compile errors
-    public static String patternFail = null; // 
+    public static String patternFail = null; //
     public static final Match $eof = Match.$EOF;
-       
+
     public enum Match {
 %%Match%%
         $ERROR (null),
@@ -56,7 +56,7 @@ public class Token {
         lno = 0;
         line = null;
     }
-    
+
     public Token(Match match, String str, int lno, String line) {
         this.match = match;
         this.str = str;

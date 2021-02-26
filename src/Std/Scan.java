@@ -56,7 +56,7 @@ public class Scan implements IScan {
             // System.err.print("s=" + s);
         }
     }
-        
+
     public Token cur() {
         // lazy
         if (tok != null)
