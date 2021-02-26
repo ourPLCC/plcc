@@ -97,6 +97,16 @@ def main():
             argv = argv[1:]
         else:
             break
+
+    # Handle --version option.
+    if 'version' in flags and flags['version']:
+        from pathlib import Path
+        version_file = Path(__file__).resolve().parent / 'VERSION'
+        with open(version_file, 'r') as f:
+            contents = f.read()
+            print("PLCC " + contents.strip())
+        sys.exit(0)
+
     nxt = nextLine()     # nxt is the next line generator
     lex(nxt)    # lexical analyzer generation
     par(nxt)    # LL(1) check and parser generation
@@ -115,7 +125,7 @@ def plccInit():
     for fname in STD:
         flags[fname] = fname
     flags['libplcc'] = LIBPLCC()
-    flags['Token'] = True         
+    flags['Token'] = True
     # behavior-related flags
     flags['PP'] = ''              # preprocessor cmd (e.g., 'cpp -P')
     flags['debug'] = 0            # default debug value
@@ -125,7 +135,7 @@ def plccInit():
     flags['parser'] = True        # create a parser
     flags['semantics'] = True     # create semantics routines
     flags['nowrite'] = False      # when True, produce *no* file output
-    
+
 def lex(nxt):
     # print('=== lexical specification')
     for line in nxt:
@@ -232,7 +242,7 @@ def lexFinishUp():
     except FileExistsError:
         pass
     except:
-        death(std + ': cannot access directory') 
+        death(std + ': cannot access directory')
     fname = '{}/{}'.format(dst, 'Token.java')
     try:
         tokenFile = open(fname, 'w')
@@ -347,7 +357,7 @@ def parFinishUp():
 
     if getFlag('nowrite'):
         return
-    # copy the Std parser-related files 
+    # copy the Std parser-related files
     dst = getFlag('destdir')
     libplcc = getFlag('libplcc')
     std = libplcc + '/Std'
@@ -358,7 +368,7 @@ def parFinishUp():
                 shutil.copy('{}/{}.java'.format(std, fname), '{}/{}.java'.format(dst, fname))
             except:
                 death('Failure copying {} from {} to {}'.format(fname, std, dst))
-    
+
     # build parser stub classes
     buildStubs()
     # build the PLCC$Start.java file from the start symbol
@@ -508,7 +518,7 @@ def checkLL1():
         if len(form) == 0:         # the form is empty, so it only derives Null
             return {'Null'}
         tnt = form[0]              # get the item at the start of the sentential form
-        if isTerm(tnt): 
+        if isTerm(tnt):
             return {tnt}           # the form starts with a terminal, which is clearly its only first set item
         # tnt must be a nonterm -- get the first set for this and add it to our current set
         f = first[tnt]             # get the current first set for tnt (=form[0])
@@ -580,7 +590,7 @@ def checkLL1():
     if debug('[checkLL1] nonterm switch sets:'):
         for nt in switch:
             debug('[checkLL1] {} => {}'.format(nt, switch[nt]))
-    
+
     # finally check for LL(1)
     for nt in switch:
         allTerms = set()
@@ -590,7 +600,7 @@ def checkLL1():
             if s:
                 death('''\
 not LL(1):
-term(s) {} appears in first sets for more than one rule starting with nonterm {} 
+term(s) {} appears in first sets for more than one rule starting with nonterm {}
 '''.format(' '.join(fst), nt))
             else:
                 allTerms.update(fst)
@@ -738,7 +748,7 @@ def indent(n, iList):
         newList.append('{}{}'.format(indentString, item))
     # print('### str={}'.format(str))
     return newList
-    
+
 def makeParse(cls, rhs):
     args = []
     parseList = []
@@ -969,7 +979,7 @@ def semFinishUp():
         except:
             death('cannot write to file {}'.format(fname))
         print('  {}.java'.format(cls))
-    # copy the Std runtime-related files 
+    # copy the Std runtime-related files
     dst = getFlag('destdir')
     libplcc = getFlag('libplcc')
     std = libplcc + '/Std'
@@ -980,7 +990,7 @@ def semFinishUp():
                 shutil.copy('{}/{}.java'.format(std, fname), '{}/{}.java'.format(dst, fname))
             except:
                 death('Failure copying {} from {} to {}'.format(fname, std, dst))
-    
+
 
 #####################
 # utility functions #
@@ -993,7 +1003,7 @@ def done(msg=''):
 
 def nextLine():
     # create a generator to get the next line in the current input file
-    global Lno, Fname, Line 
+    global Lno, Fname, Line
     for Fname in argv:
         # open the next input file
         f = None # the current open file
