@@ -24,7 +24,7 @@ public class Trace implements ITrace {
     }
 
     public void print(Token t) {
-        print(t.val.toString()+" \""+t.toString()+"\"", t.lno);
+        print(t.match.toString()+" \""+t.toString()+"\"", t.lno);
     }
 
     public Trace nonterm(String s, int lno) {

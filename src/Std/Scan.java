@@ -18,6 +18,13 @@ public class Scan implements IScan {
         this.lno = 0;
         s = null;
         tok = null;
+        // force the enum Match class to compile its patterns
+        String msg = Token.Match.init();
+        if (msg != null) {
+            // one or more pattern compilation errors have occurred
+            System.err.println(msg);
+            System.exit(1);
+        }
     }
 
     // create a scanner object on a string
@@ -49,37 +56,37 @@ public class Scan implements IScan {
             // System.err.print("s=" + s);
         }
     }
-
+        
     public Token cur() {
         // lazy
         if (tok != null)
             return tok; // don't get a new token if we already have one
 
         String matchString = "";
-        Token.Val valFound = null;
+        Token.Match matchFound = null;
 
         LOOP:
         while (true) {
             fillString(); // get another line if necessary
             if (s == null) {
-                tok = new Token(Token.Val.$EOF, "!EOF", lno); // EOF
+                tok = new Token(Token.$eof, "!EOF", lno, null); // EOF
                 return tok;
             }
             // s cannot be null here
             int matchEnd = start; // current end of match
-            for (Token.Val val : Token.Val.values()) {
-                Pattern pat = val.cPattern;
-                if (pat == null)
+            for (Token.Match match : Token.Match.values()) {
+                Pattern cpat = match.cPattern;
+                if (cpat == null)
                     break; // nothing matches, so can't find a token
-                if (val.skip && valFound != null)
+                if (match.skip && matchFound != null)
                     continue; // ignore skips if we have a pending token
-                Matcher m = pat.matcher(s);
+                Matcher m = cpat.matcher(s);
                 m.region(start, end);
                 if (m.lookingAt()) {
                     int e = m.end();
                     if (e == start)
                         continue; // empty match, so try next pattern
-                    if (val.skip) {
+                    if (match.skip) {
                         // there's a non-empty skip match,
                         // so we skip over the matched part
                         // and get more stuff to read
@@ -90,23 +97,23 @@ public class Scan implements IScan {
                         // found a longer match -- keep it!
                         matchEnd = e;
                         matchString = m.group();
-                        valFound = val;
+                        matchFound = match;
                     }
                 }
             }
-            if (valFound == null) { // got to $ERROR, so nothing matches!!
+            if (matchFound == null) { // got to $ERROR, so nothing matches!!
                 char ch = s.charAt(start++); // grab the char and advance
                 String sch;
                 if (ch >= ' ' && ch <= '~')
                     sch = String.format("\"%c\"", ch);
                 else
                     sch = String.format("\\u%04x", (int)ch);
-                tok = new Token(Token.Val.$ERROR, "!ERROR("+sch+")", lno);
+                tok = new Token(Token.Match.$ERROR, "!ERROR("+sch+")", lno, s);
                 return tok;
             }
             start = matchEnd; // start of next token match
             // matchString is the matching string
-            tok = new Token(valFound, matchString, lno); // persistent value
+            tok = new Token(matchFound, matchString, lno, s); // persistent
             return tok;
         }
     }
@@ -120,24 +127,29 @@ public class Scan implements IScan {
     }
 
     public void put(Token t) {
-            throw new RuntimeException("\n>>> Scan class: put not implemented");
+            throw new PLCCException(">>> PLCC Scan error",
+                                    "put not implemented");
     }
 
-    public Token match(Token.Val v, Trace trace) {
+    // See if the expected token match is the same as the match
+    // of the current token
+    public Token match(Token.Match match, Trace trace) {
         Token t = cur();
-        Token.Val vv = t.val;
-        if (v == vv) {
+        Token.Match mcur = t.match; // the token we got
+        if (match == mcur) { // compare the match expected with the token we got
             if (trace != null)
                 trace.print(t);
             adv();
         } else {
-            String str;
-            if (vv == Token.Val.$ERROR)
-                str = t.toString();
+            String mstr;
+            if (mcur == Token.Match.$ERROR)
+                mstr = t.toString();
             else
-                str = vv.toString();
-            throw new RuntimeException
-                ("\n>>> match failure: expected token " + v + ", got " + str);
+                mstr = mcur.toString();
+            if (t.line != null)
+                mstr += String.format("\n>>> [%3d: %s]", t.lno, t.line.trim());
+            String msg = "expected token " + match + ", got " + mstr;
+            throw new PLCCException (">>> Parse error", msg);
         }
         return t;
     }
@@ -150,12 +162,12 @@ public class Scan implements IScan {
         while (hasNext()) {
             Token t = next();
             String s;
-            switch(t.val) {
+            switch(t.match) {
             case $ERROR:
-                s = t.str;
+                s = t.toString();
                 break;
             default:
-                s = String.format("%s '%s'", t.val.toString(), t.str);
+                s = String.format("%s '%s'", t.match.toString(), t.toString());
             }
             System.out.println(String.format("%4d: %s", lno, s));
         }

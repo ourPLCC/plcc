@@ -9,16 +9,16 @@ public class Token {
 
     public Val val;          // the token value
     public String str;       // the token string matched
-    public int lno;	     // the line number where the token occurred
+    public int lno;          // the line number where the token occurred
     public StringBuffer buf; // used to collect the token's lexeme
-
+    
     public Token() {
         val = null;
         str = null;
         lno = 0;
         buf = new StringBuffer();
     }
-
+    
     public Token(Val val, String str, int lno) {
         this.val = val;
         this.str = str;

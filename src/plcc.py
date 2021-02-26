@@ -36,6 +36,7 @@ Line = ''           # current line in the file
 STD = []            # reserved names from Std library classes
 STDT = []           # token-related files in the Std library directory
 STDP = []           # parse-related files in the Std library directory
+STDR = []           # runtime-related files in the Std library directory
 
 flags = {}          # processing flags (dictionary)
 
@@ -96,26 +97,17 @@ def main():
             argv = argv[1:]
         else:
             break
-
-    # Handle --version option.
-    if 'version' in flags and flags['version']:
-        from pathlib import Path
-        version_file = Path(__file__).resolve().parent / 'VERSION'
-        with open(version_file, 'r') as f:
-            contents = f.read()
-            print("PLCC " + contents.strip())
-        sys.exit(0)
-
     nxt = nextLine()     # nxt is the next line generator
     lex(nxt)    # lexical analyzer generation
     par(nxt)    # LL(1) check and parser generation
     sem(nxt)    # semantic actions
 
 def plccInit():
-    global flags, STD, STDT, STDP
+    global flags, STD, STDT, STDP, STDR
     STDT = ['ILazy','IMatch','ITrace','IScan','Trace','Scan']
     STDP = ['Parser','Rep']
-    STD = STDT + STDP
+    STDR = ['PLCCException']
+    STD = STDT + STDP + STDR
     STD.append('Token')
     # file-related flags -- can be overwritten
     # by a grammar file '!flag=...' spec
@@ -123,7 +115,7 @@ def plccInit():
     for fname in STD:
         flags[fname] = fname
     flags['libplcc'] = LIBPLCC()
-    flags['Token'] = True
+    flags['Token'] = True         
     # behavior-related flags
     flags['PP'] = ''              # preprocessor cmd (e.g., 'cpp -P')
     flags['debug'] = 0            # default debug value
@@ -133,17 +125,20 @@ def plccInit():
     flags['parser'] = True        # create a parser
     flags['semantics'] = True     # create semantics routines
     flags['nowrite'] = False      # when True, produce *no* file output
-
+    
 def lex(nxt):
     # print('=== lexical specification')
     for line in nxt:
-        if line == '%':
-            break
-        line = line.lstrip()
-        if len(line) == 0 or line[0] == '#': # skip empty lines and comments
+        line = re.sub('\s+#.*', '', line)   # remove trailing comments ...
+        # NOTE: a token that looks like this ' #' will mistakenly be
+        # considered as a comment. Use '[ ]#' instead
+        line = line.strip()
+        if len(line) == 0: # skip empty lines
             continue
-        line = re.sub('\s+#.*$', '', line)   # remove trailing comments ...
-        line = line.rstrip()                 # ... and any remaining whitespace
+        if line[0] == '#':
+            continue
+        if line == '%':
+            break;
         # print ('>>> {}'.format(line))
         jpat = '' # the Java regular expression pattern for this skip/term
         pFlag = getFlag('pattern')
@@ -237,7 +232,7 @@ def lexFinishUp():
     except FileExistsError:
         pass
     except:
-        death(std + ': cannot access directory')
+        death(std + ': cannot access directory') 
     fname = '{}/{}'.format(dst, 'Token.java')
     try:
         tokenFile = open(fname, 'w')
@@ -252,7 +247,7 @@ def lexFinishUp():
             death(fname + ': cannot read library file')
         for line in tokenTemplate:
             # note that line keeps its trailing newline
-            if re.match('^\s*%%Vals%%', line):
+            if re.match('^\s*%%Match%%', line):
                 for ts in termSpecs:
                     print('        ' + ts + ',', file=tokenFile)
             else:
@@ -267,7 +262,7 @@ def lexFinishUp():
             death(fname + ': cannot read library file')
         for line in tokenTemplate:
             # note that line keeps its trailing newline
-            if re.match('^\s*%%Vals%%', line):
+            if re.match('^\s*%%Match%%', line):
                 tssep = ''
                 for ts in termSpecs:
                     print(tssep + '        ' + ts, file=tokenFile, end='')
@@ -292,13 +287,12 @@ def par(nxt):
         done()
     rno = 0
     for line in nxt:
+        line = re.sub('#.*$', '', line) # remove comments
+        line = line.strip()
+        if len(line) == 0:
+            continue                    # skip entirely blank lines
         if line == '%':
             break
-        line = line.lstrip() # clobber leading whitespace
-        line = re.sub('#.*$', '', line) # remove comments
-        line = line.rstrip()            # clobber any trailing whitespace
-        if line == '':
-            continue                    # skip entirely blank lines
         # if re.search('_', line):
         #     deathLNO('underscore "_" not permitted in grammar rule line')
         rno += 1
@@ -353,7 +347,7 @@ def parFinishUp():
 
     if getFlag('nowrite'):
         return
-    # copy the Std parser-related files
+    # copy the Std parser-related files 
     dst = getFlag('destdir')
     libplcc = getFlag('libplcc')
     std = libplcc + '/Std'
@@ -364,7 +358,7 @@ def parFinishUp():
                 shutil.copy('{}/{}.java'.format(std, fname), '{}/{}.java'.format(dst, fname))
             except:
                 death('Failure copying {} from {} to {}'.format(fname, std, dst))
-
+    
     # build parser stub classes
     buildStubs()
     # build the PLCC$Start.java file from the start symbol
@@ -514,7 +508,7 @@ def checkLL1():
         if len(form) == 0:         # the form is empty, so it only derives Null
             return {'Null'}
         tnt = form[0]              # get the item at the start of the sentential form
-        if isTerm(tnt):
+        if isTerm(tnt): 
             return {tnt}           # the form starts with a terminal, which is clearly its only first set item
         # tnt must be a nonterm -- get the first set for this and add it to our current set
         f = first[tnt]             # get the current first set for tnt (=form[0])
@@ -586,7 +580,7 @@ def checkLL1():
     if debug('[checkLL1] nonterm switch sets:'):
         for nt in switch:
             debug('[checkLL1] {} => {}'.format(nt, switch[nt]))
-
+    
     # finally check for LL(1)
     for nt in switch:
         allTerms = set()
@@ -596,7 +590,7 @@ def checkLL1():
             if s:
                 death('''\
 not LL(1):
-term(s) {} appears in first sets for more than one rule starting with nonterm {}
+term(s) {} appears in first sets for more than one rule starting with nonterm {} 
 '''.format(' '.join(fst), nt))
             else:
                 allTerms.update(fst)
@@ -651,11 +645,12 @@ public abstract class {base} {{
 {dummy}
     public static {base} parse(Scan scn$, Trace trace$) {{
         Token t$ = scn$.cur();
-        Token.Val v$ = t$.val;
-        switch(v$) {{
+        Token.Match match$ = t$.match;
+        switch(match$) {{
 {cases}
         default:
-            throw new RuntimeException("{base} cannot begin with " + v$);
+            throw new PLCCException(">>> Parse error",
+                                    "{base} cannot begin with " + t$);
         }}
     }}
 
@@ -743,7 +738,7 @@ def indent(n, iList):
         newList.append('{}{}'.format(indentString, item))
     # print('### str={}'.format(str))
     return newList
-
+    
 def makeParse(cls, rhs):
     args = []
     parseList = []
@@ -752,7 +747,7 @@ def makeParse(cls, rhs):
     for item in rhs:
         (tnt, field) = defangg(item)
         if field == None:
-            parseList.append('scn$.match(Token.Val.{}, trace$);'.format(tnt))
+            parseList.append('scn$.match(Token.Match.{}, trace$);'.format(tnt))
             continue
         if field in fieldSet:
             death('duplicate field name {} in rule RHS {}'.format(field, ' '.join(rhs)))
@@ -760,7 +755,7 @@ def makeParse(cls, rhs):
         args.append(field)
         if isTerm(tnt):
             fieldType = 'Token'
-            parseList.append('Token {} = scn$.match(Token.Val.{}, trace$);'.format(field, tnt))
+            parseList.append('Token {} = scn$.match(Token.Match.{}, trace$);'.format(field, tnt))
         else:
             fieldType = nt2cls(tnt)
             parseList.append('{} {} = {}.parse(scn$, trace$);'.format(fieldType, field, fieldType))
@@ -785,7 +780,7 @@ def makeArbnoParse(cls, rhs, sep):
         (tnt, field) = defangg(item)
         if field == None:
             # a bare token -- match it
-            loopList.append('scn$.match(Token.Val.{}, trace$);'.format(tnt))
+            loopList.append('scn$.match(Token.Match.{}, trace$);'.format(tnt))
             continue
         if field in fieldSet:
             death('duplicate field name {} in rule RHS {}'.format(field, ' '.join(rhs)))
@@ -795,7 +790,7 @@ def makeArbnoParse(cls, rhs, sep):
         if isTerm(tnt):
             # a term (token)
             baseType = 'Token'
-            loopList.append('{}.add(scn$.match(Token.Val.{}, trace$));'.format(field, tnt))
+            loopList.append('{}.add(scn$.match(Token.Match.{}, trace$));'.format(field, tnt))
         else:
             # a nonterm
             baseType = nt2cls(tnt)
@@ -815,8 +810,8 @@ def makeArbnoParse(cls, rhs, sep):
 {inits}
         while (true) {{
             Token t$ = scn$.cur();
-            Token.Val v$ = t$.val;
-            switch(v$) {{
+            Token.Match match$ = t$.match;
+            switch(match$) {{
 {switchCases}
 {loopList}
                 continue;
@@ -834,16 +829,16 @@ def makeArbnoParse(cls, rhs, sep):
 {inits}
         // first trip through the parse
         Token t$ = scn$.cur();
-        Token.Val v$ = t$.val;
-        switch(v$) {{
+        Token.Match match$ = t$.match;
+        switch(match$) {{
 {switchCases}
             while(true) {{
 {loopList}
                 t$ = scn$.cur();
-                v$ = t$.val;
-                if (v$ != Token.Val.{sep})
+                match$ = t$.match;
+                if (match$ != Token.Match.{sep})
                     break; // not a separator, so we're done
-                scn$.match(v$, trace$);
+                scn$.match(match$, trace$);
             }}
         }} // end of switch
         {returnItem}
@@ -952,7 +947,7 @@ def getCode(nxt):
 def semFinishUp():
     if getFlag('nowrite'):
         return
-    global stubs, STD
+    global stubs, STD, STDR
     dst = flags['destdir']
     print('\nJava source files created:')
     cmd = getFlag('PP') # run a preprocessor, if specified
@@ -974,6 +969,18 @@ def semFinishUp():
         except:
             death('cannot write to file {}'.format(fname))
         print('  {}.java'.format(cls))
+    # copy the Std runtime-related files 
+    dst = getFlag('destdir')
+    libplcc = getFlag('libplcc')
+    std = libplcc + '/Std'
+    for fname in STDR:
+        if getFlag(fname):
+            debug('[semFinishUp] copying {} from {} to {} ...'.format(fname, std, dst))
+            try:
+                shutil.copy('{}/{}.java'.format(std, fname), '{}/{}.java'.format(dst, fname))
+            except:
+                death('Failure copying {} from {} to {}'.format(fname, std, dst))
+    
 
 #####################
 # utility functions #
@@ -986,7 +993,7 @@ def done(msg=''):
 
 def nextLine():
     # create a generator to get the next line in the current input file
-    global Lno, Fname, Line
+    global Lno, Fname, Line 
     for Fname in argv:
         # open the next input file
         f = None # the current open file

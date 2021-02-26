@@ -6,30 +6,30 @@ PLCC="$LIB/plcc.py"
 
 if [ "$1" = "-c" ];
 then
-        rm Java/*.java Java/*.class 2> /dev/null
+        rm Java/*.java Java/*.class &>/dev/null
         shift
 fi
 
 if [ $# -gt 0 ];
 then
-	FILES="$@"
+        FILES="$@"
 else
-	FILES=${FILE:-grammar}
+        FILES="${FILE:-grammar}"
 fi
 
 [ -d "$LIB" ] || {
-	echo "$LIB: no such directory" >&2
-	exit 1
+        echo "$LIB: no such directory" >&2
+        exit 1
 }
 
 $PYTHON3 "$PLCC" $FILES || {
-	echo "cannot compile $FILES" >&2
-	exit 4
+        echo "cannot compile $FILES" >&2
+        exit 4
 }
 
 [ -d Java ] || {
-	echo "Java directory missing" >&2
-	exit 5
+        echo "Java directory missing" >&2
+        exit 5
 }
 
-(cd Java ; javac *.java)
+(cd ./Java ; javac *.java)
