@@ -146,8 +146,6 @@ public class Scan implements IScan {
                 mstr = t.toString();
             else
                 mstr = mcur.toString();
-            if (t.line != null)
-                mstr += String.format("\n>>> [%3d: %s]", t.lno, t.line.trim());
             String msg = "expected token " + match + ", got " + mstr;
             throw new PLCCException (">>> Parse error", msg);
         }

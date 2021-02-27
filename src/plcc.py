@@ -663,7 +663,7 @@ public abstract class {base} {{
 {cases}
         default:
             throw new PLCCException(">>> Parse error",
-                                    "{base} cannot begin with " + t$);
+                                    "{base} cannot begin with " + match$);
         }}
     }}
 
