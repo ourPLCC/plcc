@@ -5,7 +5,7 @@
 ARG ALPINE_IMAGE=alpine:3.12
 ARG ALPINE_BASH_PACKAGE=bash~=5.0
 ARG ALPINE_PYTHON_PACKAGE=python3~=3.8
-ARG ALPINE_JAVA_PACKAGE=openjdk11~=11.0
+ARG ALPINE_JAVA_PACKAGE=openjdk11-jdk~=11.0
 
 # Bash unit testing framework
 ARG ALPINE_BATS_PACKAGE=bats~=1.2
@@ -37,7 +37,7 @@ RUN apk add --no-cache ${ALPINE_BASH_PACKAGE}
 # Install bash
 ARG ALPINE_BATS_PACKAGE
 RUN apk add --no-cache ${ALPINE_BATS_PACKAGE}
-  
+
 # Create separate users for PLCC and the developer.
 RUN addgroup -S plcc && adduser -S plcc -G plcc
 RUN addgroup -S my && adduser -S my -G my
@@ -51,4 +51,3 @@ WORKDIR /workdir
 RUN chown my:my /workdir
 USER my:my
 CMD ["/bin/bash"]
-  
