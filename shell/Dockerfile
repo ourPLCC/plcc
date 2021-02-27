@@ -3,7 +3,6 @@
 # and isn't in the final image.
 
 FROM alpine:3.12
-COPY . /plcc
 
 # Install Python 3
 RUN apk add --no-cache python3~=3.8 \
