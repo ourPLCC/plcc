@@ -1,0 +1,75 @@
+let
+  c = 
+    class
+      static p = proc(e) <e>set x = add1(x)
+      static x = 3
+    end
+  x = 11
+in 
+  { display# .<c>p(c)
+  ; display# .<c>p(@)
+  ; display# .<c>p(c)
+  ; display# .<c>p(@)
+  ; newline
+  }
+
+< class
+    static c1 = class static pp = 1 static f = proc(e) <<e>c2>pp end
+    static c2 = class static pp = 2 static f = proc(e) <<e>c3>pp end
+    static c3 = class static pp = 3 static f = proc(e) <<e>c1>pp end
+  end
+> { display# .<c1>f(@)
+  ; display# .<c2>f(@)
+  ; display# .<c3>f(@)
+  ; newline
+  }
+
+define x = 10
+% one way -- in method m, x is bound to 10 (the initial env)
+let
+  p =
+    class
+      static c = myclass
+      field x
+      method init = proc(t) {set x = t ; self}
+      method m = proc() <c>x
+    end
+in
+  let
+    o = .<new p>init(4)
+  in
+    .<o>m()
+
+% another way -- in method m, x is bound to 4 (a field)
+!< new 
+     class
+       static c = myclass
+       field x
+       method init = proc(t) {set x = t ; self}
+       method m = proc() x
+     end
+ >init(4)
+ > m()
+!>
+
+% a different twist on the odd/even mutual recursion problem
+< new class
+    method odd? = proc(t) if t then .even?(sub1(t)) else 0
+    method even? = proc(t) if t then .odd?(sub1(t)) else 1
+  end
+> { display# .even?(100)
+  ; display# .even?(99)
+  ; display# .odd?(99)
+  ; newline
+  } 
+
+% can we do this with static procedures?
+< class
+    static odd? = proc(t) if t then .even?(sub1(t)) else 0
+    static even? = proc(t) if t then .odd?(sub1(t)) else 1
+  end
+>{ display# .even?(100)
+ ; display# .even?(99)
+ ; display# .odd?(99)
+ ; newline
+ }

@@ -1,0 +1,21 @@
+define c1 =
+  class
+    field x
+    method i1 = proc(x) {set <this>x = x ; this}
+    method f = proc() x
+    method g = proc() <self>x
+  end
+
+define c2 =
+  class extends c1
+    field x
+    method i2 = proc(x) {set <this>x = x ; this}
+  end
+
+define o1 = .<new c1>i1(5)
+define o2 = .<new c2>i2(3)
+
+% .<o1>f()
+% .<o1>g()
+% .<o2>f()
+% .<o2>g()

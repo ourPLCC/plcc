@@ -1,0 +1,13 @@
+let
+  x = 3
+  c = class
+        static x = 5
+         
+        field x
+        method init = proc() {set x = 7 ; self}
+      end
+in
+  let
+    o = .<new c>init()
+  in
+    {display# <o>x ; display# <c>x ; display# x ; newline}
