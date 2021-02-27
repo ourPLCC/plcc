@@ -46,11 +46,14 @@ termSpecs = []      # term (token) specifications for generating the Token file
 
 nonterms = set()    # set of all nonterms
 fields = {}         # maps a non-abstract class name to its list of fields
-rules = []          # list of items  of the form (nt, cls, rhs), one for each grammar rule
+rules = []          # list of items  of the form (nt, cls, rhs),
+                    # one for each grammar rule
 extends = {}        # maps a derived class to its abstract base class
 derives = {}        # maps an abstract class to a list of its derived classes
-cases = {}          # maps a non-abstract class to its set of case terminals for use in a switch
-arbno = {}          # maps an arbno class name to its separator string (or None)
+cases = {}          # maps a non-abstract class to its set of case terminals
+                    # for use in a switch
+rrule = {}          # maps a repeating rule class name to its separator string
+                    # (or None)
 stubs = {}          # maps a class name to its parser stub file
 
 def debug(msg, level=1):
@@ -338,7 +341,7 @@ def parFinishUp():
     print('Nonterminals (* indicates start symbol):')
     for nt in sorted(nonterms):
         if nt[-1] == '#':
-            continue           # ignore automatically generated arbno names
+            continue           # ignore automatically generated repeating rule names
         if nt == startSymbol:
             ss = ' *<{}>'.format(nt)
         else:
@@ -375,7 +378,7 @@ def parFinishUp():
     buildStart()
 
 def processRule(line, rno):
-    global STD, startSymbol, fields, rules, arbno, nonterm, extends, derives
+    global STD, startSymbol, fields, rules, rrule, nonterm, extends, derives
     if rno:
         debug('[processRule] rule {:3}: {}'.format(rno, line))
     tnt = line.split()     # LHS ruleType RHS
@@ -393,29 +396,29 @@ def processRule(line, rno):
     ruleType = tnt.pop(0)  # either '**=' or '::='
     rhs = tnt              # a list of all the items to the right
                            # of the ::= or **= on the line
-    if ruleType == '**=':  # this is an arbno rule
+    if ruleType == '**=':  # this is a repeating rule
         if cls:
-            deathLNO('arbno rule cannot specify a non base class name')
+            deathLNO('repeating rule cannot specify a non base class name')
         if startSymbol == '':
-            deathLNO('arbno rule cannot be the first grammar rule')
+            deathLNO('repeating rule cannot be the first grammar rule')
         if len(rhs) == 0:
-            deathLNO('arbno rules cannot be empty')
-        debug('[processRule] arbno: ' + line)
+            deathLNO('repeating rules cannot be empty')
+        debug('[processRule] repeating rule: ' + line)
         sep = rhs[-1] # get the last entry in the line
         if sep[0] == '+':
             # must be a separated list
-            sep = sep[1:] # remove the leading '+' from the separator
+            sep = sep[1:]   # remove the leading '+' from the separator
             if not isTerm(sep):
-                deathLNO('final separator in an arbno rule must be a Terminal')
+                deathLNO('separator '+sep+' in repeating rule must be a bare Token')
             rhs.pop()       # remove separator from the rhs list
         else:
             sep = None
-        # arbno rule has no derived classes, so it's just a base class
-        # saveFields(base, lhs, rhs) # check for duplicate classes,
+        # a repeating rule has no derived classes, so it's just a base class
+        # saveFields(base, lhs, rhs) ?? check for duplicate classes,
         # then map the base to its (lhs, rhs) pair
-        arbno[base] = sep   # mark base as an arbno class with separator sep
+        rrule[base] = sep   # mark base as a repeating rule class with separator sep
                             # (possibly None)
-        # next add non-arbno rules to the rule set to simulate arbno rules
+        # next add right-recursive rules to the rule set to simulate repeating rules
         rhsString = ' '.join(rhs)
         if sep:
             ntsep = nt+'#'  # 'normal' nonterms cannot have '#' symbols
@@ -429,11 +432,11 @@ def processRule(line, rno):
         return
     elif not ruleType == '::=':
         deathLNO('illegal grammar rule syntax')
-    # at this point, we may have a legal non-arbno rule
+    # at this point, we may have a legal non-repeating rule
     debug('[processRule] so far: {} ::= {}'.format(lhs, rhs))
     nonterms.update({nt}) # add nt to the set of LHS nonterms
     if cls == 'void':
-        # this rule is *generated* by an arbno rule,
+        # this rule is *generated* by a repeating rule,
         # so there are no further class-related actions to do
         saveRule(nt, lhs, None, rhs)
         return
@@ -471,7 +474,7 @@ def saveRule(nt, lhs, cls, rhs):
     if cls != None:
         if cls in fields:
             deathLNO('class {} is already defined'.format(cls))
-        if cls in arbno:
+        if cls in rrule:
             fields[cls] = (lhs, rhs[:-1]) # remove the item with the underscore
         else:
             fields[cls] = (lhs, rhs)
@@ -671,16 +674,16 @@ public abstract class {base} {{
     return stubString
 
 def makeStub(cls):
-    global fields, extends, arbno
+    global fields, extends, rrule
     # make a stub for the given non-abstract class
     debug('[makeStub] making stub for non-abstract class {}'.format(cls))
     sep = False
     (lhs, rhs) = fields[cls]
     ext = '' # assume not an extended class
-    # two cases: either cls is an arbno rule, or it isn't
-    if cls in arbno:
+    # two cases: either cls is a repeating rule, or it isn't
+    if cls in rrule:
         ruleType = '**='
-        sep = arbno[cls]
+        sep = rrule[cls]
         (fieldVars, parseString) = makeArbnoParse(cls, rhs, sep)
         if sep != None:
             rhs = rhs + ['+{}'.format(sep)]
