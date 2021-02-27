@@ -15,7 +15,7 @@ For information about how to contribute to this project, please see CONTRIBUTING
 
 * PLCC
 * Bash 5+
-* [bats 1.2.1+](https://bats-core.readthedocs.io/en/latest/index.html).
+* [bats 1.2+](https://bats-core.readthedocs.io/en/latest/index.html).
 
 ### Running the tests
 
