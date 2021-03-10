@@ -1,0 +1,67 @@
+%% This is an example of how a simple object-oriented methodology
+%% can be achieved using only procs and the environments they capture.
+
+define c1 = % a top-level object factory
+  let
+    %% statics
+    a = 3
+    b = 5
+  in 
+    proc()
+      let
+        %% fields
+        super = nil
+        x = nil
+        y = nil
+        self = nil
+      in
+        letrec
+          %% methods
+          init = proc(t, u) {set x=t ; set y=u ; self}
+          m = proc() 1
+          m1 = proc() .m()
+          m2 = proc() .<self>m()
+        in
+          set self=@
+
+define c2 = % an object factory that (sort of) extends c1
+  <.c1()> %% the superclass
+  let
+    %% statics
+    a = 5
+    c = 8
+  in
+    proc()
+      let
+        %% fields
+        super = self %% the superclass object!!!
+        x = nil
+        z = nil
+      in 
+        letrec
+          %% methods
+          init = proc(t, w) {set x=t ; set z=w ; self}
+          m = proc() 2
+        in 
+          set self = @
+
+define o1 = .c1()
+.<o1>init(2, 3)
+<o1>x % => 2
+define o2 = .c2()
+.<o2>init(5, 7)
+<o2>x               % => 5
+<o2>z               % => 7
+<o2>y               % => nil
+<o2>set y=6         % => 6
+<o2>y               % => 6
+<<o2>super>x        % => nil
+<<o2>super>set x=42 % => 42
+<<o2>super>x        % => 42
+<o2>x               % => 5
+.<o1>m1()           % => 1
+.<o1>m2()           % => 1
+.<o2>m1()           % => 1
+.<o2>m2()           % => 2
+.<<o2>super>m()     % => 1
+<o2>@@

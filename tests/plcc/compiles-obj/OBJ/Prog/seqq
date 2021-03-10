@@ -1,0 +1,57 @@
+let
+  x = 5
+in
+  < class
+      static x=3
+      static y=x
+    end
+  >y % => 3
+
+%%%%%%%%%%%%%%%%%%%%
+
+let
+  x = 5
+  z = 3
+in
+  < class extends
+      class
+        static x = z
+      end
+      static y = x
+    end
+  >y % => 3
+ 
+%%%%%%%%%%%%%%%%%%%%
+
+let
+  x = 5
+in
+  < class
+      static x=3
+      static y=<superclass>x
+    end
+  >y % => 5
+    
+%%%%%%%%%%%%%%%%%%%%
+
+let
+  x = 5
+in
+  < class
+      static p = proc() x
+      static x = 3
+    end
+  >.p() % => 3 
+     
+%%%%%%%%%%%%%%%%%%%%
+
+let
+  x = 5
+  z = 4
+in
+  < class
+      static p = proc() <superclass>x
+      static x = 3
+    end
+  >.p() % => 5
+     

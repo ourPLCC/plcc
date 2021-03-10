@@ -1,0 +1,42 @@
+define pair = 
+  class
+    field fst
+    field snd
+    method init = proc(x,y) {set fst = x ; set snd = y ; self}
+    method add = proc(t) .<new myclass>init(t, self)
+    method remove = proc() snd
+    method show = proc()
+      {if fst then {display# fst ; .<snd>show()} else newline ; self}
+  end
+
+{ newline
+; !< new pair
+   > add(3)
+   > show()
+   > add(5)
+   > show()
+   > add(11)
+   > show()
+   > remove()
+   > show()
+   > remove()
+   > show()
+   > remove()
+   > show()
+  !>
+; nil
+}
+
+let
+  toString = proc(e) display# .<e>foo()
+  c1 = class
+         static foo = proc() 1
+       end
+  c2 = class
+         static foo = proc() 2
+       end
+  c3 = class
+         static foo = proc() 3
+       end
+in
+  {.toString(c1) ; .toString(c2) ; .toString(c3) ; newline}

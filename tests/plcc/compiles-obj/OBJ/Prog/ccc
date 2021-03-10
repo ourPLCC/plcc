@@ -1,0 +1,6 @@
+define p = proc(t) t
+let
+  c = class static x=5 end
+  x = 3
+in
+  <c>.p(x)
