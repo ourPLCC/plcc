@@ -11,10 +11,19 @@ jobs:
       name: DockerHub
       url: https://hub.docker.com/repository/docker/ourplcc/plcc-in-docker
     runs-on: ubuntu-20.04
-    steps:
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+    steps:    
+      - name: Build shell image
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          tags: shell-image:latest
+          push: false
+          file: ./shell/Dockerfile
+      - name: Run tests in shell
+        uses: addnab/docker-run-action@v2
+        with:
+          image: shell-image:latest
+          run: /plcc/tests/run
       -
         name: Login to DockerHub
         uses: docker/login-action@v1
@@ -22,21 +31,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
-        name: Build shell image
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          tags: plcc-in-docker:latest
-          push: false
-          file: ./shell/Dockerfile
-      -
-        name: Run tests in shell
-        uses: addnab/docker-run-action@v2
-        with:
-          image: plcc-in-docker:latest
-          run: /plcc/tests/run
-      -
-        name: Push shell image
+        name: Build and push shell image
         id: docker_push
         uses: docker/build-push-action@v2
         with:
