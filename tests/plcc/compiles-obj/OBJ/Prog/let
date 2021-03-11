@@ -1,0 +1,37 @@
+%% an example of nested let expressions:
+
+let
+  w = 1
+  x = 3
+  y = 5
+in
+  let
+    y = x
+    z = 7
+  in
+    +(w,+(y,z)) % => 11
+
+%% we can do the same thing with classes
+<class
+  static w = 1
+  static x = 3
+  static y = 5
+end>
+  <class
+     static y = x
+     static z = 7
+  end>
+     +(w,+(y,z)) % => 11
+
+%% another way using extended classes
+
+<class extends
+  class
+    static w = 1
+    static x = 3
+    static y = 5
+  end
+  static y = x
+  static z = 7
+end>
+  +(w,+(y,z)) % => 11

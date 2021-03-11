@@ -1,0 +1,35 @@
+define c1 =
+  class
+    field x
+    method init = proc(x) {set <this>x = x ; this}
+    method get1x = proc() <this>x
+    method get1X = proc() <self>x
+  end
+
+define c2 =
+  class extends c1
+    field x
+    method init = proc(x)
+      { set <this>x = x
+      ; .<super>init(add1(x))
+      ; this
+      }
+    method get2x = proc() <this>x
+    method get2X = proc() <self>x
+  end
+
+define c3 =
+  class extends c2
+    field x
+    method init = proc(x)
+      { set <this>x = x
+      ; .<super>init(add1(x))
+      ; this}
+    method get3x = proc() <this>x
+    method get3X = proc() <self>x
+  end
+    
+
+define o1 = .<new c1>init(11)
+define o2 = .<new c2>init(42)
+define o3 = .<new c3>init(99)
