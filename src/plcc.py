@@ -36,6 +36,7 @@ Line = ''           # current line in the file
 STD = []            # reserved names from Std library classes
 STDT = []           # token-related files in the Std library directory
 STDP = []           # parse-related files in the Std library directory
+STDR = []           # runtime-related files in the Std library directory
 
 flags = {}          # processing flags (dictionary)
 
@@ -45,11 +46,14 @@ termSpecs = []      # term (token) specifications for generating the Token file
 
 nonterms = set()    # set of all nonterms
 fields = {}         # maps a non-abstract class name to its list of fields
-rules = []          # list of items  of the form (nt, cls, rhs), one for each grammar rule
+rules = []          # list of items  of the form (nt, cls, rhs),
+                    # one for each grammar rule
 extends = {}        # maps a derived class to its abstract base class
 derives = {}        # maps an abstract class to a list of its derived classes
-cases = {}          # maps a non-abstract class to its set of case terminals for use in a switch
-arbno = {}          # maps an arbno class name to its separator string (or None)
+cases = {}          # maps a non-abstract class to its set of case terminals
+                    # for use in a switch
+rrule = {}          # maps a repeating rule class name to its separator string
+                    # (or None)
 stubs = {}          # maps a class name to its parser stub file
 
 def debug(msg, level=1):
@@ -112,10 +116,11 @@ def main():
     sem(nxt)    # semantic actions
 
 def plccInit():
-    global flags, STD, STDT, STDP
+    global flags, STD, STDT, STDP, STDR
     STDT = ['ILazy','IMatch','ITrace','IScan','Trace','Scan']
     STDP = ['Parser','Rep']
-    STD = STDT + STDP
+    STDR = ['PLCCException']
+    STD = STDT + STDP + STDR
     STD.append('Token')
     # file-related flags -- can be overwritten
     # by a grammar file '!flag=...' spec
@@ -137,13 +142,16 @@ def plccInit():
 def lex(nxt):
     # print('=== lexical specification')
     for line in nxt:
-        if line == '%':
-            break
-        line = line.lstrip()
-        if len(line) == 0 or line[0] == '#': # skip empty lines and comments
+        line = re.sub('\s+#.*', '', line)   # remove trailing comments ...
+        # NOTE: a token that looks like this ' #' will mistakenly be
+        # considered as a comment. Use '[ ]#' instead
+        line = line.strip()
+        if len(line) == 0: # skip empty lines
             continue
-        line = re.sub('\s+#.*$', '', line)   # remove trailing comments ...
-        line = line.rstrip()                 # ... and any remaining whitespace
+        if line[0] == '#':
+            continue
+        if line == '%':
+            break;
         # print ('>>> {}'.format(line))
         jpat = '' # the Java regular expression pattern for this skip/term
         pFlag = getFlag('pattern')
@@ -252,7 +260,7 @@ def lexFinishUp():
             death(fname + ': cannot read library file')
         for line in tokenTemplate:
             # note that line keeps its trailing newline
-            if re.match('^\s*%%Vals%%', line):
+            if re.match('^\s*%%Match%%', line):
                 for ts in termSpecs:
                     print('        ' + ts + ',', file=tokenFile)
             else:
@@ -267,7 +275,7 @@ def lexFinishUp():
             death(fname + ': cannot read library file')
         for line in tokenTemplate:
             # note that line keeps its trailing newline
-            if re.match('^\s*%%Vals%%', line):
+            if re.match('^\s*%%Match%%', line):
                 tssep = ''
                 for ts in termSpecs:
                     print(tssep + '        ' + ts, file=tokenFile, end='')
@@ -292,13 +300,12 @@ def par(nxt):
         done()
     rno = 0
     for line in nxt:
+        line = re.sub('#.*$', '', line) # remove comments
+        line = line.strip()
+        if len(line) == 0:
+            continue                    # skip entirely blank lines
         if line == '%':
             break
-        line = line.lstrip() # clobber leading whitespace
-        line = re.sub('#.*$', '', line) # remove comments
-        line = line.rstrip()            # clobber any trailing whitespace
-        if line == '':
-            continue                    # skip entirely blank lines
         # if re.search('_', line):
         #     deathLNO('underscore "_" not permitted in grammar rule line')
         rno += 1
@@ -334,7 +341,7 @@ def parFinishUp():
     print('Nonterminals (* indicates start symbol):')
     for nt in sorted(nonterms):
         if nt[-1] == '#':
-            continue           # ignore automatically generated arbno names
+            continue           # ignore automatically generated repeating rule names
         if nt == startSymbol:
             ss = ' *<{}>'.format(nt)
         else:
@@ -371,7 +378,7 @@ def parFinishUp():
     buildStart()
 
 def processRule(line, rno):
-    global STD, startSymbol, fields, rules, arbno, nonterm, extends, derives
+    global STD, startSymbol, fields, rules, rrule, nonterm, extends, derives
     if rno:
         debug('[processRule] rule {:3}: {}'.format(rno, line))
     tnt = line.split()     # LHS ruleType RHS
@@ -389,29 +396,29 @@ def processRule(line, rno):
     ruleType = tnt.pop(0)  # either '**=' or '::='
     rhs = tnt              # a list of all the items to the right
                            # of the ::= or **= on the line
-    if ruleType == '**=':  # this is an arbno rule
+    if ruleType == '**=':  # this is a repeating rule
         if cls:
-            deathLNO('arbno rule cannot specify a non base class name')
+            deathLNO('repeating rule cannot specify a non base class name')
         if startSymbol == '':
-            deathLNO('arbno rule cannot be the first grammar rule')
+            deathLNO('repeating rule cannot be the first grammar rule')
         if len(rhs) == 0:
-            deathLNO('arbno rules cannot be empty')
-        debug('[processRule] arbno: ' + line)
+            deathLNO('repeating rules cannot be empty')
+        debug('[processRule] repeating rule: ' + line)
         sep = rhs[-1] # get the last entry in the line
         if sep[0] == '+':
             # must be a separated list
-            sep = sep[1:] # remove the leading '+' from the separator
+            sep = sep[1:]   # remove the leading '+' from the separator
             if not isTerm(sep):
-                deathLNO('final separator in an arbno rule must be a Terminal')
+                deathLNO('separator '+sep+' in repeating rule must be a bare Token')
             rhs.pop()       # remove separator from the rhs list
         else:
             sep = None
-        # arbno rule has no derived classes, so it's just a base class
-        # saveFields(base, lhs, rhs) # check for duplicate classes,
+        # a repeating rule has no derived classes, so it's just a base class
+        # saveFields(base, lhs, rhs) ?? check for duplicate classes,
         # then map the base to its (lhs, rhs) pair
-        arbno[base] = sep   # mark base as an arbno class with separator sep
+        rrule[base] = sep   # mark base as a repeating rule class with separator sep
                             # (possibly None)
-        # next add non-arbno rules to the rule set to simulate arbno rules
+        # next add right-recursive rules to the rule set to simulate repeating rules
         rhsString = ' '.join(rhs)
         if sep:
             ntsep = nt+'#'  # 'normal' nonterms cannot have '#' symbols
@@ -425,11 +432,11 @@ def processRule(line, rno):
         return
     elif not ruleType == '::=':
         deathLNO('illegal grammar rule syntax')
-    # at this point, we may have a legal non-arbno rule
+    # at this point, we may have a legal non-repeating rule
     debug('[processRule] so far: {} ::= {}'.format(lhs, rhs))
     nonterms.update({nt}) # add nt to the set of LHS nonterms
     if cls == 'void':
-        # this rule is *generated* by an arbno rule,
+        # this rule is *generated* by a repeating rule,
         # so there are no further class-related actions to do
         saveRule(nt, lhs, None, rhs)
         return
@@ -467,7 +474,7 @@ def saveRule(nt, lhs, cls, rhs):
     if cls != None:
         if cls in fields:
             deathLNO('class {} is already defined'.format(cls))
-        if cls in arbno:
+        if cls in rrule:
             fields[cls] = (lhs, rhs[:-1]) # remove the item with the underscore
         else:
             fields[cls] = (lhs, rhs)
@@ -651,11 +658,12 @@ public abstract class {base} {{
 {dummy}
     public static {base} parse(Scan scn$, Trace trace$) {{
         Token t$ = scn$.cur();
-        Token.Val v$ = t$.val;
-        switch(v$) {{
+        Token.Match match$ = t$.match;
+        switch(match$) {{
 {cases}
         default:
-            throw new RuntimeException("{base} cannot begin with " + v$);
+            throw new PLCCException(">>> Parse error",
+                                    "{base} cannot begin with " + match$);
         }}
     }}
 
@@ -666,16 +674,16 @@ public abstract class {base} {{
     return stubString
 
 def makeStub(cls):
-    global fields, extends, arbno
+    global fields, extends, rrule
     # make a stub for the given non-abstract class
     debug('[makeStub] making stub for non-abstract class {}'.format(cls))
     sep = False
     (lhs, rhs) = fields[cls]
     ext = '' # assume not an extended class
-    # two cases: either cls is an arbno rule, or it isn't
-    if cls in arbno:
+    # two cases: either cls is a repeating rule, or it isn't
+    if cls in rrule:
         ruleType = '**='
-        sep = arbno[cls]
+        sep = rrule[cls]
         (fieldVars, parseString) = makeArbnoParse(cls, rhs, sep)
         if sep != None:
             rhs = rhs + ['+{}'.format(sep)]
@@ -752,7 +760,7 @@ def makeParse(cls, rhs):
     for item in rhs:
         (tnt, field) = defangg(item)
         if field == None:
-            parseList.append('scn$.match(Token.Val.{}, trace$);'.format(tnt))
+            parseList.append('scn$.match(Token.Match.{}, trace$);'.format(tnt))
             continue
         if field in fieldSet:
             death('duplicate field name {} in rule RHS {}'.format(field, ' '.join(rhs)))
@@ -760,7 +768,7 @@ def makeParse(cls, rhs):
         args.append(field)
         if isTerm(tnt):
             fieldType = 'Token'
-            parseList.append('Token {} = scn$.match(Token.Val.{}, trace$);'.format(field, tnt))
+            parseList.append('Token {} = scn$.match(Token.Match.{}, trace$);'.format(field, tnt))
         else:
             fieldType = nt2cls(tnt)
             parseList.append('{} {} = {}.parse(scn$, trace$);'.format(fieldType, field, fieldType))
@@ -785,7 +793,7 @@ def makeArbnoParse(cls, rhs, sep):
         (tnt, field) = defangg(item)
         if field == None:
             # a bare token -- match it
-            loopList.append('scn$.match(Token.Val.{}, trace$);'.format(tnt))
+            loopList.append('scn$.match(Token.Match.{}, trace$);'.format(tnt))
             continue
         if field in fieldSet:
             death('duplicate field name {} in rule RHS {}'.format(field, ' '.join(rhs)))
@@ -795,7 +803,7 @@ def makeArbnoParse(cls, rhs, sep):
         if isTerm(tnt):
             # a term (token)
             baseType = 'Token'
-            loopList.append('{}.add(scn$.match(Token.Val.{}, trace$));'.format(field, tnt))
+            loopList.append('{}.add(scn$.match(Token.Match.{}, trace$));'.format(field, tnt))
         else:
             # a nonterm
             baseType = nt2cls(tnt)
@@ -815,8 +823,8 @@ def makeArbnoParse(cls, rhs, sep):
 {inits}
         while (true) {{
             Token t$ = scn$.cur();
-            Token.Val v$ = t$.val;
-            switch(v$) {{
+            Token.Match match$ = t$.match;
+            switch(match$) {{
 {switchCases}
 {loopList}
                 continue;
@@ -834,16 +842,16 @@ def makeArbnoParse(cls, rhs, sep):
 {inits}
         // first trip through the parse
         Token t$ = scn$.cur();
-        Token.Val v$ = t$.val;
-        switch(v$) {{
+        Token.Match match$ = t$.match;
+        switch(match$) {{
 {switchCases}
             while(true) {{
 {loopList}
                 t$ = scn$.cur();
-                v$ = t$.val;
-                if (v$ != Token.Val.{sep})
+                match$ = t$.match;
+                if (match$ != Token.Match.{sep})
                     break; // not a separator, so we're done
-                scn$.match(v$, trace$);
+                scn$.match(match$, trace$);
             }}
         }} // end of switch
         {returnItem}
@@ -952,7 +960,7 @@ def getCode(nxt):
 def semFinishUp():
     if getFlag('nowrite'):
         return
-    global stubs, STD
+    global stubs, STD, STDR
     dst = flags['destdir']
     print('\nJava source files created:')
     cmd = getFlag('PP') # run a preprocessor, if specified
@@ -974,6 +982,18 @@ def semFinishUp():
         except:
             death('cannot write to file {}'.format(fname))
         print('  {}.java'.format(cls))
+    # copy the Std runtime-related files
+    dst = getFlag('destdir')
+    libplcc = getFlag('libplcc')
+    std = libplcc + '/Std'
+    for fname in STDR:
+        if getFlag(fname):
+            debug('[semFinishUp] copying {} from {} to {} ...'.format(fname, std, dst))
+            try:
+                shutil.copy('{}/{}.java'.format(std, fname), '{}/{}.java'.format(dst, fname))
+            except:
+                death('Failure copying {} from {} to {}'.format(fname, std, dst))
+
 
 #####################
 # utility functions #
