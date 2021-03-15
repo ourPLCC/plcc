@@ -711,8 +711,9 @@ def makeStub(cls):
     else:
         dummy = ''
     stubString = """\
-import java.util.*;
+//{cls}:top//
 //{cls}:import//
+import java.util.*;
 
 // {ruleString}
 public class {cls}{ext} {{
@@ -720,6 +721,7 @@ public class {cls}{ext} {{
 {decls}
 {dummy}
     public {cls}({params}) {{
+//{cls}:init//
 {inits}
     }}
 
