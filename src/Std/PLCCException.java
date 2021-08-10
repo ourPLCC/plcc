@@ -3,7 +3,7 @@ public class PLCCException extends RuntimeException {
     String msg;
 
     public PLCCException(String pfx, String msg) {
-        super(msg = pfx + ": " + msg);
+        super(msg = "%%% " + pfx + ": " + msg);
         this.msg = msg;
     }
 

@@ -72,6 +72,16 @@ public class Token {
         return str;
     }
 
+    public String errString() {
+        switch(match) {
+        case $EOF:
+        case $ERROR:
+            return str;
+        default:
+            return match.toString(); // just the match name
+        }
+    }
+
     public boolean isEOF() {
         return this.match == $eof;
     }

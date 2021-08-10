@@ -3,7 +3,7 @@
 
 """
     PLCC: A Programming Languages Compiler-Compiler
-    Copyright (C) 2020  Timothy Fossum <plcc@pithon.net>
+    Copyright (C) 2021  Timothy Fossum <plcc@pithon.net>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,8 +35,7 @@ Fname = ''          # current file name (STDIN if standard input)
 Line = ''           # current line in the file
 STD = []            # reserved names from Std library classes
 STDT = []           # token-related files in the Std library directory
-STDP = []           # parse-related files in the Std library directory
-STDR = []           # runtime-related files in the Std library directory
+STDP = []           # parse/runtime-related files in the Std library directory
 
 flags = {}          # processing flags (dictionary)
 
@@ -59,7 +58,7 @@ stubs = {}          # maps a class name to its parser stub file
 def debug(msg, level=1):
     # print(getFlag('debug'))
     if msg and getFlag('debug') >= level:
-        print('>>> {}'.format(msg), file=sys.stderr)
+        print('%%% {}'.format(msg), file=sys.stderr)
         return True
     return False
 
@@ -70,7 +69,7 @@ def LIBPLCC():
     try:
         return os.environ['LIBPLCC']
     except KeyError:
-        return '/usr/local/pub/plcc/PLCC' ######## System specific! ########
+        death("undefined LIBPLCC environment variable -- quitting")
 
 def main():
     global argv
@@ -116,11 +115,10 @@ def main():
     sem(nxt)    # semantic actions
 
 def plccInit():
-    global flags, STD, STDT, STDP, STDR
-    STDT = ['ILazy','IMatch','ITrace','IScan','Trace','Scan']
-    STDP = ['Parser','Rep']
-    STDR = ['PLCCException']
-    STD = STDT + STDP + STDR
+    global flags, STD, STDT, STDP
+    STDT = ['ILazy','IMatch','IScan','ITrace', 'Trace', 'PLCCException', 'Scan']
+    STDP = ['ProcessFiles','Parse','Rep']
+    STD = STDT + STDP
     STD.append('Token')
     # file-related flags -- can be overwritten
     # by a grammar file '!flag=...' spec
@@ -143,7 +141,7 @@ def lex(nxt):
     # print('=== lexical specification')
     for line in nxt:
         line = re.sub('\s+#.*', '', line)   # remove trailing comments ...
-        # NOTE: a token that looks like this ' #' will mistakenly be
+        # NOTE: a token that has a substring like this ' #' will mistakenly be
         # considered as a comment. Use '[ ]#' instead
         line = line.strip()
         if len(line) == 0: # skip empty lines
@@ -306,8 +304,6 @@ def par(nxt):
             continue                    # skip entirely blank lines
         if line == '%':
             break
-        # if re.search('_', line):
-        #     deathLNO('underscore "_" not permitted in grammar rule line')
         rno += 1
         processRule(line, rno)
     parFinishUp()
@@ -341,7 +337,7 @@ def parFinishUp():
     print('Nonterminals (* indicates start symbol):')
     for nt in sorted(nonterms):
         if nt[-1] == '#':
-            continue           # ignore automatically generated repeating rule names
+            continue  # ignore automatically generated repeating rule names
         if nt == startSymbol:
             ss = ' *<{}>'.format(nt)
         else:
@@ -374,7 +370,7 @@ def parFinishUp():
 
     # build parser stub classes
     buildStubs()
-    # build the PLCC$Start.java file from the start symbol
+    # build the _Start.java file from the start symbol
     buildStart()
 
 def processRule(line, rno):
@@ -475,7 +471,7 @@ def saveRule(nt, lhs, cls, rhs):
         if cls in fields:
             deathLNO('class {} is already defined'.format(cls))
         if cls in rrule:
-            fields[cls] = (lhs, rhs[:-1]) # remove the item with the underscore
+            fields[cls] = (lhs, rhs[:-1]) # remove the separator token
         else:
             fields[cls] = (lhs, rhs)
     tnts = []
@@ -638,7 +634,9 @@ def buildStubs():
 
 def makeAbstractStub(base):
     global cases
-    caseList = []    # a list of strings, either 'case XXX:' or '    return Cls.parse(...);'
+    caseList = []    # a list of strings, 
+                     # either 'case XXX:'
+                     # or '    return Cls.parse(...);'
     for cls in derives[base]:
         if len(cases[cls]) == 0:
             death('class {} is unreachable'.format(cls))
@@ -646,15 +644,19 @@ def makeAbstractStub(base):
             caseList.append('case {}:'.format(tok))
         caseList.append('    return {}.parse(scn$,trace$);'.format(cls))
     if base == nt2cls(startSymbol):
+        ext = 'extends _Start '
         dummy = '\n    public {}() {{ }} // dummy constructor\n'.format(base)
     else:
+        ext = ''
         dummy = ''
     stubString = """\
 //{base}:top//
 //{base}:import//
 import java.util.*;
 
-public abstract class {base} {{
+public abstract class {base} {ext}{{
+
+    public static final String $className = "{base}";
 {dummy}
     public static {base} parse(Scan scn$, Trace trace$) {{
         Token t$ = scn$.cur();
@@ -662,15 +664,22 @@ public abstract class {base} {{
         switch(match$) {{
 {cases}
         default:
-            throw new PLCCException(">>> Parse error",
-                                    "{base} cannot begin with " + match$);
+            throw new PLCCException(
+                "Parse error",
+                "{base} cannot begin with " + t$.errString()
+            );
         }}
     }}
 
 //{base}//
 
 }}
-""".format(cls=cls, base=base, dummy=dummy, cases='\n'.join(indent(2, caseList)))
+""".format(cls=cls,
+           base=base,
+           dummy=dummy,
+           ext=ext,
+           cases='\n'.join(indent(2, caseList))
+          )
     return stubString
 
 def makeStub(cls):
@@ -680,6 +689,7 @@ def makeStub(cls):
     sep = False
     (lhs, rhs) = fields[cls]
     ext = '' # assume not an extended class
+    dummy = '' # dummy constructor
     # two cases: either cls is a repeating rule, or it isn't
     if cls in rrule:
         ruleType = '**='
@@ -692,7 +702,8 @@ def makeStub(cls):
         (fieldVars, parseString) = makeParse(cls, rhs)
         # two sub-cases: either cls is an extended class (with abstract base class) or it's a base class
         if cls in extends:
-            ext = ' extends ' + extends[cls]
+            # ext = 'extends ' + extends[cls] + ' '
+            ext = 'extends {} '.format(extends[cls])
         else:
             pass
     ruleString = '{} {} {}'.format(lhs, ruleType, ' '.join(rhs))
@@ -706,17 +717,20 @@ def makeStub(cls):
         params.append('{} {}'.format(fieldType, field))
     debug('[makeStub] cls={} decls={} params={} inits={}'.format(cls, decls, params, inits))
     debug('[makeStub] rule: {}'.format(ruleString))
-    if cls == nt2cls(startSymbol) and params:
+    if cls == nt2cls(startSymbol):
+        ext = 'extends _Start '
         dummy = '\n    public {}() {{ }} // dummy constructor\n'.format(cls)
-    else:
-        dummy = ''
     stubString = """\
 //{cls}:top//
 //{cls}:import//
 import java.util.*;
 
 // {ruleString}
-public class {cls}{ext} {{
+public class {cls} {ext}{{
+
+    public static final String $className = "{cls}";
+    public static final String $ruleString =
+        "{ruleString}";
 
 {decls}
 {dummy}
@@ -736,10 +750,10 @@ public class {cls}{ext} {{
 }}
 """.format(cls=cls,
            lhs=lhs,
+           dummy=dummy,
            ext=ext,
            ruleString=ruleString,
            decls='\n'.join(indent(1, decls)),
-           dummy=dummy,
            params=', '.join(params),
            inits='\n'.join(indent(2, inits)),
            parse=parseString)
@@ -867,19 +881,33 @@ def makeArbnoParse(cls, rhs, sep):
 
 def buildStart():
     global startSymbol
-    # build the PLCC$Start.java file
+    # build the _Start.java file
     if startSymbol == '':
         death('no start symbol!')
     dst = getFlag('destdir')
     if dst == None or getFlag('nowrite'):
         return
-    file = 'PLCC$Start.java'
+    file = '_Start.java'
     try:
         startFile = open('{}/{}'.format(dst, file), 'w')
     except:
         death('failure opening {} for writing'.format(file))
     startString = """\
-public abstract class PLCC$Start extends {start} {{ }}
+public abstract class _Start {{
+
+    public static _Start parse(Scan scn, Trace trace) {{
+        return {start}.parse(scn, trace);
+    }}
+
+    public void $run() {{
+        System.out.println(this.toString());
+    }}
+
+    public void $ok() {{
+        System.out.println("OK");
+    }}
+
+}}
 """.format(start=nt2cls(startSymbol))
     print(startString, file=startFile)
     startFile.close()
@@ -962,7 +990,7 @@ def getCode(nxt):
 def semFinishUp():
     if getFlag('nowrite'):
         return
-    global stubs, STD, STDR
+    global stubs, STD
     dst = flags['destdir']
     print('\nJava source files created:')
     cmd = getFlag('PP') # run a preprocessor, if specified
@@ -984,17 +1012,6 @@ def semFinishUp():
         except:
             death('cannot write to file {}'.format(fname))
         print('  {}.java'.format(cls))
-    # copy the Std runtime-related files
-    dst = getFlag('destdir')
-    libplcc = getFlag('libplcc')
-    std = libplcc + '/Std'
-    for fname in STDR:
-        if getFlag(fname):
-            debug('[semFinishUp] copying {} from {} to {} ...'.format(fname, std, dst))
-            try:
-                shutil.copy('{}/{}.java'.format(std, fname), '{}/{}.java'.format(dst, fname))
-            except:
-                death('Failure copying {} from {} to {}'.format(fname, std, dst))
 
 
 #####################
