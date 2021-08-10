@@ -10,10 +10,10 @@ skip OTHER '.'
 <aaa> **= A
 EOF
 
-  RESULT="$(cd "$BATS_TMPDIR" && plccmk -c grammar > /dev/null && echo "A asdf A fdsa A B" | parse)"
+  RESULT="$(cd "$BATS_TMPDIR" && plccmk -c grammar > /dev/null && echo "A asdf A fdsa A B" | parse -n)"
 
   echo "RESULT: $RESULT"
-  [[ "$RESULT" =~ P@[0-9a-f]+ ]]
+  [[ "$RESULT" =~ .*OK.* ]]
 
   rm -rf "$BATS_TMPDIR/grammar"
   rm -rf "$BATS_TMPDIR/Java"
