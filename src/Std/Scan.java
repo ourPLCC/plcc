@@ -127,7 +127,7 @@ public class Scan implements IScan {
     }
 
     public void put(Token t) {
-            throw new PLCCException(">>> PLCC Scan error",
+            throw new PLCCException("PLCC Scan error",
                                     "put not implemented");
     }
 
@@ -141,13 +141,8 @@ public class Scan implements IScan {
                 trace.print(t);
             adv();
         } else {
-            String mstr;
-            if (mcur == Token.Match.$ERROR)
-                mstr = t.toString();
-            else
-                mstr = mcur.toString();
-            String msg = "expected token " + match + ", got " + mstr;
-            throw new PLCCException (">>> Parse error", msg);
+            String msg = "expected token " + match + ", got " + t.errString();
+            throw new PLCCException ("Parse error", msg);
         }
         return t;
     }
@@ -182,8 +177,21 @@ public class Scan implements IScan {
     }
 
     public static void main(String [] args) {
-        BufferedReader rdr =
-            new BufferedReader(new InputStreamReader(System.in));
+        BufferedReader rdr = null;
+        if (args.length == 0) {
+            rdr = new BufferedReader(new InputStreamReader(System.in));
+        } else if (args.length == 1) {
+            try {
+                rdr = new BufferedReader(new FileReader(args[0]));
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                System.exit(1);
+            }
+        }
+        else {
+            System.err.println("usage: Scan [filename]");
+            System.exit(1);
+        }
         Scan scn = new Scan(rdr);
         scn.printTokens();
     }
