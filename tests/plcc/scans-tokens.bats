@@ -12,7 +12,7 @@ EOF
 
   TOKENS="$(
     cd "$BATS_TMPDIR" &&
-    plccmk "$BATS_TMPDIR/grammar" &&
+    plccmk -c "$BATS_TMPDIR/grammar" &&
     OUT="$(echo "$IN" | scan)" &&
     echo "$OUT"
   )"
