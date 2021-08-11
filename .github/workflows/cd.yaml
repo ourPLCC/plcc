@@ -11,15 +11,30 @@ jobs:
       name: DockerHub
       url: https://hub.docker.com/repository/docker/ourplcc/plcc-in-docker
     runs-on: ubuntu-20.04
-    steps:    
-      - name: Build shell image
+    steps:
+      -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            ourplcc/plcc-in-docker
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+      -
+        name: Build shell image
         id: docker_build
         uses: docker/build-push-action@v2
         with:
           tags: shell-image:latest
           push: false
           file: ./shell/Dockerfile
-      - name: Run tests in shell
+      -
+        name: Run tests in shell
         uses: addnab/docker-run-action@v2
         with:
           image: shell-image:latest
@@ -35,6 +50,7 @@ jobs:
         id: docker_push
         uses: docker/build-push-action@v2
         with:
-          tags: ourplcc/plcc-in-docker:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           push: true
           file: ./shell/Dockerfile
