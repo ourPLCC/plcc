@@ -3,9 +3,9 @@ name: cd
 on:
   push:
     branches:
-      - "master"
+      - 'master'
     tags:
-      - 'v*'
+      - 'v*.*.*'
 
 jobs:
   build-test-push:
