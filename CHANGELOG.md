@@ -2,6 +2,71 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0](https://github.com/ourPLCC/plcc/compare/v3.0.0...v3.1.0) (2021-08-16)
+
+* See issue [#32](https://github.com/ourPLCC/plcc/issues/32)
+* and PR [#33](https://github.com/ourPLCC/plcc/pull/33)
+
+### Features
+
+* Add `-v` "verbose" option
+
+    I also want to suggest adding a '-v' (for "verbose") flag on the
+    Parse/Rep command line. Setting this flag turns on printing the name
+    of the command-line file in which the current expression is being
+    parsed/evaluated, using the name "stdin" when reading from
+    System.in. Here is an example from the OBJ language:
+
+    Without the '-v' switch:
+
+        java -cp Java Rep Prog/oe
+        c
+        1
+        0
+        1
+        --> .<c>even?(6)
+        1
+
+    With the '-v' switch:
+
+        java -cp Java Rep -v Prog/oe
+        [Prog/oe]c
+        [Prog/oe]1
+        [Prog/oe]0
+        [Prog/oe]1
+        --> .<c>even?(6)
+        [stdin]1
+
+    The '-v' switch is particularly useful when there are several files
+    on the command line and you need to find the one where a particular
+    error occurs. This is a simple addition and does not break prior
+    behaviors.
+
+
+### Refactors
+
+* Make `Rep` and `Parse` subclasses of `ProcessFiles`
+
+  In VERSION 3.0.0, Parse and Rep both invoke main static method in
+  ProcessFiles using a parseOnly parameter that distinguishes between
+  just parsing (Parse, with parseOnly=true) and parsing and running
+  (Rep, with parseOnly=false). In ProcessFiles, the main method calls a
+  run() static method that uses an if statement that invokes either
+  $ok() or $run() on the parse tree (an instanceƒ of _Start), depending
+  on the value of parseOnly.
+
+  I don't like using if statements if they can be avoided using
+  subclassing, so I recommend that we change Rep and Parse so that they
+  are subclasses of ProcessFiles, and then they can appropriately call
+  the right action -- $ok() or $run() -- without needing to pass a flag.
+  This will not have any effects on behavior; it simply makes better
+  sense from an OO point of view.
+
+  Oh, and I have taken the two very similar code blocks in ProcessFiles
+  and factored them into a single method, processFile, which reduces the
+  code size and helps to maintain consistency.
+
+
 ## [3.0.0](https://github.com/ourPLCC/plcc/compare/v2.1.0...v3.0.0) (2021-08-10)
 
 ### ⚠ BREAKING CHANGES
@@ -17,7 +82,7 @@ All notable changes to this project will be documented in this file. See [standa
 * Printing PLCCExceptions now default to printing a leading "%%% "
   instead of ">>> ". This makes exception output stand out better.
 
-## Features:
+### Features:
 
 * Each PLCC-generated parser class file has a "<Class>:init" hook as
   the first line of its constructor. This can be used to incorporate
@@ -50,7 +115,7 @@ All notable changes to this project will be documented in this file. See [standa
   a comment unless defined otherwise in the 'grammar' file. I haven't
   used this, but someone might find it convenient.
 
-## Refactors
+### Refactors
 
 * Instead of printing the 'toString()' value of the root of the parse
   tree to "evaluate" it using the 'Rep' loop, I have the default
@@ -106,4 +171,3 @@ adjusted to point to the new src directory.
 ### Bug Fixes
 
 * Small fix regarding handling of EOF on input ([7edba11](https://github.com/ourPLCC/plcc/commit/7edba1123d8e8567fdcf24ee7c54ee7acc5c79b5))
-
