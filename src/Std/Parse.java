@@ -2,12 +2,16 @@ import java.util.*;
 import java.io.*;
 
 
-public class Parse {
+public class Parse extends ProcessFiles {
+
+    // Parse the program and call $ok() on the resulting parse tree
+    public void action(Scan scn, Trace trace) {
+        _Start.parse(scn, trace).$ok();
+    }
 
     // Read programs from command-line files
     // and then read programs from standard input.
-    // Parse each program and print "OK" once the parse is complete.
     public static void main(String [] args) {
-        ProcessFiles.main(args, true);
+        new Parse().processFiles(args);
     }
 }

@@ -7,40 +7,59 @@ import java.util.*;
 //     otherwise prompt with "--> "
 // If the '-t' command line argument is given, toggle the trace feature
 //     (defaults to no trace)
-// For each input program, parse the input to get a parse tree.
-//     If parseOnly is true, apply the $ok() method on the parse tree
-//         (defaults to printing "OK")
-//     If parseOnly is false, apply the $run() method on the parse tree
-//         (defaults to printing the toString representation of
-//          the root of the parse tree)
-public class ProcessFiles {
+// For each input program, use 'action' to parse the input
+//     and act on the resulting parse tree
 
-    private static void run(Scan scn, Trace trace, boolean parseOnly) {
-        _Start parseTree = _Start.parse(scn, trace);
-        if (parseOnly) {
-            parseTree.$ok();
-        } else {
-            parseTree.$run();
+public abstract class ProcessFiles {
+
+    // build a parse tree and act on it
+    abstract void action(Scan scn, Trace trace);
+
+    public void processFile(Scan scn, Trace trace, String prompt, String prog) {
+        try {
+            // read and process programs from this 
+            while(true) {
+                System.out.print(prompt);
+                if (scn.isEOF())
+                    break;
+                if (trace != null)
+                    trace.reset();
+                if (prog != null) {
+                    System.out.print(prog);
+                    if (trace != null)
+                        System.out.println(); // format the trace better
+                }
+                action(scn, trace);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        } catch (Error e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
         }
     }
 
-    public static void main(String [] args, boolean parseOnly) {
+    public void processFiles(String [] args) {
         Trace trace = null;
         // first read and process any input files from the command line
         Scan scn = null;
+        String prog = null;
         String prompt = "--> ";
         for (int i=0 ; i<args.length ; i++) {
             String s = args[i];
             if (s.equals("-n")) {
-                prompt = "";             // turn off prompts
+                // turns off prompts when reading from stdin
+                prompt = "";
                 continue;
             }
             if (s.equals("-t")) {
-                if (trace == null) {
-                    trace = new Trace(); // turn on tracing
-                } else {
-                    trace = null;        // turn off tracing
-                }
+                // toggle traces
+                trace = (trace == null ? new Trace() : null);
+                continue;
+            }
+            if (s.equals("-v")) {
+                // toggle verbose cmd line name output
+                prog = (prog == null ? "" : null);
                 continue;
             }
             try {
@@ -49,46 +68,17 @@ public class ProcessFiles {
                 System.out.println(s + ": no such file ... exiting");
                 System.exit(1);
             }
-            try {
-                // read and process programs from this FileReader
-                while(true) {
-                    if (scn.isEOF())
-                        break;
-                    if (trace != null)
-                        trace.reset();
-                    run(scn, trace, parseOnly);
-                }
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            } catch (Error e) {
-                System.out.println(e.getMessage());
-                System.exit(1);
-            }
+            if (prog != null)
+                prog = "[" + s + "]";
+            processFile(scn, trace, "", prog);
         }
         // finally read and process programs from standard input
         BufferedReader rdr =
             new BufferedReader(new InputStreamReader(System.in));
         scn = new Scan(rdr);
-        while (true) {
-            System.out.print(prompt);
-            try {
-                if (scn.isEOF()) {
-                    System.out.println();
-                    break; // all done!
-                }
-                if (trace != null) {
-                    trace.reset();
-                    System.out.println(); // format the trace better
-                }
-                run(scn, trace, parseOnly);
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                scn.reset(); // start over with a new  line
-            } catch (Error e) {
-                System.out.println(e.getMessage());
-                System.exit(1);
-            }
-        }
+        if (prog != null)
+            prog = "[stdin]";
+        processFile(scn, trace, prompt, prog);
     }
 
 }

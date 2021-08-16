@@ -10,4 +10,4 @@
     exit 2
 }
 
-java -cp ./Java Parse
+java -cp ./Java Parse $*
