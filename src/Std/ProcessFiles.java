@@ -32,9 +32,9 @@ public abstract class ProcessFiles {
                 action(scn, trace);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         } catch (Error e) {
-            System.out.println(e.getMessage());
+            System.err.println(e);
             System.exit(1);
         }
     }
@@ -65,7 +65,7 @@ public abstract class ProcessFiles {
             try {
                 scn = new Scan(new BufferedReader(new FileReader(s)));
             } catch (FileNotFoundException e) {
-                System.out.println(s + ": no such file ... exiting");
+                System.err.println(s + ": no such file ... exiting");
                 System.exit(1);
             }
             if (prog != null)
