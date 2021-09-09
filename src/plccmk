@@ -14,7 +14,9 @@ if [ $# -gt 0 ];
 then
         FILES="$@"
 else
-        FILES="${FILE:-grammar}"
+        DEFAULT=spec
+        [ -f "$DEFAULT" ] || DEFAULT=grammar
+        FILES="${FILE:-$DEFAULT}"
 fi
 
 [ -d "$LIB" ] || {

@@ -1,6 +1,5 @@
 # -*-python-*-
 
-
 """
     PLCC: A Programming Languages Compiler-Compiler
     Copyright (C) 2021  Timothy Fossum <plcc@pithon.net>
@@ -381,19 +380,19 @@ def processRule(line, rno):
     if len(tnt) < 2:
         deathLNO('illegal grammar rule') # no ruleType
     lhs = tnt.pop(0)       # the LHS of this rule
-    nt, cls = partitionLHS(lhs)
+    nt, cls = defangLHS(lhs)
     base = nt2cls(nt)      # the base (class) name of this nonterminal
-    if base in STD:
-        deathLNO('{}: reserved class name'.format(base))
-    if cls in STD:
-        deathLNO('{}: reserved class name'.format(cls))
     if base == cls:
         deathLNO('base class and derived class names cannot be the same!')
+    if base in STD:
+        deathLNO('{}: reserved class name'.format(base))
+    if cls != None and cls in STD:
+        deathLNO('{}: reserved class name'.format(cls))
     ruleType = tnt.pop(0)  # either '**=' or '::='
     rhs = tnt              # a list of all the items to the right
                            # of the ::= or **= on the line
     if ruleType == '**=':  # this is a repeating rule
-        if cls:
+        if cls != None:
             deathLNO('repeating rule cannot specify a non base class name')
         if startSymbol == '':
             deathLNO('repeating rule cannot be the first grammar rule')
@@ -461,12 +460,13 @@ def processRule(line, rno):
 #    fields[cls] = (lhs, rhs)
 
 def saveRule(nt, lhs, cls, rhs):
-    """ construct a tuple of the form (nt, tnts) where nt is the LHS nonterm (minus the <>)
-        and tnts is a list of the terminal/nonterm items extracted from the rhs
-        (and excluding their field names).  Then add this to the rules list for determining LL1.
+    """ construct a tuple of the form (nt, tnts) where nt is the LHS nonterm
+        (minus the <>) and tnts is a list of the terminal/nonterm items
+        extracted from the rhs (and excluding their field names).
+        Then add this to the rules list for determining LL1.
         Also, map fields[cls] to the (lhs, rhs) pair
     """
-    global rules, fields
+    global rules, fields, rrule
     if cls != None:
         if cls in fields:
             deathLNO('class {} is already defined'.format(cls))
@@ -476,33 +476,11 @@ def saveRule(nt, lhs, cls, rhs):
             fields[cls] = (lhs, rhs)
     tnts = []
     for item in rhs:
-        tnts.append(defangg(item)[0])
+        tnt, field = defangRHS(item)
+        if tnt == None: # item is a bare nonterm
+            tnt = item;
+        tnts.append(tnt) # tnt may be a nonterm or a token name
     rules.append((nt, cls, tnts)) # add the rule tuple to the rules list
-
-def partitionLHS(lhs):
-    # split the lhs string <xxx>[:yyy] and return xxx, yyy
-    # if :yyy is missing, return xxx, None
-    # xxx must be a legal nonterm name,
-    # and yyy (if present) must be either 'void' or a legal class name
-    nt, c, cls = lhs.partition(':')
-    if c == '':
-        cls = None   # :yyy part is not present
-    elif cls == '':  # :yyy is present, but yyy is empty
-        deathLNO('illegal LHS: ' + lhs)
-    ntt = defang(nt) # extract xxx (remove '<' and '>')
-    if ntt == '':
-        deathLNO('missing nonterminal')
-    if ntt == 'void':
-        deathLNO('cannot use "void" as a nonterminal in LHS {}'.format(lhs))
-    if '<{}>'.format(ntt) == nt and isNonterm(ntt):
-        pass         # OK format
-    else:
-        deathLNO('illegal nonterminal format {} in LHS {}'.format(nt, lhs))
-    if cls == None or cls == 'void' or isClass(cls):
-        pass         # OK cls
-    else:
-        deathLNO('illegal class name {} in LHS {}'.format(cls, lhs))
-    return ntt, cls
 
 def checkLL1():
     global rules, nonterms, cases
@@ -644,20 +622,17 @@ def makeAbstractStub(base):
             caseList.append('case {}:'.format(tok))
         caseList.append('    return {}.parse(scn$,trace$);'.format(cls))
     if base == nt2cls(startSymbol):
-        ext = 'extends _Start '
-        dummy = '\n    public {}() {{ }} // dummy constructor\n'.format(base)
+        ext = ' extends _Start'
     else:
         ext = ''
-        dummy = ''
     stubString = """\
 //{base}:top//
 //{base}:import//
 import java.util.*;
 
-public abstract class {base} {ext}{{
+public abstract class {base}{ext} /*{base}:class*/ {{
 
     public static final String $className = "{base}";
-{dummy}
     public static {base} parse(Scan scn$, Trace trace$) {{
         Token t$ = scn$.cur();
         Token.Match match$ = t$.match;
@@ -672,11 +647,9 @@ public abstract class {base} {ext}{{
     }}
 
 //{base}//
-
 }}
 """.format(cls=cls,
            base=base,
-           dummy=dummy,
            ext=ext,
            cases='\n'.join(indent(2, caseList))
           )
@@ -689,7 +662,6 @@ def makeStub(cls):
     sep = False
     (lhs, rhs) = fields[cls]
     ext = '' # assume not an extended class
-    dummy = '' # dummy constructor
     # two cases: either cls is a repeating rule, or it isn't
     if cls in rrule:
         ruleType = '**='
@@ -703,7 +675,7 @@ def makeStub(cls):
         # two sub-cases: either cls is an extended class (with abstract base class) or it's a base class
         if cls in extends:
             # ext = 'extends ' + extends[cls] + ' '
-            ext = 'extends {} '.format(extends[cls])
+            ext = ' extends {}'.format(extends[cls])
         else:
             pass
     ruleString = '{} {} {}'.format(lhs, ruleType, ' '.join(rhs))
@@ -718,22 +690,20 @@ def makeStub(cls):
     debug('[makeStub] cls={} decls={} params={} inits={}'.format(cls, decls, params, inits))
     debug('[makeStub] rule: {}'.format(ruleString))
     if cls == nt2cls(startSymbol):
-        ext = 'extends _Start '
-        dummy = '\n    public {}() {{ }} // dummy constructor\n'.format(cls)
+        ext = ' extends _Start'
     stubString = """\
 //{cls}:top//
 //{cls}:import//
 import java.util.*;
 
 // {ruleString}
-public class {cls} {ext}{{
+public class {cls}{ext} /*{cls}:class*/ {{
 
     public static final String $className = "{cls}";
     public static final String $ruleString =
         "{ruleString}";
 
 {decls}
-{dummy}
     public {cls}({params}) {{
 //{cls}:init//
 {inits}
@@ -746,11 +716,9 @@ public class {cls} {ext}{{
     }}
 
 //{cls}//
-
 }}
 """.format(cls=cls,
            lhs=lhs,
-           dummy=dummy,
            ext=ext,
            ruleString=ruleString,
            decls='\n'.join(indent(1, decls)),
@@ -773,21 +741,25 @@ def makeParse(cls, rhs):
     parseList = []
     fieldVars = []
     fieldSet = set()
+    rhsString = ' '.join(rhs)
     for item in rhs:
-        (tnt, field) = defangg(item)
-        if field == None:
-            parseList.append('scn$.match(Token.Match.{}, trace$);'.format(tnt))
+        (tnt, field) = defangRHS(item)
+        if tnt == None:
+            # item must be a bare token -- just match it
+            parseList.append('scn$.match(Token.Match.{}, trace$);'.format(item))
             continue
         if field in fieldSet:
-            death('duplicate field name {} in rule RHS {}'.format(field, ' '.join(rhs)))
+            deathLNO('duplicate field name {} in rule RHS {}'.format(field, rhsString))
         fieldSet.update({field})
         args.append(field)
         if isTerm(tnt):
             fieldType = 'Token'
-            parseList.append('Token {} = scn$.match(Token.Match.{}, trace$);'.format(field, tnt))
+            parseList.append(
+                'Token {} = scn$.match(Token.Match.{}, trace$);'.format(field, tnt))
         else:
             fieldType = nt2cls(tnt)
-            parseList.append('{} {} = {}.parse(scn$, trace$);'.format(fieldType, field, fieldType))
+            parseList.append(
+                '{} {} = {}.parse(scn$, trace$);'.format(fieldType, field, fieldType))
         fieldVars.append((field, fieldType))
     parseList.append('return new {}({});'.format(cls, ', '.join(args)))
     debug('[makeParse] parseList={}'.format(parseList))
@@ -801,35 +773,39 @@ def makeArbnoParse(cls, rhs, sep):
     args = []        # the arguments to pass to the constructor
     loopList = []    # the match/parse code in the Arbno loop
     fieldVars = []   # the field variable names (all Lists), to be returned
-    fieldSet = set() # the set of field variable names
+    fieldSet = set() # the set of field variable names for this RHS
+    rhsString = ' '.join(rhs)
     # rhs = rhs[:-1]   # remove the last item from the grammar rule (which has an underscore item)
     # create the parse statements to be included in the loop
     switchCases = [] # the token cases in the switch statement
     for item in rhs:
-        (tnt, field) = defangg(item)
-        if field == None:
-            # a bare token -- match it
-            loopList.append('scn$.match(Token.Match.{}, trace$);'.format(tnt))
+        (tnt, field) = defangRHS(item)
+        if tnt == None:
+            loopList.append('scn$.match(Token.Match.{}, trace$);'.format(item))
             continue
-        if field in fieldSet:
-            death('duplicate field name {} in rule RHS {}'.format(field, ' '.join(rhs)))
-        fieldSet.update({field})
+        # field is either derived from tnt or is an annotated field name
         field += 'List'
-        args.append(field)
         if isTerm(tnt):
-            # a term (token)
+            # a token
             baseType = 'Token'
-            loopList.append('{}.add(scn$.match(Token.Match.{}, trace$));'.format(field, tnt))
-        else:
-            # a nonterm
+            loopList.append(
+                '{}.add(scn$.match(Token.Match.{}, trace$));'.format(field, tnt))
+        elif isNonterm(tnt):
             baseType = nt2cls(tnt)
             loopList.append('{}.add({}.parse(scn$, trace$));'.format(field, baseType))
+        else:
+            pass # cannot get here
+        args.append(field)
+        if field in fieldSet:
+            deathLNO(
+                'duplicate field name {} in RHS rule {}'.format(field, rhsString))
+        fieldSet.update({field})
         fieldType = 'List<{}>'.format(baseType)
         fieldVars.append((field, fieldType))
         inits.append('{} {} = new ArrayList<{}>();'.format(fieldType, field, baseType))
     switchCases = []
     if len(cases[cls]) == 0:
-        death('class {} is unreachable'.format(cls))
+        deathLNO('class {} is unreachable'.format(cls))
     for item in cases[cls]:
         switchCases.append('case {}:'.format(item))
     returnItem = 'return new {}({});'.format(cls, ', '.join(args))
@@ -933,13 +909,16 @@ def sem(nxt):
         # print('>>> cls={} mod={}'.format(cls, mod))
         cls = cls.strip()
         codeString = getCode(nxt) # grab the stuff between %%% ... %%%
+        # check to see if this has the form Class:mod
+        mod = mod.strip() # mod might be 'import', 'top', etc.
         if mod:
-            mod = mod.strip() # mod is either 'import' or 'top'
             if cls == '*': # apply the mod substitution to *all* of the stubs
                 for cls in stubs:
                     stub = stubs[cls]
                     repl = '//{}:{}//'.format(cls, mod)
                     stub = stub.replace(repl, '{}\n{}'.format(codeString,repl))
+                    repl = '/*{}:{}*/'.format(cls, mod)
+                    stub = stub.replace(repl, '{} {}'.format(codeString,repl))
                     debug('class {}:\n{}\n'.format(cls, stub))
                     stubs[cls] = stub
                 continue
@@ -951,9 +930,12 @@ def sem(nxt):
             stub = stubs[cls]
             if mod:
                 repl = '//{}:{}//'.format(cls, mod)
-            else:
+                stub = stub.replace(repl, '{}\n{}'.format(codeString,repl))
+                repl = '/*{}:{}*/'.format(cls, mod)
+                stub = stub.replace(repl, '{} {}'.format(codeString,repl))
+            else: # the default
                 repl = '//{}//'.format(cls)
-            stub = stub.replace(repl, '{}\n{}'.format(codeString,repl))
+                stub = stub.replace(repl, '{}\n\n{}'.format(codeString,repl))
             debug('class {}:\n{}\n'.format(cls, stub))
             stubs[cls] = stub
         else:
@@ -1105,58 +1087,72 @@ def deathLNO(msg):
 def push(struct, item):
     struct.append(item)
 
-def defang(exp):
-    # if exp is of the form '<xxx>', return xxx
-    # otherwise leave alone
-    match = re.match('<(.+)>$', exp)
-    if match:
-        return match.group(1)
-    return exp
-
-def defangg(item):
-    """
-    item format      returns
-    -----------      -------
-    PQR              (PQR, None)
-    <pqr>            (pqr, pqr)
-    <PQR>            (PQR, pqr)  # pqr is PQR in lowercase
-    <pqr>stu         (pqr, stu)
-    <PQR>stu         (PQR, stu)
-                     death in any other cases
-    pqr is a nonterm (possibly ending with '#') and PQR is a term (token).
-    The first item in the returned tuple is either a Nonterm or a Term
-    The second item in the tuple is either None or an identifier
-    starting in lowercase
-    """
-    tnt = None
-    field = None
-    debug('[defangg] item={}'.format(item))
-    m = re.match(r'<([^>]*)>(.*)$', item)
+def defang(item):
+    # item is either <xxx>, <xxx>:?yyy, or neither
+    # xxx must be a nonterm or a token name
+    global term # all token names
+    debug('[defang] item={}'.format(item))
+    m = re.match(r'<(\w+#?)>(:?\w*)$', item)
     if m:
-        tnt = m.group(1)
-        field = m.group(2)
-        if field == '':
-            if isTerm(tnt):
-                field = tnt.lower()
-            else:
-                field = tnt
+        xxx = m.group(1)
+        yyy = m.group(2)
+        if isTerm(xxx) or isNonterm(xxx):
+            pass
+        else:
+            deathLNO('malformed "<{}>" in BNF item {}'.format(xxx, item))
+        if yyy == '':
+            return (xxx, None) # no annotation
+        # yyy is nonempty here
+        if yyy[0] == ':':
+            yyy = yyy[1:] # ditch the ':' part of yyy
+        if yyy == '':
+            deathLNO('missing annotation in BNF item {}'.format(item))
+        if isClass(yyy) or isID(yyy):
+            pass
+        else:
+            deathLNO('malformed annotation "{}" in BNF item {}'.format(yyy, item))
+        return (xxx, yyy)
+    else: # item must be a bare token
+        if not isTerm(item):
+            deathLNO('malformed BNF item {}'.format(item))
+        if not item in term:
+            deathLNO('unknown token name "{}" in BNF rule'.format(item))
+        return (None, None)
+
+def defangLHS(lhs):
+    # lhs must be either <nt> or <nt>:?cls
+    # where nt is a nonterminal and cls is a class name
+    nt, cls = defang(lhs)
+    if not isNonterm(nt):
+        deathLNO('illegal nonterminal "<{}>" in BNF LHS {}'.format(nt, lhs))
+    # nt must be a nonterm here
+    if cls != None and not isClass(cls):
+        deathLNO('illegal class name "{}" in BNF LHS {}'.format(cls, lhs))
+    return (nt, cls)
+
+def defangRHS(item):
+    # item must be either a token, <tnt>,  or <tnt>:?field
+    # where tnt is a token or nonterminal and field is a field name
+    # returns (None, None) if item is a token
+    # returns (tnt, field) otherwise, where field is derived implicitly from tnt
+    #   or field is explicitly given
+    tnt, field = defang(item)
+    if tnt == None:
+        # item is a bare token
+        return (None, None)
+    if field != None and not isID(field):
+        deathLNO('illegal field name "{}" in BNF RHS item {}'.format(field, item))
+    # at this point, tnt is either a token or nonterm
+    if isTerm(tnt):
+        # tnt is a token
+        if field == None:
+            field = tnt.lower() # derive the field name from the token name
+    elif isNonterm(tnt):
+        # tnt is a nonterminal
+        if field == None:
+            field = tnt # set the field name to the nonterminal name
     else:
-        m = re.match('\w+#?$', item)
-        if m:
-            tnt = item
-            field = None
-    # just check for legal values (done once)
-    if tnt == None or tnt == '':
-        deathLNO('malformed RHS grammar item {}'.format(item))
-    if not isTerm(tnt) and not isNonterm(tnt):
-        deathLNO('malformed RHS grammar item {}'.format(item))
-    if isTerm(tnt) and not tnt in term:
-        deathLNO('unknown token name in RHS grammar item {}'.format(item))
-    if field == None:
-        if not isTerm(tnt):
-            deathLNO('cannot have a bare nonterm in RHS grammar item {}'.format(item))
-    elif not isID(field):
-        deathLNO('field {} is an invalid identifier in RHS grammar item {}'.format(field, item))
+        deathLNO('"{}" must be a token or nonterm in BNF RHS item {}'.format(tnt,item))
     return (tnt, field)
 
 def isID(item):
