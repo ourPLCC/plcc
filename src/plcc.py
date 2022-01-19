@@ -612,7 +612,7 @@ def buildStubs():
 
 def makeAbstractStub(base):
     global cases
-    caseList = []    # a list of strings, 
+    caseList = []    # a list of strings,
                      # either 'case XXX:'
                      # or '    return Cls.parse(...);'
     for cls in derives[base]:
@@ -967,7 +967,7 @@ def getCode(nxt):
     else:
         deathLNO('premature end of file')
     str = '\n'.join(code)
-    return str
+    return str + '\n'
 
 def semFinishUp():
     if getFlag('nowrite'):
