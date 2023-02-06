@@ -2,10 +2,10 @@
 # We do this in a separate stage so that Git is only installed in this stage
 # and isn't in the final image.
 
-FROM alpine:3.12
+FROM alpine:3.14
 
 # Install Python 3
-RUN apk add --no-cache python3~=3.8 \
+RUN apk add --no-cache python3~=3.9 \
   && python3 -m ensurepip \
   && pip3 install --upgrade pip setuptools \
   && rm -r /usr/lib/python*/ensurepip \
@@ -20,10 +20,10 @@ ENV JAVA_HOME="/usr/lib/jvm/default-jvm"
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # Install bash.
-RUN apk add --no-cache bash~=5.0
+RUN apk add --no-cache bash~=5.1
 
 # Install bash
-RUN apk add --no-cache bats~=1.2
+RUN apk add --no-cache bats~=1.3
 
 # Create separate users for PLCC and the developer.
 RUN addgroup -S plcc && adduser -S plcc -G plcc
