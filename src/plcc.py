@@ -310,7 +310,7 @@ def par(nxt):
 def parFinishUp():
     global STDP, startSymbol, nonterms, extends, derives, rules
     if not rules:
-        print('No grammar rules', file=sys.stderr)
+        print('No grammar rules')
         return
     debug('[parFinishUp] par: finishing up...')
     # check to make sure all RHS nonterms appear as the LHS of at least one rule
@@ -477,7 +477,7 @@ def saveRule(nt, lhs, cls, rhs):
     tnts = []
     for item in rhs:
         tnt, field = defangRHS(item)
-        if tnt == None: # item is a bare nonterm
+        if tnt == None: # item is a bare token
             tnt = item;
         tnts.append(tnt) # tnt may be a nonterm or a token name
     rules.append((nt, cls, tnts)) # add the rule tuple to the rules list
@@ -909,7 +909,9 @@ def sem(nxt):
         # print('>>> cls={} mod={}'.format(cls, mod))
         cls = cls.strip()
         codeString = getCode(nxt) # grab the stuff between %%% ... %%%
-        # check to see if this has the form Class:mod
+        if line[-8:] == ':ignore!':
+            continue
+        # check to see if line has the form Class:mod
         mod = mod.strip() # mod might be 'import', 'top', etc.
         if mod:
             if cls == '*': # apply the mod substitution to *all* of the stubs
@@ -922,10 +924,10 @@ def sem(nxt):
                     debug('class {}:\n{}\n'.format(cls, stub))
                     stubs[cls] = stub
                 continue
+        # if mod == 'ignore!':
+        #     continue
         if not isClass(cls):
             deathLNO('{}: ill-defined class name'.format(cls))
-        if mod == 'ignore!':
-            continue
         if cls in stubs:
             stub = stubs[cls]
             if mod:
@@ -967,7 +969,7 @@ def getCode(nxt):
     else:
         deathLNO('premature end of file')
     str = '\n'.join(code)
-    return str
+    return str + '\n'
 
 def semFinishUp():
     if getFlag('nowrite'):
@@ -1000,9 +1002,7 @@ def semFinishUp():
 # utility functions #
 #####################
 
-def done(msg=''):
-    if msg:
-        print(msg, file=sys.stderr)
+def done():
     exit(0)
 
 def nextLine():
