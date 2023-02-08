@@ -12,8 +12,6 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       -
         name: Docker meta
         id: meta
@@ -22,10 +20,7 @@ jobs:
           images: |
             ghcr.io/ourPLCC/plcc
           tags: |
-            type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
