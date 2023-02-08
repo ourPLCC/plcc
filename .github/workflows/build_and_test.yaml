@@ -48,5 +48,6 @@ jobs:
       - name: Run tests in shell
         uses: addnab/docker-run-action@v2
         with:
-          image: ${{ steps.meta.outputs.tags[0] }}
+          registry: ghcr.io
+          image: ourPLCC/plcc:${{ steps.meta.outputs.version }}
           run: /plcc/tests/run
