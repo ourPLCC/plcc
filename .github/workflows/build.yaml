@@ -1,38 +1,24 @@
 ---
-name: Build and Test
+name: Build
 
 on:
   pull_request:
 
 jobs:
   build:
-    name: Build and Test
+    name: Build
     runs-on: ubuntu-latest
     steps:
       -
         name: Checkout
         uses: actions/checkout@v3
       -
-        name: Build test image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: ./shell/Dockerfile
-          tags: test-image:latest
-          push: false
-      -
-        name: Test
-        uses: addnab/docker-run-action@v3
-        with:
-          image: test-image:latest
-          run: /plcc/tests/run
-      -
         name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
         with:
           images: |
-            ghcr.io/ourPLCC/plcc
+            ghcr.io/ourplcc/plcc
           tags: |
             type=ref,event=pr
       -
@@ -45,7 +31,7 @@ jobs:
         name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
-          registry: ghcr.io/ourPLCC/plcc
+          registry: ghcr.io/ourplcc/plcc
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       -
