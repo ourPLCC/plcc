@@ -48,5 +48,5 @@ jobs:
       - name: Run tests in shell
         uses: addnab/docker-run-action@v2
         with:
-          image: shell-image:latest
+          image: ghcr.io/ourPLCC/plcc:${{ steps.meta.outputs.tags[0] }}
           run: /plcc/tests/run
