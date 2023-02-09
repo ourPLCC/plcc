@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+For release notes after version 3.1.0, please see <https://github.com/ourPLCC/plcc/releases>.
 
 ## [3.1.0](https://github.com/ourPLCC/plcc/compare/v3.0.0...v3.1.0) (2021-08-16)
 
