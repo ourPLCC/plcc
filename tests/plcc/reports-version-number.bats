@@ -6,7 +6,7 @@
   echo "OUTPUT: $output"
   echo "ERROR: $error"
 
-  regex='^PLCC \d+\.\d+\.\d+(-dev.0)?$'
+  regex='^(\d+\.\d+\.\d+(-.*)?)|(Unknown)$'
   [[ "$output" =~ $regex ]]
   [[ "$status" -eq 0 ]]
 }

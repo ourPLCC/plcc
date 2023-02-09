@@ -101,11 +101,8 @@ def main():
 
     # Handle --version option.
     if 'version' in flags and flags['version']:
-        from pathlib import Path
-        version_file = Path(__file__).resolve().parent / 'VERSION'
-        with open(version_file, 'r') as f:
-            contents = f.read()
-            print("PLCC " + contents.strip())
+        import version
+        print(version.get_version())
         sys.exit(0)
 
     nxt = nextLine()     # nxt is the next line generator
@@ -612,7 +609,7 @@ def buildStubs():
 
 def makeAbstractStub(base):
     global cases
-    caseList = []    # a list of strings, 
+    caseList = []    # a list of strings,
                      # either 'case XXX:'
                      # or '    return Cls.parse(...);'
     for cls in derives[base]:
