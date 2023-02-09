@@ -25,6 +25,9 @@ RUN apk add --no-cache bash~=5.1
 # Install bash
 RUN apk add --no-cache bats~=1.3
 
+# Install git
+RUN apk add --no-cache git
+
 # Create separate users for PLCC and the developer.
 RUN addgroup -S plcc && adduser -S plcc -G plcc
 RUN addgroup -S my && adduser -S my -G my
