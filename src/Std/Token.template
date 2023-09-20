@@ -1,43 +1,44 @@
 import java.util.*;
 
-// Token class without patterns
+// bare Token class for use with hand-crafted scanners
 public class Token {
 
-    public enum Val {
-%%Vals%%
-    }
+    public enum Match {
+%%Match%%
+        }
 
-    public Val val;          // the token value
-    public String str;       // the token string matched
-    public int lno;          // the line number where the token occurred
-    public StringBuffer buf; // used to collect the token's lexeme
+    public Match match;      // token match
+    public String str;       // this token's lexeme (never empty!)
+    // the following two fields may be unused
+    public int lno;          // the line number where this token was found
+    public String line;      // the text line where this token appears
 
     public Token() {
-        val = null;
+        match = null;
         str = null;
         lno = 0;
-        buf = new StringBuffer();
+        line = null;
     }
 
-    public Token(Val val, String str, int lno) {
-        this.val = val;
+    public Token(Match match, String str, int lno, String line) {
+        this.match = match;
         this.str = str;
         this.lno = lno;
+        this.line = line;
     }
 
-    public Token(Val val, String str) {
-        this(val, str, 0);
+    public Token(Match match, String str) {
+        this(match, str, 0, null);
     }
 
     public String toString() {
-        if (str == null)
-            str = buf.toString();
         return str;
     }
 
     public static void main(String [] args) {
-        for (Val v : Val.values())
-            System.out.println(v);
+        for (Match match: Match.values()) {
+            System.out.println( String.format("%s", match));
+        }
     }
 
 //Token//
