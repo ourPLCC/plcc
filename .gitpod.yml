@@ -3,7 +3,6 @@ image: gitpod/workspace-full:latest
 
 tasks:
   - name: Install PLCC
-    command: ./.gitpod/install-plcc.sh
     command: |
       echo 'export LIBPLCC="$GITPOD_REPO_ROOT/src"
       export PATH="$LIBPLCC:$PATH"
