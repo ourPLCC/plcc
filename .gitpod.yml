@@ -7,4 +7,4 @@ tasks:
       echo 'export LIBPLCC="$GITPOD_REPO_ROOT/src"
       export PATH="$LIBPLCC:$PATH"
       ' >> "$HOME/.bashrc"
-      echo "\n    Open a new terminal.\n"
+      source "$HOME/.bashrc"
