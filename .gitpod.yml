@@ -1,0 +1,10 @@
+# Image of workspace. Learn more: https://www.gitpod.io/docs/configure/workspaces/workspace-image
+image: gitpod/workspace-full:latest
+
+tasks:
+  - name: Install PLCC
+    command: |
+      echo 'export LIBPLCC="$GITPOD_REPO_ROOT/src"
+      export PATH="$LIBPLCC:$PATH"
+      ' >> "$HOME/.bashrc"
+      echo "\n    Open a new terminal.\n"
