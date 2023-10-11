@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LIB="${LIBPLCC:-/usr/local/pub/plcc/PLCC}"
+LIB="${LIBPLCC:-/home/fossumtv/PL/src}"
 PYTHON3=python3
 PLCC="$LIB/plcc.py"
 

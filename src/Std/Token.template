@@ -5,7 +5,7 @@ public class Token {
 
     public enum Match {
 %%Match%%
-        }
+    }
 
     public Match match;      // token match
     public String str;       // this token's lexeme (never empty!)

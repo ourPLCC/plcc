@@ -11,13 +11,15 @@ public class Scan implements IScan {
 
     public int lno;              // current line number
     public Token tok;            // this is persistent across all calls to cur()
+    public Token lineMode;       // token to toggle line mode
 
     // create a scanner object on a buffered reader
     public Scan(BufferedReader rdr) {
         this.rdr = rdr;
         this.lno = 0;
-        s = null;
-        tok = null;
+        this.lineMode = null;
+        this.s = null;
+        this.tok = null;
         // force the enum Match class to compile its patterns
         String msg = Token.Match.init();
         if (msg != null) {
@@ -36,6 +38,7 @@ public class Scan implements IScan {
         // force the scanner to process the next line
         s = null;
         tok = null;
+        lineMode = null;
     }
 
     // fill the string buffer from the reader if it's exhausted or null)
@@ -47,7 +50,7 @@ public class Scan implements IScan {
                 if (s == null)
                     return; // end of file
                 lno++;
-                s += "\n";
+                s += "\n";  // make sure the string has a newline
                 start = 0;
                 end = s.length();
             } catch (IOException e) {
@@ -73,20 +76,41 @@ public class Scan implements IScan {
                 return tok;
             }
             // s cannot be null here
+            // are we in line mode?
+            if (lineMode != null) {
+                Pattern cpat = lineMode.match.cPattern;
+                Matcher m = cpat.matcher(s);
+                m.region(0,end);
+                start = end; // consume the line before next match
+                if (m.lookingAt()) {
+                    // found the lineMode token, exit line mode
+                    // and return the matched lineMode token
+                    // System.out.println("leaving line mode...");
+                    tok = new Token(lineMode.match, m.group(), lno, s);
+                    lineMode = null;
+                    return tok;
+                } else {
+                    // return the entire line as a token
+                    tok = new Token(Token.Match.$LINE, s, lno, s);
+                    return tok;
+                }
+            }
             int matchEnd = start; // current end of match
             for (Token.Match match : Token.Match.values()) {
                 Pattern cpat = match.cPattern;
                 if (cpat == null)
                     break; // nothing matches, so can't find a token
-                if (match.skip && matchFound != null)
+                if (match.tokType == Token.TokType.SKIP && matchFound != null)
                     continue; // ignore skips if we have a pending token
+                if (start != 0 && match.pattern.charAt(0) == '^')
+                    continue; // '^' must match at start of line
                 Matcher m = cpat.matcher(s);
                 m.region(start, end);
                 if (m.lookingAt()) {
                     int e = m.end();
                     if (e == start)
                         continue; // empty match, so try next pattern
-                    if (match.skip) {
+                    if (match.tokType == Token.TokType.SKIP) {
                         // there's a non-empty skip match,
                         // so we skip over the matched part
                         // and get more stuff to read
@@ -114,6 +138,12 @@ public class Scan implements IScan {
             start = matchEnd; // start of next token match
             // matchString is the matching string
             tok = new Token(matchFound, matchString, lno, s); // persistent
+            // System.out.println(String.format("match=%s\n", toggle));
+            if (matchFound.tokType == Token.TokType.LINE_TOGGLE) {
+                // System.out.println("going to line mode...");
+                start = end; // swallow the rest of the line
+                lineMode = tok;
+            }
             return tok;
         }
     }

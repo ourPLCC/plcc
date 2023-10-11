@@ -4,29 +4,50 @@ import java.util.regex.*;
 // Token class with match patterns (used with the built-in Scan class)
 public class Token {
 
-    // this is set to an error message string
+    // patternFail is set to an error message string
     // if there are pattern compile errors
     public static String patternFail = null; //
     public static final Match $eof = Match.$EOF;
 
+    public enum TokType {
+        TOKEN,
+        SKIP,
+        LINE_TOGGLE,
+        SPECIAL;
+    }
+
     public enum Match {
 %%Match%%
         $ERROR (null),
-        $EOF (null);
+        $EOF (null),
+        $LINE (null);
 
         public String pattern;
-        public boolean skip;
-        public Pattern cPattern; // compiled pattern
+        public TokType tokType;
+        public Pattern cPattern = null; // compiled pattern
 
-        // a token pattern (skip == false)
+        // a SPECIAL token type or a TOKEN/LINE_TOGGLE
         Match(String pattern) {
-            this(pattern, false);
+            this(pattern, null);
+        } 
+
+        // legacy ??
+        Match(String pattern, boolean skip) {
+            this(pattern, TokType.SKIP);
         }
 
-        Match(String pattern, boolean skip) {
-            this.pattern = pattern;
-            this.skip = skip;
+        Match(String pattern, TokType tokType) {
             if (pattern != null) {
+                if (tokType == TokType.SKIP) {
+                    this.tokType = TokType.SKIP;
+                } else if (pattern.length() >= 2 &&
+                           pattern.substring(0,2).equals("^^")) {
+                    pattern = pattern.substring(1);
+                    this.tokType = TokType.LINE_TOGGLE;
+                } else {
+                    this.tokType = TokType.TOKEN;
+                }
+                this.pattern = pattern;
                 try {
                     this.cPattern = Pattern.compile(pattern, Pattern.DOTALL);
                 } catch (PatternSyntaxException e) {
@@ -36,12 +57,14 @@ public class Token {
                     patternFail += (" " +this);
                     this.cPattern = null;
                 }
+            } else {
+                this.tokType = TokType.SPECIAL; // SPECIAL
             }
         }
 
         // Use this to force loading Match class to compile patterns.
         public static String init() {
-            return patternFail;
+            return patternFail; // returns null if no errors
         }
     }
 
@@ -88,22 +111,27 @@ public class Token {
 
     public static void main(String [] args) {
         String msg = Match.init();
-        if (msg != null)
+        if (msg != null) {
             System.out.println(msg);
+            System.exit(1);
+        }
         for (Match match: Match.values()) {
-            if (match.pattern == null)
-                continue;
-            String what;
-            if (match.skip)
-                what = "skip";
-            else
-                what = "token";
+            if (match.tokType == TokType.SPECIAL) {
+                System.out.println(
+                    String.format("special "+match.toString())
+                );
+                continue; // not a real token
+            }
+            String what = "??";
+            switch(match.tokType) {
+                case SKIP -> what = "skip";
+                case TOKEN -> what = "token";
+                case LINE_TOGGLE -> what = "token (line toggle)";
+            }
             System.out.println(
-                String.format("%s %s '%s'", what, match, match.pattern)
+                String.format("%s %s '%s'",what,match.toString(),match.pattern)
             );
         }
-        if (msg != null)
-            System.exit(1);
     }
 
 //Token//
