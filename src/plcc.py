@@ -2,7 +2,7 @@
 
 """
     PLCC: A Programming Languages Compiler-Compiler
-    Copyright (C) 2021  Timothy Fossum <plcc@pithon.net>
+    Copyright (C) 2023  Timothy Fossum <plcc@pithon.net>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,20 +23,22 @@ import re
 import os
 import io
 import shutil
-import pipes
 import tempfile
 
 argv = sys.argv[1:] # skip over the command-line argument
 
 # current file information
-Lno = 0             # current line number
 Fname = ''          # current file name (STDIN if standard input)
+Lno = 0             # current line number in file
 Line = ''           # current line in the file
+nlgen = None        # next line generator for Fname
 STD = []            # reserved names from Std library classes
 STDT = []           # token-related files in the Std library directory
 STDP = []           # parse/runtime-related files in the Std library directory
 
 flags = {}          # processing flags (dictionary)
+
+lineMode = False    # True if in line mode
 
 startSymbol = ''    # start symbol (first nonterm in rules)
 term = set()        # set of term (token) names
@@ -122,9 +124,8 @@ def plccInit():
     for fname in STD:
         flags[fname] = fname
     flags['libplcc'] = LIBPLCC()
-    flags['Token'] = True
+    flags['Token'] = True         # generate scanner-related files
     # behavior-related flags
-    flags['PP'] = ''              # preprocessor cmd (e.g., 'cpp -P')
     flags['debug'] = 0            # default debug value
     flags['destdir'] = 'Java'     # the default destination directory
     flags['pattern'] = True       # create a scanner that uses re. patterns
@@ -135,6 +136,9 @@ def plccInit():
 
 def lex(nxt):
     # print('=== lexical specification')
+    # Handle any flags appearing at beginning of lexical spec section;
+    # turn off when all flags have been processed
+    flagSwitch = True # turn off after all the flags have been processed
     for line in nxt:
         line = re.sub('\s+#.*', '', line)   # remove trailing comments ...
         # NOTE: a token that has a substring like this ' #' will mistakenly be
@@ -142,13 +146,26 @@ def lex(nxt):
         line = line.strip()
         if len(line) == 0: # skip empty lines
             continue
-        if line[0] == '#':
+        if line[0] == '#': # skip comments
             continue
+        if line[0] == '!': # handle a PLCC compile-time flag
+            if flagSwitch:
+                line = line[1:]
+                # print ('>>> flag line: {}'.format(line))
+                try:
+                    processFlag(line)
+                except Exception as msg:
+                    deathLNO(msg)
+                continue
+            else:
+                deathLNO('all PLCC flags must occur before token/skip specs')
+        flagSwitch = False # stop accepting compile-time flags
         if line == '%':
-            break;
+            break; # end of lexical specification section
         # print ('>>> {}'.format(line))
         jpat = '' # the Java regular expression pattern for this skip/term
         pFlag = getFlag('pattern')
+        # only process patterns if the 'pattern' flag is True
         if pFlag:
             # handle capturing the match part and replacing with empty string
             def qsub(match):
@@ -182,7 +199,6 @@ def lex(nxt):
             if re.search("[\"']", line):
                 deathLNO('Puzzling skip/token pattern specification')
         # next determine if it's a skip or token specification
-        line = line.strip()
         result = line.split()
         rlen = len(result)
         if rlen >= 3:
@@ -199,7 +215,7 @@ def lex(nxt):
             deathLNO(name + ': duplicate token/skip name')
         term.update({name})
         if what == 'skip':
-            skip = ', true'   # Java boolean constant
+            skip = ', TokType.SKIP'   # Java constant
         elif what == 'token':
             skip = ''
         else:
@@ -254,7 +270,7 @@ def lexFinishUp():
             death(fname + ': cannot read library file')
         for line in tokenTemplate:
             # note that line keeps its trailing newline
-            if re.match('^\s*%%Match%%', line):
+            if re.match('^%%Match%%', line):
                 for ts in termSpecs:
                     print('        ' + ts + ',', file=tokenFile)
             else:
@@ -269,7 +285,7 @@ def lexFinishUp():
             death(fname + ': cannot read library file')
         for line in tokenTemplate:
             # note that line keeps its trailing newline
-            if re.match('^\s*%%Match%%', line):
+            if re.match('^%%Match%%', line):
                 tssep = ''
                 for ts in termSpecs:
                     print(tssep + '        ' + ts, file=tokenFile, end='')
@@ -951,20 +967,22 @@ def getCode(nxt):
         if re.match(r'\s*#', line) or re.match(r'\s*$', line):
             # skip comments or blank lines
             continue
-        if re.match(r'\s*%%{', line): # legacy plcc
-            stopMatch = r'\s*%%}'
+        if re.match(r'%%{', line): # legacy plcc
+            stopMatch = r'%%}'
             break
-        if re.match(r'\s*%%%', line):
-            stopMatch = r'\s*%%%'
+        if re.match(r'%%%', line):
+            stopMatch = r'%%%'
             break
         else:
             deathLNO('expecting a code segment')
+    lineMode = True # switch on line mode
     for line in nxt:
         if re.match(stopMatch, line):
             break
         code.append(line)
     else:
         deathLNO('premature end of file')
+    lineMode = False # switch off line mode
     str = '\n'.join(code)
     return str + '\n'
 
@@ -974,22 +992,14 @@ def semFinishUp():
     global stubs, STD
     dst = flags['destdir']
     print('\nJava source files created:')
-    cmd = getFlag('PP') # run a preprocessor, if specified
+    # print *all* of the generated files
     for cls in sorted(stubs):
         if cls in STD:
             death('{}: reserved class name'.format(cls))
         try:
             fname = '{}/{}.java'.format(dst, cls)
-            if len(cmd) > 0:
-                t = pipes.Template()
-                # print('>>> adding {} preprocessor to the pipe'.format(cmd))
-                t.append(cmd, '--')
-                # print('>>> writing to file {}'.format(fname))
-                with t.open(fname, 'w') as f:
-                    print(stubs[cls], end='', file=f)
-            else:
-                with open(fname, 'w') as f:
-                    print(stubs[cls], end='', file=f)
+            with open(fname, 'w') as f:
+                print(stubs[cls], end='', file=f)
         except:
             death('cannot write to file {}'.format(fname))
         print('  {}.java'.format(cls))
@@ -1005,34 +1015,77 @@ def done():
 def nextLine():
     # create a generator to get the next line in the current input file
     global Lno, Fname, Line
-    for Fname in argv:
-        # open the next input file
-        f = None # the current open file
-        if Fname == '-':
-            f = sys.stdin
-            Fname = 'STDIN'
+    global stack # used for '#include ...' processing
+    global argv  # file arguments
+    global nlgen # next line generator for Fname
+    maxStack = 4 # maximum #include stacking level
+    stack = []
+    # debug('...here...')
+    while True:
+        if len(stack) > 0:
+            # pop any #include parent off the stack (stack is initially empty)
+            (Fname, Lno, nlgen) = stack.pop()
+            debug('back to reading from file ' + Fname)
+        elif len(argv) > 0:
+            # get the next command line filename
+            Fname = argv[0]
+            nlgen = nextLineGen(Fname) # resets Lno to zero
+            argv = argv[1:] # advance to next filename parameter
         else:
+            return None # nothing left!!
+        while True:
             try:
-                f = open(Fname, 'r')
+                Line = next(nlgen)
+                if Line == None:
+                    debug('exiting current nextLineGen')
+                    break
+                Line = Line.rstrip()
+                debug('[{}]: {}'.format(Fname, Line))
+                # Line is the next line in this file
+                # first handle '#include ...' directives
+                if lineMode:
+                    pass # don't process #include directives  when in line mode
+                else:
+                    if Line[:8] == '#include':
+                        ary = Line.split(None, maxsplit = 1)
+                        if len(ary) == 2 and ary[0] == '#include':
+                            if len(stack) >= maxStack:
+                                death('max #include nesting depth exceeded')
+                            debug('include directive: {} {}'
+                                  .format(ary[0],ary[1]))
+                            # ary[1] must be a filename
+                            stack.append((Fname, Lno, nlgen))
+                            Fname = ary[1].strip()
+                            # print('### now reading from file '+Fname)
+                            nlgen = nextLineGen(Fname)
+                            continue
+                        else:
+                            death(line + ': invalid #include directive')
+                line = Line.rstrip()
+                debug('{:4} [{}] {}'.format(Lno,Fname,Line), level=2)
+                yield line
             except:
-                death(Fname + ': error opening file')
-        Lno = 0
-        # f is the current open file
-        for Line in f:
-            # get the next line in this file
-            Lno += 1
-            line = Line.rstrip()
-            if len(line) > 0 and line[0] == '!':
-                line = line[1:]
-                # print ('>>> flag line: {}'.format(line))
-                try:
-                    processFlag(line)
-                except Exception as msg:
-                    deathLNO(msg)
-                continue
-            debug('{:4} [{}] {}'.format(Lno,Fname,Line), level=2)
-            yield line
-        f.close()
+                break
+
+
+# next line generator for fname
+def nextLineGen(fname):
+    global Lno
+    debug('creating a nextLineGen generator for file ' + fname)
+    if fname == '-':
+        fname = 'STDIN'
+        f = sys.stdin
+    else:
+        try:
+            f = open(fname, 'r')
+        except:
+            death(fname + ': error opening file')
+    Lno = 0
+    debug('now reading from file ' + fname)
+    for Line in f:
+        Lno += 1
+        yield Line
+    f.close
 
 def processFlag(flagSpec):
     global flags
@@ -1089,11 +1142,13 @@ def defang(item):
     # xxx must be a nonterm or a token name
     global term # all token names
     debug('[defang] item={}'.format(item))
-    m = re.match(r'<(\w+#?)>(:?\w*)$', item)
+    m = re.match(r'<(\w*#?)>(:?\w*)$', item)
     if m:
         xxx = m.group(1)
         yyy = m.group(2)
-        if isTerm(xxx) or isNonterm(xxx):
+        if xxx == '':
+            xxx = '$LINE';
+        elif isTerm(xxx) or isNonterm(xxx):
             pass
         else:
             deathLNO('malformed "<{}>" in BNF item {}'.format(xxx, item))
@@ -1162,10 +1217,10 @@ def isNonterm(nt):
     return re.match('[a-z]\w*#?$', nt)
 
 def isClass(cls):
-    return cls == 'void' or re.match('[A-Z][\$\w]*$', cls)
+    return re.match('[A-Z][\$\w]*$', cls) or cls == 'void'
 
 def isTerm(term):
-    return re.match('[A-Z][A-Z\d_]*$', term)
+    return re.match('[A-Z][A-Z\d_$]*$', term) or term == '$LINE'
 
 def nt2cls(nt):
     # return the class name of the nonterminal nt
