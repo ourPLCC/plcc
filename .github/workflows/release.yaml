@@ -33,7 +33,7 @@ jobs:
         name: Checkout
         uses: actions/checkout@v3
       -
-        uses: docker://ghcr.io/codfish/semantic-release-action@sha256:43a9e5ce88fc0460c22f3f3c45e39ac99e1cefff2ffd76c6e8c34306c8ccec91
+        uses: docker://ghcr.io/codfish/semantic-release-action@sha256:cfb2b8231400c4bcb0abb8403c38aaff0c865e1bae8892b9b40893db9ef49403
         id: semantic
         with:
           branches: |
