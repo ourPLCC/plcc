@@ -9,4 +9,4 @@ tasks:
       ' >> "$HOME/.bashrc"
       source "$HOME/.bashrc"
   - name: Update Java
-    command: sdk install java
+    command: sdk install java < /dev/null
