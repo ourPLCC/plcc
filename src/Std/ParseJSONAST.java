@@ -14,6 +14,6 @@ public class ParseJSONAST extends ProcessFiles {
     // Read programs from command-line files
     // and then read programs from standard input.
     public static void main(String [] args) {
-        new Parse().processFiles(args);
+        new ParseJSONAST().processFiles(args);
     }
 }
