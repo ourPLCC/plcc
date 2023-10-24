@@ -8,7 +8,9 @@ public class ParseJSONAST extends ProcessFiles {
 
     // Parse the program and call $ok() on the resulting parse tree
     public void action(Scan scn, Trace trace) {
-        _Start.parse(scn, trace).$ok();
+        ObjectMapper objectMapper = new ObjectMapper();
+        parseTree = _Start.parse(scn, trace).$ok();
+        objectMapper.writeValue(new File("AST.json"), parseTree);
     }
 
     // Read programs from command-line files
