@@ -10,4 +10,9 @@
     exit 2
 }
 
-java -cp ./Java Parse $*
+if [ echo "$*" | grep "--json" ]; 
+then 
+    java -cp ./Java:jackson-annotations-2.15.2.jar:jackson-core-2.15.2.jar:jackson-databind-2.15.2.jar ParseJsonAst $*
+else 
+    java -cp ./Java Parse $*
+fi
