@@ -115,7 +115,7 @@ def main():
 def plccInit():
     global flags, STD, STDT, STDP
     STDT = ['ILazy','IMatch','IScan','ITrace', 'Trace', 'PLCCException', 'Scan']
-    STDP = ['ProcessFiles','Parse','Rep']
+    STDP = ['ProcessFiles','Parse','Rep','ParseJsonAst']
     STD = STDT + STDP
     STD.append('Token')
     # file-related flags -- can be overwritten
