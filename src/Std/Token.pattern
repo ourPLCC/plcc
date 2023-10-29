@@ -124,9 +124,15 @@ public class Token {
             }
             String what = "??";
             switch(match.tokType) {
-                case SKIP -> what = "skip";
-                case TOKEN -> what = "token";
-                case LINE_TOGGLE -> what = "token (line toggle)";
+                case SKIP:
+                    what = "skip";
+                    break;
+                case TOKEN:
+                    what = "token";
+                    break;
+                case LINE_TOGGLE:
+                    what = "token (line toggle)";
+                    break;
             }
             System.out.println(
                 String.format("%s %s '%s'",what,match.toString(),match.pattern)
