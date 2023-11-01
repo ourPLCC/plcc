@@ -11,10 +11,12 @@ public class ParseJsonAst extends ProcessFiles {
     public void action(Scan scn, Trace trace) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        objectMapper.enable(SerializationFeature.WRAP_ROOT_VALUE);
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         _Start parseTree = _Start.parse(scn, trace);
         parseTree.$ok();
         try {
-            objectMapper.writeValue(new File("AST.json"), parseTree);
+            objectMapper.writeValue(new File("ASTroot.json"), parseTree);
         } catch (IOException e) {
             e.printStackTrace();
         }

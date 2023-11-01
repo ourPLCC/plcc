@@ -1,0 +1,26 @@
+{
+  "Program" : {
+    "exp" : {
+      "prim" : { },
+      "rands" : {
+        "expList" : [ {
+          "lit" : {
+            "match" : "LIT",
+            "str" : "5",
+            "lno" : 2,
+            "line" : "-(5, 1)\n",
+            "eof" : false
+          }
+        }, {
+          "lit" : {
+            "match" : "LIT",
+            "str" : "1",
+            "lno" : 2,
+            "line" : "-(5, 1)\n",
+            "eof" : false
+          }
+        } ]
+      }
+    }
+  }
+}
