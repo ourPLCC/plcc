@@ -20,9 +20,9 @@ jobs:
           file: ./shell/Dockerfile
           tags: test-image:latest
           push: false
-          build-args:
-            - PYTHON3_VERSION="~=3.0.0"
-            - OPENJDK_VERSION=""
+          build-args: |
+            PYTHON3_VERSION="~=3.0.0"
+            OPENJDK_VERSION=""
       -
         name: Test
         uses: addnab/docker-run-action@v3

@@ -1,5 +1,5 @@
 ---
-name: Test
+name: Test with max python and max java
 
 on:
   pull_request:
@@ -20,9 +20,9 @@ jobs:
           file: ./shell/Dockerfile
           tags: test-image:latest
           push: false
-          build-args:
-            - PYTHON3_VERSION=""
-            - OPENJDK_VERSION=""          
+          build-args: |
+            PYTHON3_VERSION=""
+            OPENJDK_VERSION="~=11"          
       -
         name: Test
         uses: addnab/docker-run-action@v3
