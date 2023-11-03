@@ -2,7 +2,7 @@
 # We do this in a separate stage so that Git is only installed in this stage
 # and isn't in the final image.
 
-FROM alpine:3
+FROM debian:12
 
 # Install Python 3
 ARG PYTHON3_VERSION=""
