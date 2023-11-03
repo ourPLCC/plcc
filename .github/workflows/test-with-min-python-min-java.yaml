@@ -1,12 +1,12 @@
 ---
-name: Test
+name: Test with min python and min java
 
 on:
   pull_request:
 
 jobs:
   build:
-    name: Test
+    name: Test with min python and min java
     runs-on: ubuntu-latest
     steps:
       -

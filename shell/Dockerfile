@@ -6,7 +6,8 @@ FROM alpine:3
 
 # Install Python 3
 ARG PYTHON3_VERSION=""
-RUN apk add --no-cache python3${PYTHON3_VERSION} \
+ENV PYTHON3_PACKAGE=python3${PYTHON3_VERSION}
+RUN apk add --no-cache python3${PYTHON3_PACKAGE} \
   && python3 -m ensurepip \
   && pip3 install --upgrade pip setuptools \
   && rm -r /usr/lib/python*/ensurepip \
