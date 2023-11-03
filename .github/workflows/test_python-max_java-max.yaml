@@ -1,0 +1,28 @@
+---
+name: test_python-max_java-max
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    name: test_python-max_java-max
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Build test image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./shell/test.dockerfile
+          tags: test-image:latest
+          push: false
+      -
+        name: Test
+        uses: addnab/docker-run-action@v3
+        with:
+          image: test-image:latest
+          run: $LIBPLCC/../tests/run

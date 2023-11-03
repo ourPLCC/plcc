@@ -1,12 +1,12 @@
 ---
-name: Test(Python=max,Java=max)
+name: test_python-3.5.10_Java-11.0.21-tem
 
 on:
   pull_request:
 
 jobs:
   build:
-    name: Test(Python=max,Java=max)
+    name: test_python-3.5.10_Java-11.0.21-tem
     runs-on: ubuntu-latest
     steps:
       -
@@ -20,6 +20,9 @@ jobs:
           file: ./shell/test.dockerfile
           tags: test-image:latest
           push: false
+          build-args: |
+            JAVA_VERSION=11.0.21-tem
+            PYTHON_VERSION=3.5.10
       -
         name: Test
         uses: addnab/docker-run-action@v3
