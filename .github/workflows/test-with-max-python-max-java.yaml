@@ -1,12 +1,12 @@
 ---
-name: Test with max python and max java
+name: Test with (Python, Java) = (max, max)
 
 on:
   pull_request:
 
 jobs:
   build:
-    name: Test with max python and max java
+    name: Test with (Python, Java) = (max, max)
     runs-on: ubuntu-latest
     steps:
       -
@@ -17,12 +17,12 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./shell/Dockerfile
+          file: ./shell/test.dockerfile
           tags: test-image:latest
           push: false
           build-args: |
-            PYTHON3_VERSION=""
-            OPENJDK_VERSION="~=11"          
+            PYTHON_VERSION=""
+            JAVA_VERSION=""
       -
         name: Test
         uses: addnab/docker-run-action@v3
