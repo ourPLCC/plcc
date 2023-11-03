@@ -1,0 +1,31 @@
+---
+name: Test
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Build test image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./shell/Dockerfile
+          tags: test-image:latest
+          push: false
+          build-args:
+            - PYTHON3_VERSION=""
+            - OPENJDK_VERSION=""          
+      -
+        name: Test
+        uses: addnab/docker-run-action@v3
+        with:
+          image: test-image:latest
+          run: /plcc/tests/run

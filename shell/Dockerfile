@@ -5,7 +5,8 @@
 FROM alpine:3
 
 # Install Python 3
-RUN apk add --no-cache python3~=3 \
+ARG PYTHON3_VERSION=""
+RUN apk add --no-cache "python3${PYTHON3_VERSION}" \
   && python3 -m ensurepip \
   && pip3 install --upgrade pip setuptools \
   && rm -r /usr/lib/python*/ensurepip \
@@ -14,7 +15,8 @@ RUN apk add --no-cache python3~=3 \
   && rm -r /root/.cache
 
 # Install JDK
-RUN apk add --no-cache openjdk17-jdk~=17
+ARG OPENJDK_VERSION=""
+RUN apk add --no-cache "openjdk17-jdk${OPENJDK_VERSION}"
 RUN which java
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm"
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
