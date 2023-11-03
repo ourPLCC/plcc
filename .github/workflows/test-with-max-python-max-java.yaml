@@ -1,12 +1,12 @@
 ---
-name: Test with (Python, Java) = (max, max)
+name: Test(Python=max,Java=max)
 
 on:
   pull_request:
 
 jobs:
   build:
-    name: Test with (Python, Java) = (max, max)
+    name: Test(Python=max,Java=max)
     runs-on: ubuntu-latest
     steps:
       -
@@ -25,4 +25,4 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: test-image:latest
-          run: /plcc/tests/run
+          run: $LIBPLCC/../tests/run
