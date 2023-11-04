@@ -29,3 +29,4 @@ jobs:
         with:
           image: test-image:latest
           run: $LIBPLCC/../tests/run
+          shell: bash
