@@ -27,5 +27,9 @@ jobs:
           image: test-image:latest
           run: |
             source /home/tester/.sdkman/bin/sdkman-init.sh
+            python3 --version
+            python --version
+            java --version
+            javac --version
             /home/tester/.plcc/tests/run
           shell: bash
