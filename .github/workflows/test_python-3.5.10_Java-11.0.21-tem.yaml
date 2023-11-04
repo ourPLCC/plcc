@@ -28,5 +28,5 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: test-image:latest
-          run: $LIBPLCC/../tests/run
           shell: bash
+          run: $LIBPLCC/../tests/run
