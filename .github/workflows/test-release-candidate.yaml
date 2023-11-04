@@ -1,12 +1,12 @@
 ---
-name: Test
+name: Test release candidate
 
 on:
   pull_request:
 
 jobs:
   build:
-    name: Test
+    name: Test release candidate
     runs-on: ubuntu-latest
     steps:
       -
