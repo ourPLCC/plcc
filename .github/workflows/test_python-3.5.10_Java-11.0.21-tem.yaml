@@ -29,6 +29,6 @@ jobs:
         with:
           image: test-image:latest
           run: |
-            /home/tester/.sdkman/bin/sdkman-init.sh
+            source /home/tester/.sdkman/bin/sdkman-init.sh
             /home/tester/.plcc/tests/run
           shell: bash
