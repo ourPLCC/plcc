@@ -2,12 +2,10 @@
 # We do this in a separate stage so that Git is only installed in this stage
 # and isn't in the final image.
 
-FROM debian:12
+FROM alpine:3
 
 # Install Python 3
-ARG PYTHON3_VERSION=""
-ENV PYTHON3_PACKAGE=python3${PYTHON3_VERSION}
-RUN apk add --no-cache python3${PYTHON3_PACKAGE} \
+RUN apk add --no-cache python3~=3 \
   && python3 -m ensurepip \
   && pip3 install --upgrade pip setuptools \
   && rm -r /usr/lib/python*/ensurepip \
@@ -16,8 +14,7 @@ RUN apk add --no-cache python3${PYTHON3_PACKAGE} \
   && rm -r /root/.cache
 
 # Install JDK
-ARG OPENJDK_VERSION=""
-RUN apk add --no-cache openjdk17-jdk${OPENJDK_VERSION}
+RUN apk add --no-cache openjdk17-jdk~=17
 RUN which java
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm"
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
