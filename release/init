@@ -1,5 +1,0 @@
-#!/bin/sh
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-echo "Appending variables to .env ..."
-cat "$DIR/example.env" >> .env
-echo "Please edit .env, then run $DIR/build"
