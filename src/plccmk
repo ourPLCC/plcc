@@ -39,5 +39,24 @@ $PYTHON3 "$PLCC" $FILES || {
         echo "Java directory missing" >&2
         exit 5
 }
+if  echo "$*" | grep -- "--python" &> /dev/null
+then
 
-(cd ./Java ; javac -cp ".:${CP}" *.java)
+    ARGS=()
+    while [ $# -gt 0 ] ; do
+        case "$1" in
+            --python)
+                shift
+            ;;
+            *)
+                ARGS+=("$1")
+                shift
+            ;;
+        esac
+    done
+
+    (cd ./Java ; javac -cp ".:${CP}" *.java)
+else 
+    (cd ./Java ; javac *.java)
+fi
+
