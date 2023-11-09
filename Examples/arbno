@@ -1,6 +1,0 @@
-A 'A'
-B 'B'
-skip OTHER '.'
-%
-<p> ::= <aaa> B
-<aaa> **= A

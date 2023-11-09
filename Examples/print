@@ -1,3 +1,0 @@
-skip WHITESPACE '\s'
-PRINT '\p{Print}'
-skip NONPRINT '.'
