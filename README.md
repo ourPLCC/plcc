@@ -27,10 +27,11 @@ tests/run
 
 ### Running the tests inside the official container.
 
-Run the PLCC container...
+Build and run the PLCC container...
 
 ```bash
-container/run
+containers/plcc/build.bash
+containers/plcc/run.bash
 ```
 
 You are now running inside the PLCC container. Now run the tests.

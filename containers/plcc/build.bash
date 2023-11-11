@@ -1,5 +1,6 @@
-#!/bin/sh
+#!/usr/bin/env bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-cd "$DIR/.."
+set -euxo pipefail
+cd "$DIR/../.."
 echo "Building test-environment ..."
-docker-compose -f "$DIR/docker-compose.yml" build
+docker compose --file "$DIR/docker-compose.yml" build

@@ -17,7 +17,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./.github/workflows/min-max-test.dockerfile
+          file: ./containers/configurable/Dockerfile
           tags: test-image:latest
           push: false
       -
