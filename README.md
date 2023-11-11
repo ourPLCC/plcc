@@ -25,15 +25,17 @@ Run the tests...
 tests/run
 ```
 
-### Running the tests inside the Docker shell.
+### Running the tests inside the official container.
 
-Run the shell...
+Build and run the PLCC container...
 
 ```bash
-shell/run
+containers/plcc/build.bash
+containers/plcc/run.bash
 ```
 
-Run the tests
+You are now running inside the PLCC container. Now run the tests.
+
 ```bash
 /plcc/tests/run
 ```

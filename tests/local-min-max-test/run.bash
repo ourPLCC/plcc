@@ -14,7 +14,7 @@ function main() {
 function build_test_container_with_maximum_versions_of_python_and_java() {
     docker build \
         --tag test \
-        --file ./.github/workflows/min-max-test.dockerfile \
+        --file ./containers/configurable/Dockerfile \
         .
 }
 
@@ -23,7 +23,7 @@ function build_test_container_with_minimum_versions_of_python_and_java() {
         --build-arg=PYTHON_VERSION=3.5.10 \
         --build-arg=JAVA_VERSION=11.0.21-tem \
         --tag test \
-        --file ./.github/workflows/min-max-test.dockerfile \
+        --file ./containers/configurable/Dockerfile \
         .
 }
 
