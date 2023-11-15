@@ -2,7 +2,7 @@
 
 > Version 2.0.0 or above
 
-See [Dependencies](Dependencies) for supported versions of Java, Python, and shells.
+See [Dependencies](Dependencies.md) for supported versions of Java, Python, and shells.
 
 1. You need Command Prompt (on Windows) or a Bash shell to run PLCC's scripts.
 2. Install Java JDK 11 or higher. We recommend [OpenJDK](https://openjdk.java.net/).
