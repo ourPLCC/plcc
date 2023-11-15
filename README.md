@@ -5,7 +5,6 @@ PLCC is a Programming Language Compiler Compiler.
 General
 - Licensed under [GPLv3.0 or higher](LICENSE)
 - [Open an issue](https://github.com/ourPLCC/plcc/issues) to contact us, report a problem, or make a suggestion.
-- [Contributing guidelines](CONTRIBUTING.md)
 
 User Guide
 - [Getting Started](docs/User/Getting-Started.md)
