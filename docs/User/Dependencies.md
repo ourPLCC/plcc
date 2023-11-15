@@ -18,9 +18,7 @@
 ## Dependencies for PLCC-in-Docker
 
 * Docker
-    * Supported versions: most recent version
 
 ## Dependencies for Development
 
-* Bats
-    * Supported versions: most recent version
+* GitPod
