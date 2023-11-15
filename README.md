@@ -2,46 +2,24 @@
 
 PLCC is a Programming Language Compiler Compiler.
 
-Please see [our wiki](https://github.com/ourPLCC/plcc/wiki) for documentation.
+General
+- Licensed under [GPLv3.0 or higher](LICENSE)
+- [Open an issue](https://github.com/ourPLCC/plcc/issues) to contact us, report a problem, or make a suggestion.
 
-To contact us, report a problem, or make a suggestion, please open an issue
-here: <https://github.com/ourPLCC/plcc/issues>.
+User Guide
+- [Getting Started](docs/User/Getting-Started.md)
+- [Native PLCC Installation](docs/User/Native-PLCC-Installation.md)
+- [PLCC-in-Docker](docs/User/PLCC-in-Docker.md)
+- [Use PLCC](docs/User/Use.md)
+- [Dependencies](docs/User/Dependencies.md)
+- [Version numbers](docs/User/Version-numbers.md)
+- [Download the PLCC-paper.pdf](docs/PLCC-paper.pdf)
 
-For information about how to contribute to this project, please see CONTRIBUTING.md.
+Developer Guide
+- [Contribute Using a Fork](docs/Developer/Contribute-Using-a-Fork.md)
+- [Contribute Without a Fork](docs/Developer/Contribute-Without-a-Fork.md)
+- [Testing](docs/Developer/Testing.md)
 
-## Automated Tests
-
-### Dependencies
-
-* PLCC
-* Bash 5+
-* [bats 1.2+](https://bats-core.readthedocs.io/en/latest/index.html).
-
-### Running the tests
-
-Run the tests...
-
-```bash
-tests/run
-```
-
-### Running the tests inside the official container.
-
-Build and run the PLCC container...
-
-```bash
-containers/plcc/build.bash
-containers/plcc/run.bash
-```
-
-You are now running inside the PLCC container. Now run the tests.
-
-```bash
-/plcc/tests/run
-```
-
-### Writing Tests
-
-See [Bats documentation](https://bats-core.readthedocs.io/en/latest/index.html).
-Place tests in `tests/plcc`. See existing tests for examples.
-
+Maintainer Guide
+- [Merging PRs](docs/Maintainer/Merging-PRs.md)
+- [Release](docs/Maintainer/Release.md)
