@@ -24,7 +24,6 @@ import os
 import io
 import shutil
 import tempfile
-
 argv = sys.argv[1:] # skip over the command-line argument
 
 # current file information
@@ -113,9 +112,12 @@ def main():
     sem(nxt)    # semantic actions
 
 def plccInit():
-    global flags, STD, STDT, STDP
+    global flags, argv, STD, STDT, STDP
     STDT = ['ILazy','IMatch','IScan','ITrace', 'Trace', 'PLCCException', 'Scan']
-    STDP = ['ProcessFiles','Parse','Rep','ParseJsonAst']
+    STDP = ['ProcessFiles','Parse','Rep']
+    if len(argv) > 1:
+        if argv[1] == "--python":
+            STDP.append('ParseJsonAst')
     STD = STDT + STDP
     STD.append('Token')
     # file-related flags -- can be overwritten
