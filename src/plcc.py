@@ -115,8 +115,9 @@ def plccInit():
     global flags, argv, STD, STDT, STDP
     STDT = ['ILazy','IMatch','IScan','ITrace', 'Trace', 'PLCCException', 'Scan']
     STDP = ['ProcessFiles','Parse','Rep']
+    print(argv)
     if len(argv) > 1:
-        if argv[1] == "--python":
+        if argv[0] == "--python":
             STDP.append('ParseJsonAst')
     STD = STDT + STDP
     STD.append('Token')
