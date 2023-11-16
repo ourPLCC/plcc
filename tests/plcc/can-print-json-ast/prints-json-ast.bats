@@ -8,8 +8,8 @@
 
   cp "${BATS_TEST_DIRNAME}"/* "$BATS_TMPDIR/"
   cd "${BATS_TMPDIR}"
-  plccmk --json given-grammar.lang
-  parse --json -n < given-program.lang > result.json
+  plccmk --json-ast given-grammar.lang
+  parse -n --json-ast < given-program.lang > result.json
   diff expected.json result.json
 
   for f in $FILES ; do
