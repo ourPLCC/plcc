@@ -39,13 +39,13 @@ $PYTHON3 "$PLCC" $FILES || {
         echo "Java directory missing" >&2
         exit 5
 }
-if  echo "$*" | grep -- "--jsonast" &> /dev/null
+if  echo "$*" | grep -- "--json_ast" &> /dev/null
 then
 
     ARGS=()
     while [ $# -gt 0 ] ; do
         case "$1" in
-            --python)
+            --json_ast)
                 shift
             ;;
             *)

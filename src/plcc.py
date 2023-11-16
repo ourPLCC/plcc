@@ -137,7 +137,7 @@ def plccInit():
 
 def jsonAstInit():
     global flags, STD, STDP
-    if 'jsonast' in flags and flags['jsonast']:
+    if 'json_ast' in flags and flags['json_ast']:
         if 'ParseJsonAst' not in STDP:
             if 'ParseJsonAst' not in STD:
                 STDP.append('ParseJsonAst')
