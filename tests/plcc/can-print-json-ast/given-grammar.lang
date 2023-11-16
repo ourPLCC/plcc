@@ -1,0 +1,21 @@
+skip WHITESPACE '\s+'
+skip COMMENT '%.*'
+LIT '\d+'
+LPAREN '\('
+RPAREN '\)'
+COMMA ','
+ADDOP '\+'
+SUBOP '\-'
+ADD1OP 'add1'
+SUB1OP 'sub1'
+VAR '[A-Za-z]\w*'
+%
+<program>        ::= <exp>
+<exp>:LitExp     ::= <LIT>
+<exp>:VarExp     ::= <VAR>
+<exp>:PrimappExp ::= <prim> LPAREN <rands> RPAREN
+<rands>          **= <exp> +COMMA
+<prim>:AddPrim   ::= ADDOP
+<prim>:SubPrim   ::= SUBOP
+<prim>:Add1Prim  ::= ADD1OP
+<prim>:Sub1Prim  ::= SUB1OP

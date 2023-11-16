@@ -1,0 +1,35 @@
+{
+  "Program" : {
+    "$type" : "Program",
+    "exp" : {
+      "$type" : "PrimappExp",
+      "prim" : {
+        "$type" : "AddPrim"
+      },
+      "rands" : {
+        "$type" : "Rands",
+        "expList" : [ "java.util.ArrayList", [ {
+          "$type" : "LitExp",
+          "lit" : {
+            "$type" : "Token",
+            "match" : "LIT",
+            "str" : "3",
+            "lno" : 1,
+            "line" : "+(3, 2)\n",
+            "eof" : false
+          }
+        }, {
+          "$type" : "LitExp",
+          "lit" : {
+            "$type" : "Token",
+            "match" : "LIT",
+            "str" : "2",
+            "lno" : 1,
+            "line" : "+(3, 2)\n",
+            "eof" : false
+          }
+        } ] ]
+      }
+    }
+  }
+}
