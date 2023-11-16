@@ -26,7 +26,7 @@ public class ParseJsonAst extends ProcessFiles {
         _Start parseTree = _Start.parse(scn, trace);
         parseTree.$ok();
         try {
-            objectMapper.writeValue(new File("ASTroot.json"), parseTree);
+            objectMapper.writeValue(new File("JsonAST.json"), parseTree);
         } catch (IOException e) {
             e.printStackTrace();
         }
