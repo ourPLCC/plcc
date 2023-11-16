@@ -2,7 +2,7 @@
 
 If none of the following work in your context, see [Getting Started](Getting-Started.md).
 
-**For use in Bash** (requires curl, Java SDK >=11, and Python >=3.5), run...
+**For use in Bash** (requires bash, curl, git, Java SDK >=11, and Python >=3.5), run...
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installer/install.bash)"
