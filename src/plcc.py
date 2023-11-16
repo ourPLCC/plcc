@@ -106,6 +106,8 @@ def main():
         print(version.get_version())
         sys.exit(0)
 
+    jsonAstInit()
+
     nxt = nextLine()     # nxt is the next line generator
     lex(nxt)    # lexical analyzer generation
     par(nxt)    # LL(1) check and parser generation
@@ -115,9 +117,6 @@ def plccInit():
     global flags, argv, STD, STDT, STDP
     STDT = ['ILazy','IMatch','IScan','ITrace', 'Trace', 'PLCCException', 'Scan']
     STDP = ['ProcessFiles','Parse','Rep']
-    print(argv)
-    if 'jsonast' in flags and flags['jsonast']:
-        STDP.append('ParseJsonAst')
     STD = STDT + STDP
     STD.append('Token')
     # file-related flags -- can be overwritten
@@ -135,6 +134,14 @@ def plccInit():
     flags['parser'] = True        # create a parser
     flags['semantics'] = True     # create semantics routines
     flags['nowrite'] = False      # when True, produce *no* file output
+
+def jsonAstInit():
+    global flags, STD, STDP
+    if 'jsonast' in flags and flags['jsonast']:
+        if 'ParseJsonAst' not in STDP:
+            if 'ParseJsonAst' not in STD:
+                STDP.append('ParseJsonAst')
+                flags['ParseJsonAst'] = 'ParseJsonAst'
 
 def lex(nxt):
     # print('=== lexical specification')

@@ -22,7 +22,7 @@ then
     ARGS=()
     while [ $# -gt 0 ] ; do
         case "$1" in
-            --json)
+            --jsonast)
                 shift
             ;;
             *)
