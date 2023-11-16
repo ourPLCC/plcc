@@ -16,7 +16,7 @@ CP="${JACKSON_ANNOTATIONS}:${JACKSON_CORE}:${JACKSON_DATABIND}"
     exit 2
 }
 
-if  echo "$*" | grep -- "--json-ast" &> /dev/null
+if  echo "$*" | grep -- "--jsonast" &> /dev/null
 then
 
     ARGS=()
