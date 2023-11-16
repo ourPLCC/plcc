@@ -39,7 +39,7 @@ $PYTHON3 "$PLCC" $FILES || {
         echo "Java directory missing" >&2
         exit 5
 }
-if  echo "$*" | grep -- "--python" &> /dev/null
+if  echo "$*" | grep -- "--json-ast" &> /dev/null
 then
 
     ARGS=()
