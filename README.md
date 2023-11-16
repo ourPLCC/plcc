@@ -1,6 +1,7 @@
 # PLCC
 
-PLCC is a Programming Language Compiler Compiler.
+PLCC is a Programming Language Compiler Compiler designed for use in
+a Programming Languages course.
 
 General
 - Licensed under [GPLv3.0 or higher](LICENSE)
