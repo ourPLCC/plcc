@@ -1,9 +1,9 @@
 # Quick Start
 
-For use in Bash, run...
+For use in Bash (requires bash, curl, Java, and Python), run...
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/install/install.bash)"
+/bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installer/install.bash)"
 ```
 
 For use in GitPod, add the following to your project's `.gitpod.yml`
@@ -12,7 +12,9 @@ For use in GitPod, add the following to your project's `.gitpod.yml`
 tasks:
   - name: Install PLCC
     command: |
-        /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/install/install.bash)" > ~/.bashrc
+        /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installer/install.bash)" > ~/.bashrc
+        # Uncomment to checkout install specific version
+        # git -C "$HOME/.local/plcc/" checkout v4.0.1
         exec bash
 ```
 
