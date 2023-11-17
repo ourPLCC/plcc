@@ -3,16 +3,20 @@
 PLCC is a Programming Language Compiler Compiler designed for use in
 a Programming Languages course.
 
-General
-- License: [GPLv3.0 or higher](LICENSE)
-- Get help, request features, report a problem: [open an issue](https://github.com/ourPLCC/plcc/issues).
+**General**
 
-User Guide
+- License: [GPLv3.0 or higher](LICENSE)
+- Need help? [Chat with us on Discord](https://discord.gg/EVtNSxS9E2)
+- Want to report a problem or request feature? [Open an issue](https://github.com/ourPLCC/plcc/issues).
+
+**User Guide**
+
 - [Install PLCC](docs/User/Install.md)
 - [Use PLCC](docs/User/Use.md)
 - [Download the PLCC-paper.pdf](docs/PLCC-paper.pdf)
 
-Developer Guide
+**Developer Guide**
+
 - [Contribute Using a Fork](docs/Developer/Contribute-Using-a-Fork.md)
 - [Contribute Without a Fork](docs/Developer/Contribute-Without-a-Fork.md)
 - [Testing](docs/Developer/Testing.md)
