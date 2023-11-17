@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 
 
@@ -25,11 +26,16 @@ public class ParseJsonAst extends ProcessFiles {
 
         _Start parseTree = _Start.parse(scn, trace);
         parseTree.$ok();
-        try {
-            objectMapper.writeValue(new File("JsonAST.json"), parseTree);
-        } catch (IOException e) {
+        try
+        {
+            String json = objectMapper.writeValueAsString(parseTree);
+            System.out.println(json);
+        }
+        catch (JsonProcessingException e)
+        {
             e.printStackTrace();
         }
+
     }
 
     // Read programs from command-line files
