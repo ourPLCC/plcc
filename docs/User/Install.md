@@ -1,14 +1,21 @@
 # Install PLCC
 
+This document will help you install PLCC into in your
+preferred environment.
+
 ## 1. Quick Start
 
 ### 1.1. Bash
 
-Requires bash, curl, git, Java SDK >=11, and Python >=3.5.10.
+Requires bash, curl, Git, Java SDK >=11, and Python >=3.5.10.
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installer/install.bash)"
 ```
+
+After following the instructions printed by the last command,
+test your installation
+(see "Test your PLCC installation" at the end of this document.).
 
 ### 1.2. Docker
 
@@ -18,11 +25,14 @@ Start a shell in the PLCC container.
 docker run --rm -it -v "${PWD}:/workdir" ghcr.io/ourplcc/plcc:latest
 ```
 
-Or run a command in the PLCC container.
+You can also run single commands in the PLCC container as follows.
 
 ```bash
 docker run --rm -it -v "${PWD}:/workdir" ghcr.io/ourplcc/plcc:latest PLCC COMMAND HERE
 ```
+
+Test your installation (see "Test your PLCC installation" at the end of
+this document.)
 
 ### 1.3. GitPod
 
@@ -41,12 +51,12 @@ tasks:
         exec bash
 ```
 
-Then open your repo in GitPod and PLCC is available in the workspace's
-terminal.
+Open a new GitPod workspace for this repository and test your installation
+(see "Test your PLCC installation" at the end of this document.)
 
-### 1.4. None of the above worked!
+## 1.4. If none of the above work for you...
 
-Please read on.
+Read on.
 
 ## 2. Install and Use PLCC
 
@@ -156,7 +166,7 @@ Disadvantages
 The remaining sections will describe how to install and use PLCC in
 each of these environments.
 
-## 3. Install PLCC natively
+## 3. Install PLCC natively (Linux, Mac, or Windows)
 
 In any order, you need to install PLCC's dependencies and PLCC itself.
 Each are described below.
@@ -174,9 +184,10 @@ available in your shell's path.
 * Python >= 3.5.10 ([Python](https://python.org/))
 
 Installing a Java JDK has become complicated because there
-are many different distributes with different licenses and support windows. You might consider installing [OpenJDK](https://openjdk.java.net/).
+are many different distributes with different licenses and support windows.
+Consider installing [OpenJDK](https://openjdk.java.net/).
 
-### 3.2. Install PLCC itself
+### 3.2. Install PLCC itself using the installer (Bash only)
 
 If you are installing PLCC into a Bash environment, you can use the
 installer (requires Git and Curl):
@@ -184,6 +195,15 @@ installer (requires Git and Curl):
 ```bash
 /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installer/install.bash)"
 ```
+
+After following the instructions printed by the last command,
+test your installation
+(see "Test your PLCC installation" at the end of this document.).
+
+If the above doesn't work for you, try following the manual installation
+instructions next.
+
+### 3.3. Install PLCC itself manually (Windows, Linux, or Mac)
 
 If you are installing PLCC into another environment or the installer did not
 work for you, you can install PLCC manually.
@@ -194,13 +214,21 @@ First, download a copy of PLCC. You can do this in two different ways:
     ```bash
     git clone https://github.com/ourPLCC/plcc.git
     ```
-* Download a zip of the desired version of PLCC from the [PLCC Releases page](https://github.com/ourPLCC/plcc/releases), and extract it into its new home on your computer.
+* Download a zip of the desired version of PLCC from the
+  [PLCC Releases page](https://github.com/ourPLCC/plcc/releases),
+  and extract it into its new home on your computer.
 
 Next, update your environment variables as follows:
 
-1. Identify the PLCC's `src` directory within the directory (or subdirectories) created when you extracted the zip.
-2. Define a new environment variable named `LIBPLCC` whose value is the full path to PLCC's `src` directory.
-3. Add the full path to PLCC's `src` directory to beginning of the `PATH` environment variable.
+1. Identify the PLCC's `src` directory within the directory (or subdirectories)
+  created when you extracted the zip.
+2. Define a new environment variable named `LIBPLCC` whose value is the
+  full path to PLCC's `src` directory.
+3. Add the full path to PLCC's `src` directory to beginning of the
+  `PATH` environment variable.
+
+Test your installation
+(see "Test your PLCC installation" at the end of this document.).
 
 ## 4. Install and use in Docker
 
@@ -208,14 +236,11 @@ A Docker container is a lightweight virtual machine.
 Using Docker Desktop, you can download, install,
 and run a container in a single command.
 
-### 4.1. Install for use in Docker
-
 Install and run
 [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
-### 4.2. Use PLCC in Docker
-
-The following mounts the current working directory
+With Docker Desktop running, the following mounts the
+current working directory
 into /workdir inside the container and starts an
 interactive shell inside the container that has
 access to all of the PLCC commands as well as
@@ -227,7 +252,7 @@ directory.
 docker run --rm -it -v "${PWD}:/workdir" ghcr.io/ourplcc/plcc:latest
 ```
 
-You can also run a PLCC command on the code in your
+You can also run a single PLCC command on the code in your
 current directory by appending the command and its
 arguments to the same Docker command.
 
@@ -258,6 +283,9 @@ Or run a command inside the container like this.
 plcc-container plcc --version
 ```
 
+Test your installation
+(see "Test your PLCC installation" at the end of this document.).
+
 ## 5. Install and use in GitPod
 
 GitPod provides workspaces (temporary development environments)
@@ -266,9 +294,8 @@ This section describes how to configure a repository so that
 PLCC is automatically installed into workspaces created for that
 repository.
 
-### 5.1. Install PLCC for use in GitPod
-
-Add or update `.gitpod.yml` in the root of a repository
+To configure your repository to install PLCC when opened in GitPod,
+add or update `.gitpod.yml` in the root of a repository
 in GitLab/GitHub/Bitbucket repository with the following:
 
 ```yaml
@@ -283,11 +310,21 @@ tasks:
         exec bash
 ```
 
-### 5.2. Use PLCC in GitPod
+Open a new GitPod workspace for this repository and test your installation
+(see "Test your PLCC installation" at the end of this document.).
 
-In GitPod, start a workspace for the repository you configured
-above. PLCC and its scripts are available in the workspace's terminal.
+## 6. Test your PLCC installation
+
+Run the following commands in a new shell, terminal, or command-prompt
+in the environment in which you installed PLCC.
 
 ```bash
 plcc --version
+java --version
+javac --version
+python3 --version
 ```
+
+If all the commands produce version numbers, and the versions of java and
+javac are the same, then you have successfully installed PLCC and are ready
+to [learn to use PLCC](Use.md).
