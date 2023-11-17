@@ -1,24 +1,22 @@
 # PLCC
 
-PLCC is a Programming Language Compiler Compiler.
+PLCC is a Programming Language Compiler Compiler designed for use in
+a Programming Languages course.
 
 General
-- Licensed under [GPLv3.0 or higher](LICENSE)
-- [Open an issue](https://github.com/ourPLCC/plcc/issues) to contact us, report a problem, or make a suggestion.
+- License: [GPLv3.0 or higher](LICENSE)
+- Get help, request features, report a problem: [open an issue](https://github.com/ourPLCC/plcc/issues).
 
 User Guide
-- [Getting Started](docs/User/Getting-Started.md)
-- [Native PLCC Installation](docs/User/Native-PLCC-Installation.md)
-- [PLCC-in-Docker](docs/User/PLCC-in-Docker.md)
+- [Install PLCC](docs/User/Install.md)
 - [Use PLCC](docs/User/Use.md)
-- [Dependencies](docs/User/Dependencies.md)
-- [Version numbers](docs/User/Version-numbers.md)
 - [Download the PLCC-paper.pdf](docs/PLCC-paper.pdf)
 
 Developer Guide
 - [Contribute Using a Fork](docs/Developer/Contribute-Using-a-Fork.md)
 - [Contribute Without a Fork](docs/Developer/Contribute-Without-a-Fork.md)
 - [Testing](docs/Developer/Testing.md)
+- [Version numbers](docs/Developer/Version-numbers.md)
 
 Maintainer Guide
 - [Merging PRs](docs/Maintainer/Merging-PRs.md)
