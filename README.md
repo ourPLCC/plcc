@@ -14,14 +14,17 @@ a Programming Languages course.
 - [Install PLCC](docs/User/Install.md)
 - [Use PLCC](docs/User/Use.md)
 - [Download the PLCC-paper.pdf](docs/PLCC-paper.pdf)
+- [Join our community on Discord](https://discord.gg/EVtNSxS9E2)
 
 **Developer Guide**
 
+- [Join our community on Discord](https://discord.gg/EVtNSxS9E2)
 - [Contribute Using a Fork](docs/Developer/Contribute-Using-a-Fork.md)
 - [Contribute Without a Fork](docs/Developer/Contribute-Without-a-Fork.md)
 - [Testing](docs/Developer/Testing.md)
 - [Version numbers](docs/Developer/Version-numbers.md)
 
-Maintainer Guide
+**Maintainer Guide**
+
 - [Merging PRs](docs/Maintainer/Merging-PRs.md)
 - [Release](docs/Maintainer/Release.md)
