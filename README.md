@@ -3,26 +3,59 @@
 PLCC is a Programming Language Compiler Compiler designed for use in
 a Programming Languages course.
 
-**General**
-
 - License: [GPLv3.0 or higher](LICENSE)
-- Need help? Chat with us on [Discord](https://discord.gg/EVtNSxS9E2)
-- Want to report a problem or request feature? [Open an issue](https://github.com/ourPLCC/plcc/issues).
+- Need help? [Chat with us](https://discord.gg/EVtNSxS9E2)
+- Report a problem or request a feature? [Open an issue](https://github.com/ourPLCC/plcc/issues).
+- [Documentation](docs/README.md)
 
-**User Guide**
+## Quick Start
 
-- [Install PLCC](docs/User/Install.md)
-- [Use PLCC](docs/User/Use.md)
-- [Download the PLCC-paper.pdf](docs/PLCC-paper.pdf)
+### Install
 
-**Developer Guide**
+If the following don't work for you or your context,
+please see [Documentation](docs/README.md).
 
-- [Contribute Using a Fork](docs/Developer/Contribute-Using-a-Fork.md)
-- [Contribute Without a Fork](docs/Developer/Contribute-Without-a-Fork.md)
-- [Testing](docs/Developer/Testing.md)
-- [Version numbers](docs/Developer/Version-numbers.md)
+**Bash (Linux, macOS, Windows via WSL)**
 
-**Maintainer Guide**
+Requires bash, curl, and git.
 
-- [Merging PRs](docs/Maintainer/Merging-PRs.md)
-- [Release](docs/Maintainer/Release.md)
+```bash
+/bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installer/install.bash)"
+```
+
+**Docker**
+
+Start a shell in the PLCC container.
+
+```bash
+docker run --rm -it -v "${PWD}:/workdir" ghcr.io/ourplcc/plcc:latest
+```
+
+**GitPod**
+
+Add the following to `.gitpod.yml` in the root of your GitLab/GitHub/Bitbucket
+repository:
+
+```yaml
+image: gitpod/workspace-full:latest
+
+tasks:
+  - name: Install PLCC
+    command: |
+        /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installer/install.bash)" >> ~/.bashrc
+        exec bash
+```
+
+### Use
+
+```bash
+$ $EDITOR grammar        # Write a grammar file defining your language.
+$ $EDITOR samples        # Write sample programs in your language.
+$ plccmk -c grammar      # Compile grammar into a scanner, parser, and interpreter.
+$ scan < samples         # Run the scanner on your samples.
+$ parse -n -t < samples  # Run the parser on your samples.
+$ rep -n -t < samples    # Run the interpreter on your samples.
+```
+
+See [Documentation](docs/README.md) for more details.
+

@@ -3,62 +3,7 @@
 This document will help you install PLCC into in your
 preferred environment.
 
-## 1. Quick Start
-
-### 1.1. Bash
-
-Requires bash, curl, Git, Java SDK >=11, and Python >=3.5.10.
-
-```bash
-/bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installer/install.bash)"
-```
-
-After following the instructions printed by the last command,
-test your installation
-(see "Test your PLCC installation" at the end of this document.).
-
-### 1.2. Docker
-
-Start a shell in the PLCC container.
-
-```bash
-docker run --rm -it -v "${PWD}:/workdir" ghcr.io/ourplcc/plcc:latest
-```
-
-You can also run single commands in the PLCC container as follows.
-
-```bash
-docker run --rm -it -v "${PWD}:/workdir" ghcr.io/ourplcc/plcc:latest PLCC COMMAND HERE
-```
-
-Test your installation (see "Test your PLCC installation" at the end of
-this document.)
-
-### 1.3. GitPod
-
-Add or update `.gitpod.yml` in the root of your GitLab/GitHub/Bitbucket
-repository with the following:
-
-```yaml
-image: gitpod/workspace-full:latest
-
-tasks:
-  - name: Install PLCC
-    command: |
-        /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installer/install.bash)" >> ~/.bashrc
-        # Uncomment to checkout install specific version
-        # git -C "$HOME/.local/plcc/" checkout v4.0.1
-        exec bash
-```
-
-Open a new GitPod workspace for this repository and test your installation
-(see "Test your PLCC installation" at the end of this document.)
-
-## 1.4. If none of the above work for you...
-
-Read on.
-
-## 2. Install and Use PLCC
+## 1. Install and Use PLCC
 
 PLCC can be installed and used in different environments.
 This section provides a brief guide to help you select the
