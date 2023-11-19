@@ -1,4 +1,4 @@
-# Documentation
+# PLCC Documentation
 
 - [Install PLCC](/docs/User/Install.md)
 - [Commands PLCC](/docs/User/Commands.md)
