@@ -264,12 +264,14 @@ Run the following commands in a new shell, terminal, or command-prompt
 in the environment in which you installed PLCC.
 
 ```bash
-plcc --version
+python --version
+python3 --version
 java --version
 javac --version
-python3 --version
+plcc --version
 ```
 
-If all the commands produce version numbers, and the versions of java and
-javac are the same, then you have successfully installed PLCC and are ready
-to [learn to use PLCC](Use.md).
+If at least one of the python commands has a version >= 3.5.10,
+and the versions of java and javac are the same and have version >= 11,
+and plcc responds,
+then you have successfully installed PLCC and are ready to use PLCC.
