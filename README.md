@@ -57,5 +57,4 @@ $ parse -n -t < samples  # Run the parser on your samples.
 $ rep -n -t < samples    # Run the interpreter on your samples.
 ```
 
-See [Documentation](docs/README.md) for more details.
-
+See [Documentation](/docs/README.md) for more details.
