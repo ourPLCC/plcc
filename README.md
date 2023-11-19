@@ -4,7 +4,7 @@ PLCC is a Programming Language Compiler Compiler designed for use in
 a Programming Languages course.
 
 - License: [GPLv3.0 or higher](LICENSE)
-- Need help? [Chat with us](https://discord.gg/EVtNSxS9E2)
+- Need help? [Chat with us on Discord](https://discord.gg/EVtNSxS9E2).
 - Report a problem or request a feature? [Open an issue](https://github.com/ourPLCC/plcc/issues).
 - [Documentation](docs/README.md)
 
