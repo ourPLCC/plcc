@@ -6,14 +6,14 @@ a Programming Languages course.
 - License: [GPLv3.0 or higher](LICENSE)
 - Need help? [Chat with us on Discord](https://discord.gg/EVtNSxS9E2).
 - Report a problem or request a feature? [Open an issue](https://github.com/ourPLCC/plcc/issues).
-- [Documentation](docs/README.md)
+- [PLCC's Documentation](docs/README.md)
 
 ## Quick Start
 
 ### Install
 
 If the following don't work for you or your context,
-please see [Documentation](docs/README.md).
+please see [PLCC's Documentation](docs/README.md) for more options.
 
 **Bash (Linux, macOS, Windows via WSL)**
 
@@ -23,15 +23,17 @@ Requires bash, curl, and git.
 /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installer/install.bash)"
 ```
 
-**Docker**
+**Docker (any OS)**
 
-Start a shell in the PLCC container.
+Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
+
+Start a shell (Linux like shell including PowerShell) in the PLCC container.
 
 ```bash
-docker run --rm -it -v "${PWD}:/workdir" ghcr.io/ourplcc/plcc:latest
+docker run --rm -it -v "$PWD:/workdir" ghcr.io/ourplcc/plcc:latest
 ```
 
-**GitPod**
+**GitPod (any OS)**
 
 Add the following to `.gitpod.yml` in the root of your GitLab/GitHub/Bitbucket
 repository:
