@@ -59,13 +59,11 @@ $ parse -n -t < samples  # Run the parser on your samples.
 $ rep -n -t < samples    # Run the interpreter on your samples.
 ```
 
-For example. We want to create scanner, parser, and interpreter for a
-language that allows us to express subtraction of whole numbers in
-prefix notation: e.g., -( -(4,1), -(3,2) ). The interpreter will evaluate
-such expressions and print the result.
 
-We create a file named `samples` whose contents contains three example
-programs in our new language.
+#### Example
+
+Create a scanner, parser, and interpreter to evaluate subtraction
+expressions. Here are some example input programs (file `samples`).
 
 ```
 3
@@ -75,7 +73,7 @@ programs in our new language.
 -(-(4,1), -(3,2))
 ```
 
-Next, let's define our language in a file named `grammar`:
+Write a `grammar` file.
 
 ```java
 skip WHITESPACE '\s+'
@@ -116,7 +114,7 @@ WholeExp
 %%%
 ```
 
-Now, we compile our grammar.
+Compile it.
 
 ```bash
 $ plccmk -c grammar
@@ -134,7 +132,7 @@ Java source files created:
   WholeExp.java
 ```
 
-Now, we can try our language's scanner.
+Test the scanner.
 
 ```bash
 gitpod /workspace/plcc (StoneyJackson-docs) $ scan < samples 
@@ -163,7 +161,7 @@ gitpod /workspace/plcc (StoneyJackson-docs) $ scan < samples
    5: RP ')'
 ```
 
-Now try the parser.
+Test the parser.
 
 ```bash
 $ parse -t -n < samples 
@@ -209,7 +207,7 @@ OK
 OK
 ```
 
-And finally the interpreter.
+Test the interpreter.
 
 ```bash
 $ rep -n < samples 
@@ -249,8 +247,8 @@ rep [-t] [-n] [file...]
 
 ## Grammar
 
-A grammar file consist of three sections, separated by a percent on a line
-by itself.
+A grammar file consist of three sections separated by a line containing
+a single percent.
 
 ```
 [Lexical specification]
@@ -263,76 +261,52 @@ by itself.
 PLCC generates a different tool from each section.
 
 ```
-Lexical specification   => Scanner
-Syntactic specification => Parser
-Semantic specification  => Interpreter
+Lexical   GENERATES Scanner
+Syntactic GENERATES Parser
+Semantic  GENERATES Interpreter
 ```
 
 The tools are dependent on each other as follows:
 
 ```
-Interpreter depends-on Parser depends-on Scanner
+Interpreter DEPENDS-ON Parser DEPENDS-ON Scanner
 ```
 
 Likewise the corresponding sections are dependent on
 each other:
 
 ```
-Semantic depends-on Syntactic depends-on Lexical
+Semantic DEPENDS-ON Syntactic DEPENDS-ON Lexical
 ```
 
-For example, this means, if you only need to build a parser,
-you may omit the semantic specification, but not the
-lexical and syntactic specifications.
+For example, to build a parser, you don't need a semantic spec,
+but you do need a lexical and syntactic specs.
 
 ### Lexical Specification
 
-The lexical specification is used to build a scanner.
-A scanner scans an input string from left to right looking
-for patterns. When it finds a pattern it recognizes, it
-either emits it as a named token, or skips it. If it does
-not recognize any patterns, it emits an error.
-
-In the lexical specification, we define named patterns that
-will be either emitted as tokens or skipped.
-
-Each rule starts with `token` or `skip`, this is followed by
-its name in all caps and underscores, and ends with a regular
-expression enclosed in either single or double quotes.
-
-In this section, lines starting with `#` are comments.
-
-Here's an annotated example of a lexical specification
+The lexical specification contains `token` and `skip` rules,
+one per line. Lines starting with `#` are comments.
+For example,
 
 ```
-# Match and consume one or more whitespace characters,
-# but do not emit a token.
+# Skip rules discard the text the match.
 skip WHITESPACE '\s+'
 
-# Match and consume one or more digit characters,
-# and emit them as a WHOLE token.
-token WHOLE '\d+'
-
-# And so on...
-token MINUS '\-'
-token LP '\('
-token RP '\)'
-token COMMA ','
+# Token rules emits a Token containing their name and the match.
+token PLUS "\+"
+token WORD "\w+"
 ```
 
-#### Regular Expressions
+* Names must be all-caps and may have underscores.
+* Patterns are regular expressions (regex) enclosed in either single
+or double quotes. Here are some resources on regex.
+  * [java.util.regex.Pattern](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html): Complete reference of regex syntax that PLCC accepts.
+  * [RegexOne](https://regexone.com/): Great set of interact lessons.
+  * [regex101](https://regex101.com/): Great tool for building, testing, and visualizing.
 
-Patterns are defined using Java's regular expression syntax.
-Here are some good resources for regex:
+#### Scan algorithm
 
-* [java.util.regex.Pattern](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html): Complete reference of syntax.
-* [RegexOne](https://regexone.com/): Great set of interact lessons.
-* [regex101](https://regex101.com/): Great tool for building, testing, and visualizing.
-
-#### The Scanning Algorithm
-
-The scanner is implemented in Java, but here is
-a partial pseudo-Python implementation to illustrate it.
+Partial, pseudo-Python implementation of PLCC's scan algorithm.
 
 ```python
 def scan(rules, unmatched):
@@ -352,18 +326,11 @@ def get_rule_to_apply(rules, unmatched)
   return get_rule_appearing_first_in_spec(rules)
 ```
 
-Each pass of the loop selects a rule to apply to the
-start of the unmatched input string. The rule selected
-is the rule that matches the most characters
-(the ***longest***), and the one that appears ***first***
-in the spec if there is a tie for ***longest***. 
-We call this this ***first-longest-match*** rule.
-The substring matched by the selected rule are removed
-from the front of the unmatched string. If the selected
-rule is a token rule, then the matched string is emitted
-as a Token along with the name of the rule. This continues
-until the unmatched string is empty, or no rules match
-the start of the unmatched string (which is an error).
+Each iteration selects and applies a rule to the
+start of the unmatched input string. The rule that
+appears first in the spec with the longest match is
+selected (the ***First-Longest-Match-Rule***).
+If no such rule exists, then an error is emitted.
 
 ### Syntactic specification
 
