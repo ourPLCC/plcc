@@ -9,6 +9,12 @@ a Programming Languages course.
 - Want to contribute? Start with our [Contributing guide](docs/Contributing.md).
 - [Download the PLCC paper](docs/PLCC-paper.pdf) that started it all.
 
+Related repositories:
+
+- [ourPLCC/languages](https://github.com/ourPLCC/languages): Many languages implemented in PLCC.
+- [ourPLCC/course](https://github.com/ourPLCC/course): Course materials for
+  teaching a Programming Languages course the uses PLCC.
+
 ## Quick Start
 
 ### Install
