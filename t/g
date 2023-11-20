@@ -1,7 +1,57 @@
-skip S '\s+'
-token W '\w+'
-token C ','
+skip WHITESPACE '\s+'
+token WHOLE '\d+'
+token MINUS '\-'
+token LP '\('
+token RP '\)'
+token COMMA ','
 %
-<a> ::= W
-<pairs> **= <W>left <W>right +C
+<prog> ::= <exp>
+<exp>WholeExp ::= <WHOLE>
+<exp>SubExp ::= MINUS LP <exp>exp1 COMMA <exp>exp2 RP
+%
+Prog
+%%%
+  public void $run() {
+    System.out.println(exp.eval());
+  }
+%%%
+
+Exp
+%%%
+  abstract public int eval();
+%%%
+
+SubExp
+%%%
+  public int eval() {
+    return exp1.eval() - exp2.eval();
+  }
+%%%
+
+Exp:import
+%%%
+  import java.util.HashMap;
+%%%
+
+Exp
+%%%
+  static HashMap<Integer, Integer> seen = new HashMap<Integer, Integer>();
+%%%
+
+WholeExp
+%%%
+  public int eval() {
+    int x = Integer.parseInt(whole.toString());
+    checkDuplicate(x);
+    return x;
+  }
+
+  public void checkDuplicate(int x) {
+    if (seen.containsKey(x)) {
+      System.out.println("Duplicate: " + x);
+    } else {
+      seen.put(x, x);
+    }
+  }
+%%%
 
