@@ -6,14 +6,13 @@ a Programming Languages course.
 - License: [GPLv3.0 or higher](LICENSE)
 - Need help? [Chat with us on Discord](https://discord.gg/EVtNSxS9E2).
 - Report a problem or request a feature? [Open an issue](https://github.com/ourPLCC/plcc/issues).
-- [PLCC's Documentation](docs/README.md)
 
 ## Quick Start
 
 ### Install
 
 If the following don't work for you or your context,
-please see [PLCC's Documentation](docs/README.md) for more options.
+please see [Install PLCC](docs/Install.md) for more options.
 
 **Bash (Linux, macOS, Windows via WSL)**
 
