@@ -282,6 +282,12 @@ Semantic DEPENDS-ON Syntactic DEPENDS-ON Lexical
 For example, to build a parser, you don't need a semantic spec,
 but you do need a lexical and syntactic specs.
 
+An external file can be include from anywhere in the spec.
+
+```
+include external_file_name
+```
+
 ### Lexical Specification
 
 The lexical specification contains `token` and `skip` rules,
@@ -334,4 +340,168 @@ If no such rule exists, then an error is emitted.
 
 ### Syntactic specification
 
+A syntax specification is a flavor of
+[BNF (Backus-Naur From)](https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form).
+
+```
+<prog> ::= <exp>
+<exp>WholeExp ::= <WHOLE>
+<exp>SubExp ::= MINUS LP <exp>exp1 COMMA <exp>exp2 RP
+```
+
+* Non-terminal are always enclosed in angles and start
+  with a lowercase. E.g., `<exp>`.
+* Terminals are always all-caps, and MAY be enclosed
+  in angles. E.g., `<WHOLE>` and `MINUS`
+* Any symbol enclosed in angles will be included in
+  the parse tree. So `<WHOLE>` will be included,
+  but `MINUS` will not.
+* When a symbol appears more than once on the right-hand
+side of a rule, each must be given a name to distinguish it from the others. E.g., `<exp>exp1`, the distinguishing name is `exp1`. That name must start with a lower case.
+* When a non-terminal appears multiple times on the left-hand-side, each must be given a name to distinguish it
+from the others. The name must start with an upper case letter. E.g., `<exp>SubExp`, the distinguishing name is `SubExp`.
+* Alternatives definitions for a non-terminal is accomplished by
+providing multiple rules that define the same non-terminal.
+
+#### Parse Tree Class Hierarchy
+
+PLCC translates semantic rules into a class hierarchy. For example:
+
+```
+<prog> ::= <exp>
+<exp>WholeExp ::= <WHOLE>
+<exp>SubExp ::= MINUS LP <exp>exp1 COMMA <exp>exp2 RP
+```
+
+becomes (many details have been omitted):
+
+```Java
+class Prog extends _Start { Exp exp; }
+abstract class Exp {}
+class WholeExp extends Exp { Token whole; }
+class SubExp extends Exp { Exp exp1; Exp exp2; }
+```
+
+* A class is generated for the non-terminal defined by a rule (the LHS) with instance variables defined for each captured symbols (e.g., `<>`) on the RHS.
+* The first rule defines the start symbol,
+and its class inherits from _Start.
+* A non-terminal defined more than once becomes an abstract base class,
+and the distinguishing names become its subclasses.
+* Tokens always have the type of Token.
+
+#### Repetition Rule
+
+The repetition rule simplifies defining a repeating structure.
+
+```
+<pairs> **= LP <WHOLE>x <WHOLE>y RP +COMMA
+```
+
+`<pairs>` matches zero or more (x,y) pairs separated by comma: e.g., `(3 4), (5 6), (7 8)`. The separator clause (e.g., `+COMMA`) is optional. E.g.,
+
+PLCC translates the above rule into:
+
+```java
+class Pairs { List<Val> xList; List<Val> yList; }
+```
+
+The captured symbols become parallel lists. That is `xList.get(0)`
+corresponds to `yList.get(0)`.
+
 ### Semantic specification
+
+The semantic specification injects code into
+the classes generated from the syntactic specification.
+
+```java
+Prog
+%%%
+  public void $run() {
+    System.out.println(exp.eval());
+  }
+%%%
+
+Exp
+%%%
+  abstract public int eval();
+%%%
+
+SubExp
+%%%
+  public int eval() {
+    return exp1.eval() - exp2.eval();
+  }
+%%%
+
+WholeExp
+%%%
+  public int eval() {
+    return Integer.parseInt(whole.toString());
+  }
+%%%
+```
+
+* The class representing the start symbol should override the `$run`
+  method. Execution of the interpreter begins here: see `Prog` above.
+* To enable polymorphism, add an abstract method to the abstract base
+class representing a non-terminal that has alternatives: see `Exp` above. Then override this method in the subclasses representing the
+concrete alternatives: see `SubExp` and `WholeExp` above.
+
+
+#### Hooks
+
+By default, you can only inject code at the end of a class.
+Hooks allow you to inject code elsewhere.
+
+* `<classname>:top` - Top of file.
+* `<classname>:import` - Add `import`s.
+* `<classname>:class` - Declare `extends` or `implements`.
+* `<classname>:init` - Constructor.
+
+As an example, we update our original example by replacing the
+definition fr WholeExp with this.
+
+```java
+WholeExp:import
+%%%
+import java.util.HashMap;
+%%%
+
+WholeExp
+%%%
+  public static HashMap<Integer,Integer> =
+    new HashMap<Integer,Integer>();
+
+  public int eval() {
+    int x = Integer.parseInt(whole.toString());
+    checkDuplicate(x);
+    return x;
+  }
+
+  public void checkDuplicate(int x) {
+    if (seen.containsKey(x)) {
+      System.out.println("Duplicate: " + x);
+    } else {
+      seen.put(x, x);
+    }
+  }
+%%%
+```
+
+Now our interpreter reports when it sees a duplicate whole number.
+
+#### Adding additional Java files/classes
+
+Entire Java files can be added by naming a class that is not
+generated from the syntactic specification.
+
+```java
+Helper
+%%%
+import java.util.List;
+
+public class Helper {
+  \\ ...
+}
+%%%
+```
