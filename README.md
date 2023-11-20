@@ -6,6 +6,8 @@ a Programming Languages course.
 - License: [GPLv3.0 or higher](LICENSE)
 - Need help? [Chat with us on Discord](https://discord.gg/EVtNSxS9E2).
 - Report a problem or request a feature? [Open an issue](https://github.com/ourPLCC/plcc/issues).
+- Want to contribute? Start with our [Contributing guide](docs/Contributing.md).
+- [Download the PLCC paper](docs/PLCC-paper.pdf) that started it all.
 
 ## Quick Start
 
@@ -57,7 +59,6 @@ $ scan < samples         # Run the scanner on your samples.
 $ parse -n -t < samples  # Run the parser on your samples.
 $ rep -n -t < samples    # Run the interpreter on your samples.
 ```
-
 
 #### Example
 
