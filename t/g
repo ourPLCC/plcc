@@ -1,0 +1,7 @@
+skip S '\s+'
+token W '\w+'
+token C ','
+%
+<a> ::= W
+<pairs> **= <W>left <W>right +C
+
