@@ -132,6 +132,11 @@ Java source files created:
   Prog.java
   SubExp.java
   WholeExp.java
+```
+
+Now, we can try our language's scanner.
+
+```bash
 gitpod /workspace/plcc (StoneyJackson-docs) $ scan < samples 
    1: WHOLE '3'
    3: MINUS '-'
@@ -158,8 +163,7 @@ gitpod /workspace/plcc (StoneyJackson-docs) $ scan < samples
    5: RP ')'
 ```
 
-Last, we can try out our language's scanner, parser, and interpreter
-against our samples.
+Now try the parser.
 
 ```bash
 $ parse -t -n < samples 
@@ -203,6 +207,11 @@ OK
    5: | | | RP ")"
    5: | | RP ")"
 OK
+```
+
+And finally the interpreter.
+
+```bash
 $ rep -n < samples 
 3
 1
@@ -239,3 +248,123 @@ rep [-t] [-n] [file...]
 ```
 
 ## Grammar
+
+A grammar file consist of three sections, separated by a percent on a line
+by itself.
+
+```
+[Lexical specification]
+%
+[Syntactic specification]
+%
+[Semantic specification]
+```
+
+PLCC generates a different tool from each section.
+
+```
+Lexical specification   => Scanner
+Syntactic specification => Parser
+Semantic specification  => Interpreter
+```
+
+The tools are dependent on each other as follows:
+
+```
+Interpreter depends-on Parser depends-on Scanner
+```
+
+Likewise the corresponding sections are dependent on
+each other:
+
+```
+Semantic depends-on Syntactic depends-on Lexical
+```
+
+For example, this means, if you only need to build a parser,
+you may omit the semantic specification, but not the
+lexical and syntactic specifications.
+
+### Lexical Specification
+
+The lexical specification is used to build a scanner.
+A scanner scans an input string from left to right looking
+for patterns. When it finds a pattern it recognizes, it
+either emits it as a named token, or skips it. If it does
+not recognize any patterns, it emits an error.
+
+In the lexical specification, we define named patterns that
+will be either emitted as tokens or skipped.
+
+Each rule starts with `token` or `skip`, this is followed by
+its name in all caps and underscores, and ends with a regular
+expression enclosed in either single or double quotes.
+
+In this section, lines starting with `#` are comments.
+
+Here's an annotated example of a lexical specification
+
+```
+# Match and consume one or more whitespace characters,
+# but do not emit a token.
+skip WHITESPACE '\s+'
+
+# Match and consume one or more digit characters,
+# and emit them as a WHOLE token.
+token WHOLE '\d+'
+
+# And so on...
+token MINUS '\-'
+token LP '\('
+token RP '\)'
+token COMMA ','
+```
+
+#### Regular Expressions
+
+Patterns are defined using Java's regular expression syntax.
+Here are some good resources for regex:
+
+* [java.util.regex.Pattern](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html): Complete reference of syntax.
+* [RegexOne](https://regexone.com/): Great set of interact lessons.
+* [regex101](https://regex101.com/): Great tool for building, testing, and visualizing.
+
+#### The Scanning Algorithm
+
+The scanner is implemented in Java, but here is
+a partial pseudo-Python implementation to illustrate it.
+
+```python
+def scan(rules, unmatched):
+  while len(unmatched) > 0:
+    rule = get_rule_to_apply(rules, unmatched)
+    if rule is None:
+      raise Exception('Error: no rule matched')
+    n = rule.get_match_length(unmatched)
+    matched = unmatched[:n]
+    unmatched = unmatched[n:]
+    if rule.is_token():
+      yield Token(rule.name, matched)
+
+def get_rule_to_apply(rules, unmatched)
+  rules = get_rules_that_match_start(rules, unmatched)
+  rules = get_rules_with_longest_match(rules, unmatched)
+  return get_rule_appearing_first_in_spec(rules)
+```
+
+Each pass of the loop selects a rule to apply to the
+start of the unmatched input string. The rule selected
+is the rule that matches the most characters
+(the ***longest***), and the one that appears ***first***
+in the spec if there is a tie for ***longest***. 
+We call this this ***first-longest-match*** rule.
+The substring matched by the selected rule are removed
+from the front of the unmatched string. If the selected
+rule is a token rule, then the matched string is emitted
+as a Token along with the name of the rule. This continues
+until the unmatched string is empty, or no rules match
+the start of the unmatched string (which is an error).
+
+### Syntactic specification
+
+### Semantic specification
