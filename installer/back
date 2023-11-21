@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2023 Stoney Jackson <dr.stoney@gmail.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+set -euo pipefail
+
+function main () {
+    PLCC_HOME="${HOME}/.local/plcc"
+    git clone https://github.com/ourPLCC/plcc.git "${PLCC_HOME}"
+    >&2 echo
+    >&2 echo "Complete the installation: append to ${HOME}/.bashrc the following:"
+    echo "
+    # PLCC environment
+    export LIBPLCC=\"${PLCC_HOME}/src\"
+    export PATH=\"\${LIBPLCC}:\$PATH\"
+"
+
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
