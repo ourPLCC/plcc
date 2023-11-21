@@ -140,7 +140,7 @@ def lex(nxt):
     # turn off when all flags have been processed
     flagSwitch = True # turn off after all the flags have been processed
     for line in nxt:
-        line = re.sub('\s+#.*', '', line)   # remove trailing comments ...
+        line = re.sub(r'\s+#.*', '', line)   # remove trailing comments ...
         # NOTE: a token that has a substring like this ' #' will mistakenly be
         # considered as a comment. Use '[ ]#' instead
         line = line.strip()
@@ -174,7 +174,7 @@ def lex(nxt):
                     jpat = match.group(1)
                     # print('>>> match found: jpat={}'.format(jpat))
                 return ''
-            pat = "\s'(.*)'$"
+            pat = r"\s'(.*)'$"
             # print('>>> q1 pat={}'.format(pat))
             line = re.sub(pat, qsub, line)
             if jpat:
@@ -184,7 +184,7 @@ def lex(nxt):
                 # print('>>> q1 match found: line={} jpat={}'.format(line,jpat))
                 pass
             else:
-                pat = '\s"(.*)"$'
+                pat = r'\s"(.*)"$'
                 # print('>>> q2 pat={}'.format(pat))
                 line = re.sub(pat, qsub, line)
                 if jpat:
@@ -1208,19 +1208,19 @@ def defangRHS(item):
     return (tnt, field)
 
 def isID(item):
-    return re.match('[a-z]\w*#?$', item)
+    return re.match(r'[a-z]\w*#?$', item)
 
 def isNonterm(nt):
     debug('[isNonterm] nt={}'.format(nt))
     if nt == 'void' or len(nt) == 0:
         return False
-    return re.match('[a-z]\w*#?$', nt)
+    return re.match(r'[a-z]\w*#?$', nt)
 
 def isClass(cls):
-    return re.match('[A-Z][\$\w]*$', cls) or cls == 'void'
+    return re.match(r'[A-Z][\$\w]*$', cls) or cls == 'void'
 
 def isTerm(term):
-    return re.match('[A-Z][A-Z\d_$]*$', term) or term == '$LINE'
+    return re.match(r'[A-Z][A-Z\d_$]*$', term) or term == '$LINE'
 
 def nt2cls(nt):
     # return the class name of the nonterminal nt
