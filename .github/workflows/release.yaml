@@ -33,18 +33,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v3
       -
-        uses: docker://ghcr.io/codfish/semantic-release-action@sha256:cfb2b8231400c4bcb0abb8403c38aaff0c865e1bae8892b9b40893db9ef49403
+        uses: docker://ghcr.io/codfish/semantic-release-action
         id: semantic
         with:
           branches: |
             [
               'main'
             ]
-          plugins: |
-            [
-              '@semantic-release/commit-analyzer',
-              '@semantic-release/github'
-            ]
+          additional-packages: |
+            ['conventional-changelog-conventionalcommits']          
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
