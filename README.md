@@ -37,7 +37,7 @@ Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) insta
 Start a shell (Linux like shell including PowerShell) in the PLCC container.
 
 ```bash
-docker run --rm -it -v "$PWD:/workdir" ghcr.io/ourplcc/plcc:latest
+docker run --rm -it -v "$PWD:/workdir" --user "$(id -u):$(id -g)" ghcr.io/ourplcc/plcc:latest
 ```
 
 **GitPod (any OS)**
