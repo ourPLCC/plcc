@@ -1,7 +1,6 @@
-# PLCC
+# PLCC - Programming Language Compiler Compiler
 
-PLCC is a Programming Language Compiler Compiler designed for use in
-a Programming Languages course.
+PLCC is designed for teaching and learning programming languages concepts.
 
 - License: [GPLv3.0 or higher](LICENSE)
 - [Chat with us on Discord](https://discord.gg/EVtNSxS9E2)
@@ -40,7 +39,7 @@ for them for some strange, inexplicable reason.
 ## Install for Use in GitPod
 
 Add the following to `.gitpod.yml` in the root of
-your GitLab/GitHub/Bitbucket repository:
+your GitLab/GitHub/Bitbucket repository.
 
 ```yaml
 image: gitpod/workspace-full:latest
@@ -51,52 +50,97 @@ tasks:
         exec bash
 ```
 
-When the project is edited in a GitPod workspace, PLCC will be installed and available in the environments terminal.
+When the project is edited in a GitPod workspace, PLCC will be installed and
+available in the environments terminal.
 
 ## Install for Use in Docker
 
 Install [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
-With Docker Desktop running, on macOS or Linux, you can start a
-shell inside a PLCC container with access to the files in the current
-directory as follows.
+Install `plcc-con` ...
+
+* On macOS
+
+  ```bash
+  /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc-con/install.bash)" >> ~/.zshrc
+  ```
+
+* On Windows >= 10, first
+  [install WSL](https://learn.microsoft.com/en-us/windows/wsl/), and then in
+  a Bash terminal in Ubuntu
+
+  ```bash
+  /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc-con/install.bash)" >> ~/.bashrc
+  ```
+
+* On Linux
+
+  ```bash
+  /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc-con/install.bash)" >> ~/.bashrc
+  ```
+
+After starting a new shell, you can start a shell inside a PLCC container
+that has access to the files in your current directory.
+
+```bash
+plcc-con
+```
+
+Inside this shell, all of PLCC's commands are available. When you are done,
+type `exit`.
+
+You can also run a single PLCC command inside a PLCC container by passing
+the command to `plcc-con`. For example, let's find out what version of
+PLCC, Java, and Python are installed in the container.
+
+```bash
+plcc-con plcc --version
+plcc-con java -version
+plcc-con python3 --version
+```
+
+`plcc-con` is a Bash function that wraps the following Docker command
 
 ```bash
 docker run --rm -it -v "${PWD}:/workdir" --user "$(id -u):$(id -g)" ghcr.io/ourplcc/plcc:latest
-```
-
-Or in PowerShell on Windows...
-
-```bash
-docker run --rm -it -v "${PWD}:/workdir" ghcr.io/ourplcc/plcc:latest
-```
-
-Type `exit` when you are done.
-
-Alternatively, you can run a single command within a PLCC container by appending the command you want to run to the previous command. The following
-runs `plcc --version` and then immediately returns.
-
-```bash
-docker run --rm -it -v "${PWD}:/workdir" --user "$(id -u):$(id -g)" ghcr.io/ourplcc/plcc:latest plcc --version
 ```
 
 ## Native Install
 
 ### Install a Bash/Linux environment
 
-On Windows >= 10,
+* On Windows >= 10,
 please [install WSL](https://learn.microsoft.com/en-us/windows/wsl/). Then run
 a Terminal and open Ubuntu from its dropdown menu. You are now running in
 Bash inside an Ubuntu virtual machine. Use this environment to install
 and use PLCC. From now on, when an instruction refers to Linux, make sure
 you are running in this environment. Including the next line.
 
-On Linux, we assume you are running in Bash on a Debian-based Linux
+* On Linux, we assume you are running in Bash on a Debian-based Linux
 distributed (this includes Ubuntu) which uses `apt-get` as its package
 manager. If this is not your situation, you will have to adapt the instructions
 appropriately for your environment. 
 
-On macOS, please [install Homebrew](https://brew.sh/).
+* On macOS, please [install Homebrew](https://brew.sh/).
+
+### Install PLCC
+
+* On macOS (remove "`>> ~/.zshrc`" if you would like to update this file manually)
+
+  ```bash
+  brew install curl git
+  /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" >> ~/.zshrc
+  # Follow printed instructions
+  ```
+
+* On Linux or Windows under [WSL](https://learn.microsoft.com/en-us/windows/wsl/) (remove "`>> ~/.bashrc`" if you would like to update this file manually)
+
+  ```bash
+  sudo apt-get update
+  sudo apt-get install curl git
+  /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" >> ~/.bashrc
+  # Follow printed instructions
+  ```
 
 ### Install Java
 
@@ -109,7 +153,7 @@ javac -version
 
 If you are missing either, or if their versions don't match, or either is
 outdated, please [install SDKMAN!](https://sdkman.io/install),
- and use it to install Java.
+and use it to install Java.
 
 ### Install Python
 
@@ -120,53 +164,33 @@ python --version
 python3 --version
 ```
 
+If neither report an acceptable version of Python, then install Python.
 
+* On macOS
 
-### Install PLCC
+  ```bash
+  brew install python3
+  ```
 
-Install curl and git.
+* On Linux or Windows under [WSL](https://learn.microsoft.com/en-us/windows/wsl/)
 
-```bash
-# On macOS with Homebrew (https://brew.sh/)
-brew install curl git
-
-# On Linux
-sudo apt-get update && sudo apt-get install curl git
-```
-
-Run PLCC's installer and follow its instructions.
-
-```bash
-/bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" >> ~/.bashrc
-```
-
-If you would prefer to update ~/.bashrc manually, leave off `>> ~/.bashrc`.
-
-
-### GitPod (any OS)
-
-Add the following to `.gitpod.yml` in the root of your GitLab/GitHub/Bitbucket
-repository:
-
-```yaml
-image: gitpod/workspace-full:latest
-
-tasks:
-  - name: Install PLCC
-    command: |
-        /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installer/install.bash)" >> ~/.bashrc
-        exec bash
-```
+  ```bash
+  sudo apt-get update
+  sudo apt-get install python3
+  ```
 
 ## Use
 
+Now that you have a Linux-like, Bash-like environment installed with
+PLCC and its dependencies, here's how you use it.
+
 ```bash
-$ $EDITOR samples        # Write sample programs in your language.
-$ $EDITOR grammar        # Write a grammar file defining your language.
-$ plccmk -c grammar      # Compile grammar into a scanner, parser, and interpreter.
-$ scan < samples         # Run the scanner on your samples.
-$ parse -n -t < samples  # Run the parser on your samples.
-$ rep -n -t < samples    # Run the interpreter on your samples.
+$EDITOR samples        # Write sample programs in your language.
+$EDITOR grammar        # Write a grammar file defining your language.
+plccmk -c grammar      # Compile grammar into a scanner, parser, and interpreter.
+scan < samples         # Run the scanner on your samples.
+parse -n -t < samples  # Run the parser on your samples.
+rep -n -t < samples    # Run the interpreter on your samples.
 ```
 
 ### Example
@@ -176,9 +200,7 @@ expressions. Here are some example input programs (file `samples`).
 
 ```
 3
-
 -(3,2)
-
 -(-(4,1), -(3,2))
 ```
 
@@ -330,30 +352,42 @@ $
 
 ```
 plcc file
-                        runs plcc.py on 'file', which generates
-                            code in a directory named 'Java/'.
+
+  Run plcc.py on 'file' to generate code in a directory named 'Java/'.
+
+
 plccmk [-c] [--json_ast] [file]
-                        runs plcc.py on file and compiles its results.
-                        '-c' Removes 'Java/' before regenerating it.
-                        '--json_ast' add support to print JSON ASTs.
-                        'file' defaults to 'grammar'
+
+  Run plcc.py on 'file' and compile its results.
+
+  '-c' Removes 'Java/' before regenerating it.
+  '--json_ast' add support to print JSON ASTs.
+      Required if you want to call parse with --json_ast.
+  'file' defaults to 'grammar'
+
+
 scan [file...]
-                        Run Java/Scan on each file and then stdin.
-                            Scans input printing recognized token.
+
+    Run Java/Scan on each file and then stdin printing recognized tokens.
+
+
 parse [-t] [-n] [--json_ast] [file...]
-                        Run Java/Parser on each file and then stdin.
-                            Scans and parses input, printing OK for recognized
-                            programs and error otherwise.
-                        '-t' Print trace (i.e., parse tree).
-                        '-n' Suppress prompt.
-                        '--json_ast' print JSON AST to stdout.
+
+  Run Java/Parser on each file and then stdin,
+  printing OK for recognized programs and errors otherwise.
+
+  '-t' Print trace (i.e., parse tree).
+  '-n' Suppress prompt.
+  '--json_ast' print JSON AST to stdout.
+
+
 rep [-t] [-n] [file...]
-                        Run Java/Rep on each file and then stdin.
-                            REP = Read, Execute, and Print loop.
-                            Scans, parses, and evaluates each program
-                            in the input.
-                        '-t' Print trace (i.e., parse tree).
-                        '-n' Suppress prompt.
+
+    Run Java/Rep on each file and then stdin.
+    REP Reads, Executes, and Prints each program in the input.
+
+    '-t' Print trace (i.e., parse tree).
+    '-n' Suppress prompt.
 ```
 
 To print a JSON AST for a program, pass `--json_ast` to both `plccmk`
