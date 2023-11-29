@@ -24,7 +24,6 @@ import os
 import io
 import shutil
 import tempfile
-
 argv = sys.argv[1:] # skip over the command-line argument
 
 # current file information
@@ -107,13 +106,15 @@ def main():
         print(version.get_version())
         sys.exit(0)
 
+    jsonAstInit()
+
     nxt = nextLine()     # nxt is the next line generator
     lex(nxt)    # lexical analyzer generation
     par(nxt)    # LL(1) check and parser generation
     sem(nxt)    # semantic actions
 
 def plccInit():
-    global flags, STD, STDT, STDP
+    global flags, argv, STD, STDT, STDP
     STDT = ['ILazy','IMatch','IScan','ITrace', 'Trace', 'PLCCException', 'Scan']
     STDP = ['ProcessFiles','Parse','Rep']
     STD = STDT + STDP
@@ -133,6 +134,14 @@ def plccInit():
     flags['parser'] = True        # create a parser
     flags['semantics'] = True     # create semantics routines
     flags['nowrite'] = False      # when True, produce *no* file output
+
+def jsonAstInit():
+    global flags, STD, STDP
+    if 'json_ast' in flags and flags['json_ast']:
+        if 'ParseJsonAst' not in STDP:
+            if 'ParseJsonAst' not in STD:
+                STDP.append('ParseJsonAst')
+                flags['ParseJsonAst'] = 'ParseJsonAst'
 
 def lex(nxt):
     # print('=== lexical specification')

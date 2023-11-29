@@ -1,5 +1,11 @@
 #!/bin/bash
 
+JACKSON_VERSION="2.15.2"
+JACKSON_ANNOTATIONS="${LIBPLCC}/lib/jackson-annotations-${JACKSON_VERSION}.jar"
+JACKSON_CORE="${LIBPLCC}/lib/jackson-core-${JACKSON_VERSION}.jar"
+JACKSON_DATABIND="${LIBPLCC}/lib/jackson-databind-${JACKSON_VERSION}.jar"
+CP="${JACKSON_ANNOTATIONS}:${JACKSON_CORE}:${JACKSON_DATABIND}"
+
 [ -d Java ] || {
     echo "Java directory missing" >&2
     exit 1
@@ -10,4 +16,26 @@
     exit 2
 }
 
-java -cp ./Java Parse $*
+if  echo "$*" | grep -- "--json_ast" &> /dev/null
+then
+
+    ARGS=()
+    while [ $# -gt 0 ] ; do
+        case "$1" in
+            --json_ast)
+                shift
+            ;;
+            *)
+                ARGS+=("$1")
+                shift
+            ;;
+        esac
+    done
+
+    if ! java -cp "./Java:${CP}" ParseJsonAst "${ARGS[@]}" ; then
+        >&2 echo "Did you forget to pass --json_ast to plccmk?"
+        exit 1
+    fi
+else 
+    java -cp ./Java Parse $*
+fi
