@@ -4,10 +4,10 @@ PLCC is a Programming Language Compiler Compiler designed for use in
 a Programming Languages course.
 
 - License: [GPLv3.0 or higher](LICENSE)
-- Need help? [Chat with us on Discord](https://discord.gg/EVtNSxS9E2).
-- Report a problem or request a feature? [Open an issue](https://github.com/ourPLCC/plcc/issues).
-- Want to contribute? Start with our [Contributing guide](docs/Contributing.md).
-- [Download the PLCC paper](docs/PLCC-paper.pdf) that started it all.
+- [Chat with us on Discord](https://discord.gg/EVtNSxS9E2)
+- [Open an issue](https://github.com/ourPLCC/plcc/issues) to report a problem or request a feature?
+- [Contributor's guide](docs/Contributing.md)
+- [The PLCC paper](docs/PLCC-paper.pdf)
 
 Related repositories:
 
@@ -15,22 +15,50 @@ Related repositories:
 - [ourPLCC/course](https://github.com/ourPLCC/course): Course materials for
   teaching a Programming Languages course the uses PLCC.
 
-## Quick Start
+## Install
 
-### Install
+To use PLCC, you'll need a Bash environment with Java JDK >= 11, Python >= 3.5.10, and PLCC installed.
 
-If the following don't work for you or your context,
-please see [Install PLCC](docs/Install.md) for more options.
+### Windows
 
-**Bash (Linux, macOS, Windows via WSL)**
+On Windows >= 10
+install [WSL](https://learn.microsoft.com/en-us/windows/wsl/)
+to get a full Linux OS running in a virtual machine
+along side Windows.
 
-Requires bash, curl, and git.
+Once installed, open a Terminal, select Ubuntu from
+the dropdown, and you are running in Bash in
+Ubuntu (Linux).
+
+WSL is really cool, be sure to skim through its
+documentation to learn about what's possible.
+
+Now that you have WSL installed, follow the instructions
+for installing PLCC into a Bash Environment.
+
+### Bash Environment
+
+maxOS and Linux come with Bash. Windows users should
+follow the instructions above to first get a Bash
+environment, then return and follow these directions.
+
+Install curl and git.
+
+```bash
+# On macOS with Homebrew (https://brew.sh/)
+brew install curl git
+
+# On Linux with apt-get (including WSL)
+apt-get install curl git
+```
+
+Run PLCC's installer and follow its instructions.
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installer/install.bash)"
 ```
 
-**Docker (any OS)**
+### Docker (any OS)
 
 Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
 
@@ -40,7 +68,7 @@ Start a shell (Linux like shell including PowerShell) in the PLCC container.
 docker run --rm -it -v "$PWD:/workdir" --user "$(id -u):$(id -g)" ghcr.io/ourplcc/plcc:latest
 ```
 
-**GitPod (any OS)**
+### GitPod (any OS)
 
 Add the following to `.gitpod.yml` in the root of your GitLab/GitHub/Bitbucket
 repository:
@@ -55,7 +83,7 @@ tasks:
         exec bash
 ```
 
-### Use
+## Use
 
 ```bash
 $ $EDITOR samples        # Write sample programs in your language.
@@ -66,7 +94,7 @@ $ parse -n -t < samples  # Run the parser on your samples.
 $ rep -n -t < samples    # Run the interpreter on your samples.
 ```
 
-#### Example
+### Example
 
 Let's create a scanner, parser, and interpreter to evaluate subtraction
 expressions. Here are some example input programs (file `samples`).
@@ -223,7 +251,7 @@ $ rep -n < samples
 $
 ```
 
-### Commands
+## Commands
 
 ```
 plcc file
@@ -251,7 +279,7 @@ rep [-t] [-n] [file...]
                         '-n' Suppress prompt.
 ```
 
-## Grammar
+## Grammar Files
 
 A grammar file consist of three sections separated by a line containing
 a single percent.
