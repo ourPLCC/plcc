@@ -260,7 +260,7 @@ plcc file
 plccmk [-c] [--json_ast] [file]
                         runs plcc.py on file and compiles its results.
                         '-c' Removes 'Java/' before regenerating it.
-                        '--json_ast' Tells plcc.py to add the files necessary for generating a JSON AST to the Java classpath.
+                        '--json_ast' add support to print JSON ASTs.
                         'file' defaults to 'grammar'
 scan [file...]
                         Run Java/Scan on each file and then stdin.
@@ -271,7 +271,7 @@ parse [-t] [-n] [--json_ast] [file...]
                             programs and error otherwise.
                         '-t' Print trace (i.e., parse tree).
                         '-n' Suppress prompt.
-                        '--json_ast' Creates a JSON AST and prints it to stdout. This option must be used with plccmk prior to using it with parse.
+                        '--json_ast' print JSON AST to stdout.
 rep [-t] [-n] [file...]
                         Run Java/Rep on each file and then stdin.
                             REP = Read, Execute, and Print loop.
@@ -279,6 +279,14 @@ rep [-t] [-n] [file...]
                             in the input.
                         '-t' Print trace (i.e., parse tree).
                         '-n' Suppress prompt.
+```
+
+To print a JSON AST for a program, pass `--json_ast` to both `plccmk`
+and `parse`, like so:
+
+```bash
+plccmk --json_ast -c YOUR_GRAMMAR_FILE
+parse --json_ast < YOUR_PROGRAM_FILE
 ```
 
 ## Grammar Files
