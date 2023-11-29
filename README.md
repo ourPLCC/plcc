@@ -15,32 +15,114 @@ Related repositories:
 - [ourPLCC/course](https://github.com/ourPLCC/course): Course materials for
   teaching a Programming Languages course the uses PLCC.
 
-## Install
+## Options for Installation and Use
 
-To use PLCC, you'll need a Bash environment with Java JDK >= 11, Python >= 3.5.10, and PLCC installed.
+PLCC can be installed and used in different environments. The table below
+may help you determine which option is best for you and your class.
 
-### Windows
+| Option | Software Requirements | Non-Software Requirements | Consistent, Pre-configured Environment |
+| ------ | ------------------- | ----------------------- | ---------- |
+| GitPod |  Web Browser | Account on GitPod and hosting service (GitLab/GitHub/Bitbucket) <br> Knowledge of the above and Git | Yes |
+| Docker | Docker Desktop | Minimal understanding of Docker | Yes |
+| Native | Bash/Linux environment <br> Java >= 11 <br> Python >= 3.5 | System administration knowledge | No |
 
-On Windows >= 10
-install [WSL](https://learn.microsoft.com/en-us/windows/wsl/)
-to get a full Linux OS running in a virtual machine
-along side Windows.
+The advantages of GitPod or Docker are (1) few or no software dependencies
+and (2) the ability to provide your class/developers a consistent development
+environment with no installation necessary.
 
-Once installed, open a Terminal, select Ubuntu from
-the dropdown, and you are running in Bash in
-Ubuntu (Linux).
+Having your students/developers perform native installations on their
+individual machines can lead to unexpected challenges do to the variety of
+different environments this creates. This can be mitigated by having your
+IT staff install PLCC on a shared server or into a computer lab and having
+your students/developers use those if their native install stops working
+for them for some strange, inexplicable reason.
 
-WSL is really cool, be sure to skim through its
-documentation to learn about what's possible.
+## Install for Use in GitPod
 
-Now that you have WSL installed, follow the instructions
-for installing PLCC into a Bash Environment.
+Add the following to `.gitpod.yml` in the root of
+your GitLab/GitHub/Bitbucket repository:
 
-### Bash Environment
+```yaml
+image: gitpod/workspace-full:latest
+tasks:
+  - name: Install PLCC
+    command: |
+        /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" >> ~/.bashrc
+        exec bash
+```
 
-macOS and Linux come with Bash. Windows users should
-follow the instructions above to first get a Bash
-environment, then return and follow these directions.
+When the project is edited in a GitPod workspace, PLCC will be installed and available in the environments terminal.
+
+## Install for Use in Docker
+
+Install [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+With Docker Desktop running, on macOS or Linux, you can start a
+shell inside a PLCC container with access to the files in the current
+directory as follows.
+
+```bash
+docker run --rm -it -v "${PWD}:/workdir" --user "$(id -u):$(id -g)" ghcr.io/ourplcc/plcc:latest
+```
+
+Or in PowerShell on Windows...
+
+```bash
+docker run --rm -it -v "${PWD}:/workdir" ghcr.io/ourplcc/plcc:latest
+```
+
+Type `exit` when you are done.
+
+Alternatively, you can run a single command within a PLCC container by appending the command you want to run to the previous command. The following
+runs `plcc --version` and then immediately returns.
+
+```bash
+docker run --rm -it -v "${PWD}:/workdir" --user "$(id -u):$(id -g)" ghcr.io/ourplcc/plcc:latest plcc --version
+```
+
+## Native Install
+
+### Install a Bash/Linux environment
+
+On Windows >= 10,
+please [install WSL](https://learn.microsoft.com/en-us/windows/wsl/). Then run
+a Terminal and open Ubuntu from its dropdown menu. You are now running in
+Bash inside an Ubuntu virtual machine. Use this environment to install
+and use PLCC. From now on, when an instruction refers to Linux, make sure
+you are running in this environment. Including the next line.
+
+On Linux, we assume you are running in Bash on a Debian-based Linux
+distributed (this includes Ubuntu) which uses `apt-get` as its package
+manager. If this is not your situation, you will have to adapt the instructions
+appropriately for your environment. 
+
+On macOS, please [install Homebrew](https://brew.sh/).
+
+### Install Java
+
+Check if you have `java` and `javac` >= 11
+
+```
+java -version
+javac -version
+```
+
+If you are missing either, or if their versions don't match, or either is
+outdated, please [install SDKMAN!](https://sdkman.io/install),
+ and use it to install Java.
+
+### Install Python
+
+Check if you have Python >= 3.5.
+
+```bash
+python --version
+python3 --version
+```
+
+
+
+### Install PLCC
 
 Install curl and git.
 
@@ -48,25 +130,18 @@ Install curl and git.
 # On macOS with Homebrew (https://brew.sh/)
 brew install curl git
 
-# On Linux with apt-get (including WSL)
-apt-get install curl git
+# On Linux
+sudo apt-get update && sudo apt-get install curl git
 ```
 
 Run PLCC's installer and follow its instructions.
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installer/install.bash)"
+/bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" >> ~/.bashrc
 ```
 
-### Docker (any OS)
+If you would prefer to update ~/.bashrc manually, leave off `>> ~/.bashrc`.
 
-Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
-
-Start a shell (Linux like shell including PowerShell) in the PLCC container.
-
-```bash
-docker run --rm -it -v "$PWD:/workdir" --user "$(id -u):$(id -g)" ghcr.io/ourplcc/plcc:latest
-```
 
 ### GitPod (any OS)
 
