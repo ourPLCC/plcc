@@ -1,0 +1,19 @@
+# Also here is a project that uses
+# semantic-release and specifies its configuration using YAML:
+# https://github.com/GeekHomeInside/semantic-release-example/blob/master/.releaserc.yaml
+---
+branches:
+    # Only run on main.
+    - main
+
+plugins:
+    # Order matters.
+
+    - - "@semantic-release/commit-analyzer"
+      # Analyzes the commit messages since the last release
+      # and determines the next version number.
+      # Populates ${nextRelease.version} among other variables.
+      - preset: conventionalcommits
+
+    - - "@semantic-release/github"
+      # Creates GitLab release entry and uploads specified assets.
