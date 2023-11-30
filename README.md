@@ -2,15 +2,15 @@
 
 PLCC is designed for teaching and learning programming languages concepts.
 
-- License: [GPLv3.0 or higher](LICENSE)
+- [Licensed under GPLv3.0 or higher](LICENSE)
 - [Chat with us on Discord](https://discord.gg/EVtNSxS9E2)
-- [Open an issue](https://github.com/ourPLCC/plcc/issues) to report a problem or request a feature?
-- [Contributor's guide](docs/Contributing.md)
-- [The PLCC paper](docs/PLCC-paper.pdf)
+- [Report a problem or request a feature](https://github.com/ourPLCC/plcc/issues)
+- [Read the paper](docs/PLCC-paper.pdf)
+- [Learn how to contribute](docs/Contributing.md)
 
 Related repositories:
 
-- [ourPLCC/languages](https://github.com/ourPLCC/languages): Many languages implemented in PLCC.
+- [ourPLCC/languages](https://github.com/ourPLCC/languages): Languages implemented in PLCC.
 - [ourPLCC/course](https://github.com/ourPLCC/course): Course materials for
   teaching a Programming Languages course the uses PLCC.
 
@@ -36,7 +36,7 @@ IT staff install PLCC on a shared server or into a computer lab and having
 your students/developers use those if their native install stops working
 for them for some strange, inexplicable reason.
 
-## Install for Use in GitPod
+## Install PLCC for Use in GitPod
 
 Add the following to `.gitpod.yml` in the root of
 your GitLab/GitHub/Bitbucket repository.
@@ -130,7 +130,6 @@ appropriately for your environment.
   ```bash
   brew install curl git
   /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" >> ~/.zshrc
-  # Follow printed instructions
   ```
 
 * On Linux or Windows under [WSL](https://learn.microsoft.com/en-us/windows/wsl/) (remove "`>> ~/.bashrc`" if you would like to update this file manually)
@@ -139,7 +138,6 @@ appropriately for your environment.
   sudo apt-get update
   sudo apt-get install curl git
   /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" >> ~/.bashrc
-  # Follow printed instructions
   ```
 
 ### Install Java
@@ -157,14 +155,13 @@ and use it to install Java.
 
 ### Install Python
 
-Check if you have Python >= 3.5.
+Check if you have Python >= 3.5
 
 ```bash
-python --version
 python3 --version
 ```
 
-If neither report an acceptable version of Python, then install Python.
+If not, then install Python.
 
 * On macOS
 

@@ -4,9 +4,10 @@ image: gitpod/workspace-full:latest
 tasks:
   - name: Install PLCC
     command: |
+      echo ''
       echo 'export LIBPLCC="$GITPOD_REPO_ROOT/src"
       export PATH="$LIBPLCC:$PATH"
       ' >> "$HOME/.bashrc"
-      source "$HOME/.bashrc"
+      exec bash
   - name: Update Java
     command: sdk install java < /dev/null
