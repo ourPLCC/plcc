@@ -8,6 +8,5 @@ tasks:
       echo 'export LIBPLCC="$GITPOD_REPO_ROOT/src"
       export PATH="$LIBPLCC:$PATH"
       ' >> "$HOME/.bashrc"
+      sdk install java < /dev/null
       exec bash
-  - name: Update Java
-    command: sdk install java < /dev/null
