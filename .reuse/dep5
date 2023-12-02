@@ -1,0 +1,20 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: PLCC
+Upstream-Contact: PLCC Community <https://discord.gg/EVtNSxS9E2>
+Source: https://github.com/ourPLCC
+
+# Sample paragraph, commented out:
+#
+# Files: src/*
+# Copyright: $YEAR $NAME <$CONTACT>
+# License: ...
+
+Files: *
+Copyright:
+  Copyright (C) 2023  Timothy Fossum <plcc@pithon.net>
+  Copyright (C) 2023  PLCC Community <https://discord.gg/EVtNSxS9E2>
+License: GPL-3.0-or-later
+
+Files: lib/jackson/*
+Copyright: Copyright 2007-, Tatu Saloranta (tatu.saloranta@iki.fi)
+License: Apache-2.0

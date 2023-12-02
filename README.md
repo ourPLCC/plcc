@@ -1,8 +1,8 @@
 # PLCC - Programming Language Compiler Compiler
 
-PLCC is designed for teaching and learning programming languages concepts.
+PLCC is designed for teaching and learning programming language concepts.
 
-- [Licensed under GPLv3.0 or higher](LICENSE)
+- [Licensed under GPL v3.0 or higher](LICENSE)
 - [Chat with us on Discord](https://discord.gg/EVtNSxS9E2)
 - [Report a problem or request a feature](https://github.com/ourPLCC/plcc/issues)
 - [Read the paper](docs/PLCC-paper.pdf)
@@ -729,3 +729,34 @@ public class Helper {
 }
 %%%
 ```
+
+## Copyright and Licensing
+
+ourPLCC is a community of developers that maintain a number of projects
+related to PLCC. The contents of the projects were originally created
+by Timothy Fossum <plcc@pithon.net>.
+
+Thank you Tim!
+
+* Copyright (C) 2023  Timothy Fossum <plcc@pithon.net>
+* Copyright (C) 2023- PLCC Community <https://discord.gg/EVtNSxS9E2>
+* License: [GPL v3.0 or higher](LICENSES/GPL-3.0-or-later.txt).
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License,
+or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details.
+
+You should have received a copy of the
+[GNU General Public License](LICENSES/GPL-3.0-or-later.txt)
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+## Third Party Libraries
+
+PLCC uses and distributes [Jackson JSON Processor](https://github.com/FasterXML),
+under the [Apache 2.0](LICENSES/Apache-2.0.txt).

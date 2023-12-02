@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-# SPDX-FileCopyrightText: 2023 Stoney Jackson <dr.stoney@gmail.com>
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-
 echo "
 export LIBPLCC=\"${HOME}/.local/lib/plcc/src\"
 export PATH=\"\${LIBPLCC}:\$PATH\"
