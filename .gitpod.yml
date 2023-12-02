@@ -4,9 +4,15 @@ image: gitpod/workspace-full:latest
 tasks:
   - name: Install PLCC
     command: |
-      echo ''
       echo 'export LIBPLCC="$GITPOD_REPO_ROOT/src"
       export PATH="$LIBPLCC:$PATH"
       ' >> "$HOME/.bashrc"
       sdk install java < /dev/null
       exec bash
+  - name: Install developer tools
+    command: |
+      pip install --upgrade pip
+      pip install pipx
+      pipx install reuse
+      sudo apt-get update
+      sudo apt-get install silversearcher-ag

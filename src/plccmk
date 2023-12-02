@@ -5,9 +5,10 @@ PYTHON3=python3
 PLCC="$LIB/plcc.py"
 
 JACKSON_VERSION="2.15.2"
-JACKSON_ANNOTATIONS="${LIBPLCC}/lib/jackson-annotations-${JACKSON_VERSION}.jar"
-JACKSON_CORE="${LIBPLCC}/lib/jackson-core-${JACKSON_VERSION}.jar"
-JACKSON_DATABIND="${LIBPLCC}/lib/jackson-databind-${JACKSON_VERSION}.jar"
+LIBPLCC_LIB="$(cd -- "${LIBPLCC}/.." &> /dev/null ; pwd)"
+JACKSON_ANNOTATIONS="${LIBPLCC_LIB}/lib/jackson/jackson-annotations-${JACKSON_VERSION}.jar"
+JACKSON_CORE="${LIBPLCC_LIB}/lib/jackson/jackson-core-${JACKSON_VERSION}.jar"
+JACKSON_DATABIND="${LIBPLCC_LIB}/lib/jackson/jackson-databind-${JACKSON_VERSION}.jar"
 CP="${JACKSON_ANNOTATIONS}:${JACKSON_CORE}:${JACKSON_DATABIND}"
 
 if [ "$1" = "-c" ];
