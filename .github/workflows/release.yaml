@@ -41,7 +41,7 @@ jobs:
               'main'
             ]
           additional-packages: |
-            ['conventional-changelog-conventionalcommits']          
+            ['conventional-changelog-conventionalcommits', '@semantic-release/git']          
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
