@@ -21,9 +21,9 @@ may help you determine which option is best for you and your class.
 
 | Option | Software Requirements | Non-Software Requirements | Consistent, Pre-configured Environment |
 | ------ | ------------------- | ----------------------- | ---------- |
-| GitPod |  Web Browser | Account on GitPod and hosting service (GitLab/GitHub/Bitbucket) <br> Knowledge of the above and Git | Yes |
+| GitPod |  Web Browser | * Account on GitPod <br> * Account on hosting service (GitLab/GitHub/Bitbucket) <br> * Knowledge of above and Git | Yes |
 | Docker | Docker Desktop | Minimal understanding of Docker | Yes |
-| Native | Bash/Linux environment <br> Java >= 11 <br> Python >= 3.5 | System administration knowledge | No |
+| Native | * Bash/Linux-like environment <br> * Java >= 11 <br> * Python >= 3.5 | System administration knowledge | No |
 
 The advantages of GitPod or Docker are (1) few or no software dependencies
 and (2) the ability to provide your class/developers a consistent development
@@ -46,7 +46,8 @@ image: gitpod/workspace-full:latest
 tasks:
   - name: Install PLCC
     command: |
-        /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" >> ~/.bashrc
+        /bin/bash -c "$(\curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" \
+          >> ~/.bashrc
         exec bash
 ```
 
@@ -112,7 +113,7 @@ docker run --rm -it -v "${PWD}:/workdir" --user "$(id -u):$(id -g)" ghcr.io/ourp
 * On Windows >= 10,
 please [install WSL](https://learn.microsoft.com/en-us/windows/wsl/). Then run
 a Terminal and open Ubuntu from its dropdown menu. You are now running in
-Bash inside an Ubuntu virtual machine. Use this environment to install
+Bash inside an Ubuntu running inside (or next to) Windows. Use this environment to install
 and use PLCC. From now on, when an instruction refers to Linux, make sure
 you are running in this environment. Including the next line.
 
@@ -122,23 +123,6 @@ manager. If this is not your situation, you will have to adapt the instructions
 appropriately for your environment. 
 
 * On macOS, please [install Homebrew](https://brew.sh/).
-
-### Install PLCC
-
-* On macOS (remove "`>> ~/.zshrc`" if you would like to update this file manually)
-
-  ```bash
-  brew install curl git
-  /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" >> ~/.zshrc
-  ```
-
-* On Linux or Windows under [WSL](https://learn.microsoft.com/en-us/windows/wsl/) (remove "`>> ~/.bashrc`" if you would like to update this file manually)
-
-  ```bash
-  sudo apt-get update
-  sudo apt-get install curl git
-  /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" >> ~/.bashrc
-  ```
 
 ### Install Java
 
@@ -176,14 +160,34 @@ If not, then install Python.
   sudo apt-get install python3
   ```
 
+### Install PLCC
+
+* On macOS (remove "`>> ~/.zshrc`" if you would like to update this file manually)
+
+  ```bash
+  brew install curl git
+  /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" \
+    >> ~/.zshrc
+  ```
+
+* On Linux or Windows under [WSL](https://learn.microsoft.com/en-us/windows/wsl/) (remove "`>> ~/.bashrc`" if you would like to update this file manually)
+
+  ```bash
+  sudo apt-get update
+  sudo apt-get install curl git
+  /bin/bash -c "$(curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" >> ~/.bashrc
+  ```
+
 ## Use
 
 Now that you have a Linux-like, Bash-like environment installed with
 PLCC and its dependencies, here's how you use it.
 
 ```bash
-$EDITOR samples        # Write sample programs in your language.
-$EDITOR grammar        # Write a grammar file defining your language.
+mkdir mylang
+cd mylang
+vim samples            # Write sample programs in your language.
+vim grammar            # Write a grammar file defining your language.
 plccmk -c grammar      # Compile grammar into a scanner, parser, and interpreter.
 scan < samples         # Run the scanner on your samples.
 parse -n -t < samples  # Run the parser on your samples.
@@ -192,8 +196,7 @@ rep -n -t < samples    # Run the interpreter on your samples.
 
 ### Example
 
-Let's create a scanner, parser, and interpreter to evaluate subtraction
-expressions. Here are some example input programs (file `samples`).
+Create a file `samples` with the following example programs.
 
 ```
 3
@@ -263,7 +266,7 @@ Java source files created:
 Test the scanner.
 
 ```bash
-gitpod /workspace/plcc (StoneyJackson-docs) $ scan < samples 
+$ scan < samples 
    1: WHOLE '3'
    3: MINUS '-'
    3: LP '('
@@ -347,6 +350,8 @@ $
 
 ## Commands
 
+This section provides a brief reference to the commands PLCC provides.
+
 ```
 plcc file
 
@@ -387,14 +392,6 @@ rep [-t] [-n] [file...]
     '-n' Suppress prompt.
 ```
 
-To print a JSON AST for a program, pass `--json_ast` to both `plccmk`
-and `parse`, like so:
-
-```bash
-plccmk --json_ast -c YOUR_GRAMMAR_FILE
-parse --json_ast < YOUR_PROGRAM_FILE
-```
-
 ## Grammar Files
 
 A grammar file consist of three sections separated by a line containing
@@ -410,32 +407,33 @@ a single percent.
 
 PLCC generates a different tool from each section.
 
-```
-Lexical   GENERATES Scanner
-Syntactic GENERATES Parser
-Semantic  GENERATES Interpreter
-```
+| Grammar Section         | Tool Generated         |
+| ----------------------- | ---------------------- |
+| Lexical Specification   | Scanner                |
+| Syntactic Specification | Parser                 |
+| Semantic Specification  | Interpreter            |
 
 The tools are dependent on each other as follows:
 
 ```
-Interpreter DEPENDS-ON Parser DEPENDS-ON Scanner
+Interpreter -> Parser -> Scanner
 ```
 
 Likewise the corresponding sections are dependent on
 each other:
 
 ```
-Semantic DEPENDS-ON Syntactic DEPENDS-ON Lexical
+Semantic -> Syntactic -> Lexical
 ```
 
 For example, to build a parser, you don't need a semantic spec,
 but you do need a lexical and syntactic specs.
 
-An external file can be include from anywhere in the spec.
+An external file can be include from anywhere in the spec
+(replace FILENAME with the file you want to include).
 
 ```
-include external_file_name
+include FILENAME
 ```
 
 ### Lexical Specification
@@ -467,20 +465,18 @@ Partial, pseudo-Python implementation of PLCC's scan algorithm.
 
 ```python
 def scan(rules, unmatched):
-  while len(unmatched) > 0:
+  while not_empty(unmatched):
     rule = get_rule_to_apply(rules, unmatched)
-    if rule is None:
-      raise Exception('Error: no rule matched')
-    n = rule.get_match_length(unmatched)
-    matched = unmatched[:n]
-    unmatched = unmatched[n:]
-    if rule.is_token():
-      yield Token(rule.name, matched)
+    match = get_match(rule, unmatched)
+    unmatched = unmatched.remove_from_front(match)
+    if rule.is_token_rule():
+      yield rule.make_token(match)
 
 def get_rule_to_apply(rules, unmatched)
-  rules = get_rules_that_match_start(rules, unmatched)
-  rules = get_rules_with_longest_match(rules, unmatched)
-  return get_rule_appearing_first_in_spec(rules)
+  rules = rules.get_rules_that_match_front(unmatched)
+  rules = rules.get_rules_with_longest_match()
+  rule = rules.get_rule_appearing_first_in_spec()
+  return rule
 ```
 
 Each iteration selects and applies a rule to the
@@ -500,18 +496,22 @@ A syntax specification is a flavor of
 <exp>SubExp ::= MINUS LP <exp>exp1 COMMA <exp>exp2 RP
 ```
 
-* Non-terminal are always enclosed in angles and start
+* Non-terminals are always enclosed in angles and start
   with a lowercase. E.g., `<exp>`.
+* Each non-terminal must be defined by appearing on the left-hand-side
+  of at least one rule.
 * Terminals are always all-caps, and MAY be enclosed
-  in angles. E.g., `<WHOLE>` and `MINUS`
+  in angles. E.g., `<WHOLE>` and `MINUS`.
+* Terminals represent tokens which are generated by the scanner from
+  the input program.
 * Any symbol enclosed in angles will be included in
   the parse tree. So `<WHOLE>` will be included,
   but `MINUS` will not.
 * When a symbol appears more than once on the right-hand
-side of a rule, each must be given a name to distinguish it from the others. E.g., `<exp>exp1`, the distinguishing name is `exp1`. That name must start with a lower case.
+side of a rule, each must be given a name to distinguish it from the others. For example, in `<exp>exp1` the distinguishing name is `exp1`. That name must start with a lower case.
 * When a non-terminal appears multiple times on the left-hand-side, each must be given a name to distinguish it
-from the others. The name must start with an upper case letter. E.g., `<exp>SubExp`, the distinguishing name is `SubExp`.
-* Alternatives definitions for a non-terminal is accomplished by
+from the others. The name must start with an upper case letter. For example, in `<exp>SubExp` the distinguishing name is `SubExp`.
+* Alternative definitions for a non-terminal is accomplished by
 providing multiple rules that define the same non-terminal.
 
 #### Parse Tree Class Hierarchy
@@ -524,7 +524,7 @@ PLCC translates semantic rules into a class hierarchy. For example:
 <exp>SubExp ::= MINUS LP <exp>exp1 COMMA <exp>exp2 RP
 ```
 
-becomes (many details have been omitted):
+becomes (some details omitted):
 
 ```Java
 class Prog extends _Start { Exp exp; }
@@ -533,9 +533,9 @@ class WholeExp extends Exp { Token whole; }
 class SubExp extends Exp { Exp exp1; Exp exp2; }
 ```
 
-* A class is generated for the non-terminal defined by a rule (the LHS) with instance variables defined for each captured symbols (e.g., `<>`) on the RHS.
+* A class is generated for the non-terminal defined by a rule (the LHS) with instance variables defined for each captured symbols (within `<>`) on the RHS.
 * The first rule defines the start symbol,
-and its class inherits from _Start.
+and its class inherits from the standard, built-in class _Start.
 * A non-terminal defined more than once becomes an abstract base class,
 and the distinguishing names become its subclasses.
 * Tokens always have the type of Token.
@@ -548,7 +548,7 @@ The repetition rule simplifies defining a repeating structure.
 <pairs> **= LP <WHOLE>x <WHOLE>y RP +COMMA
 ```
 
-`<pairs>` matches zero or more (x,y) pairs separated by comma: e.g., `(3 4), (5 6), (7 8)`. The separator clause (e.g., `+COMMA`) is optional. E.g.,
+`<pairs>` matches zero or more (x,y) pairs separated by comma: e.g., `(3 4), (5 6), (7 8)`. The separator clause (e.g., `+COMMA`) is optional. For example,
 
 PLCC translates the above rule into:
 
@@ -556,15 +556,14 @@ PLCC translates the above rule into:
 class Pairs { List<Val> xList; List<Val> yList; }
 ```
 
-The captured symbols become parallel lists. That is `xList.get(0)`
-corresponds to `yList.get(0)`.
+The captured symbols become parallel lists. That is, `xList.git(i)` and `yList.get(i)` correspond to the i<sup>th</sup> value pair.
 
 #### Parse Algorithm
 
-**TL;DR - Start each alternative definition for the same non-terminal with a different token.**
-
 The parsing algorithm is a recursive-descent parser that parses languages
 in LL(1). Let's take a look.
+
+#### Code Generated for Parser
 
 Each rule in the syntactic spec turns into a static parse method embedded
 in the class generated by the same rule. For example,
@@ -627,14 +626,12 @@ non-terminal's class.
 
 The parse function of an abstract base class (e.g., in `Exp` above)
 determines which subclass's method to call by looking at the next token.
-For this reason, it's important that when defining a language's syntax
-that **each alternative definition for the same non-terminal start with
-a different token**.
 
 ### Semantic specification
 
 The semantic specification injects code into
-the classes generated from the syntactic specification.
+predefined locations (called hooks) within each class
+generated from the syntactic specification.
 
 ```java
 Prog
@@ -651,6 +648,7 @@ Exp
 
 SubExp
 %%%
+  @Override
   public int eval() {
     return exp1.eval() - exp2.eval();
   }
@@ -658,6 +656,7 @@ SubExp
 
 WholeExp
 %%%
+  @Override
   public int eval() {
     return Integer.parseInt(whole.toString());
   }
@@ -683,7 +682,7 @@ Hooks allow you to inject code elsewhere.
 * `<classname>:init` - Constructor.
 
 As an example, we update our original example by replacing the
-definition fr WholeExp with this.
+definition for WholeExp with this.
 
 ```java
 WholeExp:import
@@ -716,8 +715,9 @@ Now our interpreter reports when it sees a duplicate whole number.
 
 #### Adding additional Java files/classes
 
-Entire Java files can be added by naming a class that is not
-generated from the syntactic specification.
+Entire Java files can be added by naming,
+and providing a complete definition of,
+a class that is not generated from the syntactic specification.
 
 ```java
 Helper
@@ -729,6 +729,22 @@ public class Helper {
 }
 %%%
 ```
+
+## Serializing AST in JSON
+
+To print a JSON AST for a program, pass `--json_ast` to both `plccmk`
+and `parse`, like so:
+
+```bash
+plccmk --json_ast -c YOUR_GRAMMAR_FILE
+parse --json_ast < YOUR_PROGRAM_FILE
+```
+
+This feature allows other tools to be written in different languages
+that reads the JSON AST as input. In particular, there are plans to
+extend PLCC to allow semantics to be written in Python. This option
+allows the parser implemented in Java to be reused by and interpreter
+written in Python.
 
 ## Copyright and Licensing
 
