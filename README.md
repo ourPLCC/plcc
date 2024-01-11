@@ -461,29 +461,27 @@ or double quotes. Here are some resources on regex.
 
 #### Scan algorithm
 
-Partial, pseudo-Python implementation of PLCC's scan algorithm.
+Below is PLCC's scan algorithm in pseudo-code. For clarity and simplicity, a couple details related to advanced features have been omitted.
 
-```python
-def scan(rules, unmatched):
-  while not_empty(unmatched):
-    rule = get_rule_to_apply(rules, unmatched)
-    match = get_match(rule, unmatched)
-    unmatched = unmatched.remove_from_front(match)
-    if rule.is_token_rule():
-      yield rule.make_token(match)
+##### **DEFINE:** *Scan input for tokens.*
+While there is more unscanned input ...
+1. Identify the specification rule to apply. (defined below)
+2. Remove the non-empty string matched by the rule from the start of unscanned input.
+3. If rule is not a "skip rule", create and emit a token.
 
-def get_rule_to_apply(rules, unmatched)
-  rules = rules.get_rules_that_match_front(unmatched)
-  rules = rules.get_rules_with_longest_match()
-  rule = rules.get_rule_appearing_first_in_spec()
-  return rule
-```
+##### **DEFINE:** *Identify the specification rule to apply.*
+1. Identify rules that match a non-empty sequence of characters from the start of the unscanned input.
+2. If no such rule exists, emit a lexical error and stop scanning.
+3.  Otherwise, from the matching rules, identify the rule that appears first in the specification.
+4. If the matching rule that appears first is a skip rule, then return it as the rule to apply.
+5. Otherwise, from the matching rules, remove all skip rules, leaving only token rules.
+6. From the matching token rules, identify rules with the longest match.
+7. From the rules with the longest match, identify the rule that appears first in the lexical specification.
+8. Return this first, longest-match, token rule.
 
-Each iteration selects and applies a rule to the
-start of the unmatched input string. The rule that
-appears first in the spec with the longest match is
-selected (the ***First-Longest-Match-Rule***).
-If no such rule exists, then an error is emitted.
+##### Notes:
+
+* Rules do not match across newline characters.
 
 ### Syntactic specification
 
