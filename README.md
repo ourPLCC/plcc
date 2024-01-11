@@ -461,7 +461,7 @@ or double quotes. Here are some resources on regex.
 
 #### Scan algorithm
 
-Below is PLCC's scan algorithm in pseudo-code. For clarity and simplicity, a couple details related to advanced features have been omitted.
+Below is PLCC's scan algorithm in pseudo-code. For clarity and simplicity, a couple details related to advanced features have been omitted. 
 
 ##### **DEFINE:** *Scan input for tokens.*
 While there is more unscanned input ...
