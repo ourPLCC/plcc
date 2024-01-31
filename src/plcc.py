@@ -112,6 +112,7 @@ def main():
     lex(nxt)    # lexical analyzer generation
     par(nxt)    # LL(1) check and parser generation
     sem(nxt)    # semantic actions
+    done()      # exit
 
 def plccInit():
     global flags, argv, STD, STDT, STDP
@@ -971,7 +972,7 @@ def sem(nxt):
                 deathLNO('no stub for class {} -- cannot replace //{}:{}//'.format(cls, cls, mod))
             stubs[cls] = codeString
     semFinishUp()
-    done()
+    
 
 def getCode(nxt):
     code = []
