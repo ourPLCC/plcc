@@ -129,7 +129,7 @@ def plccInit():
     # behavior-related flags
     flags['debug'] = 0            # default debug value
     flags['destdir'] = 'Java'     # the default destination directory
-    flags['python_destir'] = 'Python' # destination directory for Python semantics
+    flags['python_destdir'] = 'Python' # destination directory for Python semantics
     flags['pattern'] = True       # create a scanner that uses re. patterns
     flags['LL1'] = True           # check for LL(1)
     flags['parser'] = True        # create a parser
@@ -926,6 +926,8 @@ def sem(nxt):
             argv.extend(fn)
             # print('== extend argv by {}'.format(fn))
             continue
+        if line == "%":
+            break
         if len(line) == 0 or line[0] == '#':
             # skip just comments or blank lines
             continue
