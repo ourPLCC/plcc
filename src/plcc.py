@@ -111,7 +111,9 @@ def main():
     nxt = nextLine()     # nxt is the next line generator
     lex(nxt)    # lexical analyzer generation
     par(nxt)    # LL(1) check and parser generation
-    sem(nxt)    # semantic actions
+    sem(nxt)    # java semantic actions
+    sempy(nxt)  # python semantics
+    done()
 
 def plccInit():
     global flags, argv, STD, STDT, STDP
@@ -127,13 +129,15 @@ def plccInit():
     flags['libplcc'] = LIBPLCC()
     flags['Token'] = True         # generate scanner-related files
     # behavior-related flags
-    flags['debug'] = 0            # default debug value
-    flags['destdir'] = 'Java'     # the default destination directory
-    flags['pattern'] = True       # create a scanner that uses re. patterns
-    flags['LL1'] = True           # check for LL(1)
-    flags['parser'] = True        # create a parser
-    flags['semantics'] = True     # create semantics routines
-    flags['nowrite'] = False      # when True, produce *no* file output
+    flags['debug'] = 0                  # default debug value
+    flags['destdir'] = 'Java'           # the default destination directory
+    flags['python_destdir'] = 'Python'  # default destination for fourth section semantics (Python)
+    flags['pattern'] = True             # create a scanner that uses re. patterns
+    flags['LL1'] = True                 # check for LL(1)
+    flags['parser'] = True              # create a parser
+    flags['semantics'] = True           # create java semantics routines
+    flags['python_semantics'] = True    # create python semantics routines
+    flags['nowrite'] = False            # when True, produce *no* file output
 
 def jsonAstInit():
     global flags, STD, STDP
@@ -253,6 +257,20 @@ def lexFinishUp():
         debug('[lexFinishUp] ' + dst + ': destination subdirectory exists')
     except:
         death(dst + ': error creating destination subdirectory')
+
+    if getFlag('python_semantics'):
+        dstpy = getFlag('python_destdir')
+        if not dstpy:
+            death('illegal destdir flag value')
+        try:
+            os.mkdir(dstpy)
+            debug('[lexFinishUp] ' + dstpy + ': destination subdirectory created')
+        except FileExistsError:
+            debug('[lexFinishUp] ' + dstpy + ': destination subdirectory exists')
+        except:
+            death(dstpy + ': error creating destination subdirectory')
+
+
     if not getFlag('Token'):
         return # do not create any automatically generated scanner-related files
     libplcc = getFlag('libplcc')
@@ -927,6 +945,8 @@ def sem(nxt):
         if len(line) == 0 or line[0] == '#':
             # skip just comments or blank lines
             continue
+        if line == '%':
+            break
         (cls, _, mod) = line.partition(':')
         # print('>>> cls={} mod={}'.format(cls, mod))
         cls = cls.strip()
@@ -967,7 +987,7 @@ def sem(nxt):
                 deathLNO('no stub for class {} -- cannot replace //{}:{}//'.format(cls, cls, mod))
             stubs[cls] = codeString
     semFinishUp()
-    done()
+    
 
 def getCode(nxt):
     code = []
@@ -1012,6 +1032,118 @@ def semFinishUp():
         except:
             death('cannot write to file {}'.format(fname))
         print('  {}.java'.format(cls))
+
+
+
+
+def sempy(nxt):
+    global stubs, argv
+    # print('=== python semantic routines')
+    if not getFlag('python_semantics'):
+        sempyFinishUp()
+    for line in nxt:
+        line = line.strip()
+        if line[:7] == 'include':
+            # add file names to be processed
+            fn = line[7:].split()
+            argv.extend(fn)
+            # print('== extend argv by {}'.format(fn))
+            continue
+        if len(line) == 0 or line[0] == '#':
+            # skip just comments or blank lines
+            continue
+        if line == '%':
+            break
+        (cls, _, mod) = line.partition(':')
+        # print('>>> cls={} mod={}'.format(cls, mod))
+        cls = cls.strip()
+        codeString = pythonGetCode(nxt) # grab the stuff between %%% ... %%%
+        if line[-8:] == ':ignore!':
+            continue
+        # check to see if line has the form Class:mod
+        mod = mod.strip() # mod might be 'import', 'top', etc.
+        if mod:
+            if cls == '*': # apply the mod substitution to *all* of the stubs
+                for cls in stubs:
+                    stub = stubs[cls]
+                    repl = '#{}:{}#'.format(cls, mod)
+                    stub = stub.replace(repl, '{}\n{}'.format(codeString,repl))
+                    repl = "'''{}:{}'''".format(cls, mod)
+                    stub = stub.replace(repl, '{} {}'.format(codeString,repl))
+                    debug('class {}:\n{}\n'.format(cls, stub))
+                    stubs[cls] = stub
+                continue
+        # if mod == 'ignore!':
+        #     continue
+        if not isClass(cls):
+            deathLNO('{}: ill-defined class name'.format(cls))
+        if cls in stubs:
+            stub = stubs[cls]
+            if mod:
+                repl = '#{}:{}#'.format(cls, mod)
+                stub = stub.replace(repl, '{}\n{}'.format(codeString,repl))
+                repl = "'''{}:{}'''".format(cls, mod)
+                stub = stub.replace(repl, '{} {}'.format(codeString,repl))
+            else: # the default
+                repl = '#{}#'.format(cls)
+                stub = stub.replace(repl, '{}\n\n{}'.format(codeString,repl))
+            debug('class {}:\n{}\n'.format(cls, stub))
+            stubs[cls] = stub
+        else:
+            if mod:
+                deathLNO('no stub for class {} -- cannot replace #{}:{}#'.format(cls, cls, mod))
+            stubs[cls] = codeString
+    sempyFinishUp()
+
+def pythonGetCode(nxt):
+    code = []
+    for line in nxt:
+        line = line.rstrip()
+        if re.match(r'\s*#', line) or re.match(r'\s*$', line):
+            # skip comments or blank lines
+            continue
+        if re.match(r'%%{', line): # legacy plcc
+            stopMatch = r'%%}'
+            break
+        if re.match(r'%%%', line):
+            stopMatch = r'%%%'
+            break
+        else:
+            deathLNO('expecting a code segment')
+    lineMode = True # switch on line mode
+    for line in nxt:
+        if re.match(stopMatch, line):
+            break
+        code.append(line)
+    else:
+        deathLNO('premature end of file')
+    lineMode = False # switch off line mode
+    str = '\n'.join(code)
+    return str + '\n'
+
+def sempyFinishUp():
+    if getFlag('nowrite'):
+        return
+    global stubs, STD
+    dst = flags['python_destdir']
+    print('\nPython source files created:')
+    # print *all* of the generated files
+    for cls in sorted(stubs):
+        if cls in STD:
+            death('{}: reserved class name'.format(cls))
+        try:
+            fname = '{}/{}.py'.format(dst, cls)
+            with open(fname, 'w') as f:
+                print(stubs[cls], end='', file=f)
+        except:
+            death('cannot write to file {}'.format(fname))
+        print('  {}.py'.format(cls))
+
+
+
+
+
+
 
 
 #####################
