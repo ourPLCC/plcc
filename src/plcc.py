@@ -1128,21 +1128,6 @@ def sempyFinishUp():
         return
     global stubs, STD
     dst = flags['python_destdir']
-    print('\nPython source files created:')
-    # print *all* of the generated files
-    for cls in sorted(stubs):
-        if cls in STD:
-            death('{}: reserved class name'.format(cls))
-        try:
-            fname = '{}/{}.py'.format(dst, cls)
-            with open(fname, 'w') as f:
-                print(stubs[cls], end='', file=f)
-        except:
-            death('cannot write to file {}'.format(fname))
-        print('  {}.py'.format(cls))
-
-
-
 
 
 
