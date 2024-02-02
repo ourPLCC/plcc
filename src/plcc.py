@@ -942,6 +942,8 @@ def sem(nxt):
             argv.extend(fn)
             # print('== extend argv by {}'.format(fn))
             continue
+        if line == "%":
+            break
         if len(line) == 0 or line[0] == '#':
             # skip just comments or blank lines
             continue
