@@ -947,8 +947,6 @@ def sem(nxt):
         if len(line) == 0 or line[0] == '#':
             # skip just comments or blank lines
             continue
-        if line == '%':
-            break
         (cls, _, mod) = line.partition(':')
         # print('>>> cls={} mod={}'.format(cls, mod))
         cls = cls.strip()
@@ -1045,17 +1043,9 @@ def sempy(nxt):
         sempyFinishUp()
     for line in nxt:
         line = line.strip()
-        if line[:7] == 'include':
-            # add file names to be processed
-            fn = line[7:].split()
-            argv.extend(fn)
-            # print('== extend argv by {}'.format(fn))
-            continue
         if len(line) == 0 or line[0] == '#':
             # skip just comments or blank lines
             continue
-        if line == '%':
-            break
         (cls, _, mod) = line.partition(':')
         # print('>>> cls={} mod={}'.format(cls, mod))
         cls = cls.strip()
