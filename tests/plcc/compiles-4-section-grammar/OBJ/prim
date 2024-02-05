@@ -1,0 +1,283 @@
+Prim
+%%%
+    // apply the primitive to the passed values
+    public abstract Val apply(Val [] va);
+%%%
+
+AddPrim
+%%%
+
+    public String toString() {
+  return "+";
+    }
+
+    public Val apply(Val [] va) {
+        if (va.length != 2)
+            throw new RuntimeException("two arguments expected");
+        int i0 = va[0].intVal().val;
+        int i1 = va[1].intVal().val;
+        return new IntVal(i0 + i1);
+    }
+%%%
+
+SubPrim
+%%%
+
+    public String toString() {
+        return "-";
+    }
+
+    public Val apply(Val [] va) {
+        if (va.length != 2)
+            throw new RuntimeException("two arguments expected");
+        int i0 = va[0].intVal().val;
+        int i1 = va[1].intVal().val;
+        return new IntVal(i0 - i1);
+    }
+%%%
+
+MulPrim
+%%%
+
+    public String toString() {
+        return "*";
+    }
+
+    public Val apply(Val [] va) {
+        if (va.length != 2)
+            throw new RuntimeException("two arguments expected");
+        int i0 = va[0].intVal().val;
+        int i1 = va[1].intVal().val;
+        return new IntVal(i0 * i1);
+    }
+
+%%%
+
+DivPrim
+%%%
+
+    public String toString() {
+        return "/";
+    }
+
+    public Val apply(Val [] va) {
+        if (va.length != 2)
+            throw new RuntimeException("two arguments expected");
+        int i0 = va[0].intVal().val;
+        int i1 = va[1].intVal().val;
+        if (i1 == 0)
+            throw new RuntimeException("attempt to divide by zero");
+        return new IntVal(i0 / i1);
+    }
+
+%%%
+
+Add1Prim
+%%%
+
+    public String toString() {
+        return "add1";
+    }
+
+    public Val apply(Val [] va) {
+        if (va.length != 1)
+            throw new RuntimeException("one argument expected");
+        int i0 = va[0].intVal().val;
+        return new IntVal(i0 + 1);
+    }
+
+%%%
+
+Sub1Prim
+%%%
+
+    public String toString() {
+        return "sub1";
+    }
+
+    public Val apply(Val [] va) {
+        if (va.length != 1)
+            throw new RuntimeException("one argument expected");
+        int i0 = va[0].intVal().val;
+        return new IntVal(i0 - 1);
+    }
+
+%%%
+
+ZeropPrim
+%%%
+
+    public String toString() {
+        return "zero?";
+    }
+
+    public Val apply(Val [] va) {
+        if (va.length != 1)
+            throw new RuntimeException("one argument expected");
+        int i0 = va[0].intVal().val;
+        return new IntVal(i0 == 0 ? 1 : 0);
+    }
+
+%%%
+
+LTPrim
+%%%
+    public String toString() {
+        return "<?";
+    }
+
+    public Val apply(Val [] va) {
+        if (va.length != 2)
+            throw new RuntimeException("two arguments expected");
+        int i0 = va[0].intVal().val;
+        int i1 = va[1].intVal().val;
+        return new IntVal(i0 < i1 ? 1 : 0);
+    }
+%%%
+
+LEPrim
+%%%
+    public String toString() {
+        return "<=?";
+    }
+
+    public Val apply(Val [] va) {
+        if (va.length != 2)
+            throw new RuntimeException("two arguments expected");
+        int i0 = va[0].intVal().val;
+        int i1 = va[1].intVal().val;
+        return new IntVal(i0 <= i1 ? 1 : 0);
+    }
+%%%
+
+GTPrim
+%%%
+    public String toString() {
+        return ">?";
+    }
+
+    public Val apply(Val [] va) {
+        if (va.length != 2)
+            throw new RuntimeException("two arguments expected");
+        int i0 = va[0].intVal().val;
+        int i1 = va[1].intVal().val;
+        return new IntVal(i0 > i1 ? 1 : 0);
+    }
+%%%
+
+GEPrim
+%%%
+    public String toString() {
+        return ">=?";
+    }
+
+    public Val apply(Val [] va) {
+        if (va.length != 2)
+            throw new RuntimeException("two arguments expected");
+        int i0 = va[0].intVal().val;
+        int i1 = va[1].intVal().val;
+        return new IntVal(i0 >= i1 ? 1 : 0);
+    }
+%%%
+
+NEPrim
+%%%
+    public String toString() {
+        return "<>?";
+    }
+
+    public Val apply(Val [] va) {
+        if (va.length != 2)
+            throw new RuntimeException("two arguments expected");
+        int i0 = va[0].intVal().val;
+        int i1 = va[1].intVal().val;
+        return new IntVal(i0 != i1 ? 1 : 0);
+    }
+%%%
+
+EQPrim
+%%%
+    public String toString() {
+        return "=?";
+    }
+
+    public Val apply(Val [] va) {
+        if (va.length != 2)
+            throw new RuntimeException("two arguments expected");
+        int i0 = va[0].intVal().val;
+        int i1 = va[1].intVal().val;
+        return new IntVal(i0 == i1 ? 1 : 0);
+    }
+%%%
+
+ObjectpPrim
+%%%
+    public Val apply(Val [] va) {
+	if (va.length != 1)
+            throw new RuntimeException("one argument expected");
+        Val v0 = va[0];
+        return new IntVal(v0.isObject() ? 1 : 0);
+   }
+%%%
+
+ClasspPrim
+%%%
+    public Val apply(Val [] va) {
+	if (va.length != 1)
+            throw new RuntimeException("one argument expected");
+        Val v0 = va[0];
+        return new IntVal(v0.isClass() ? 1 : 0);
+   }
+%%%
+
+ListpPrim
+%%%
+    public Val apply(Val [] va) {
+	if (va.length != 1)
+	    throw new RuntimeException("one argument expected");
+        Val v0 = va[0];
+	return new IntVal(v0.isList() ? 1 : 0);
+    }
+%%%
+	
+FirstPrim
+%%%
+    public Val apply(Val [] va) {
+        if (va.length != 1)
+            throw new RuntimeException("one argument expected");
+        ListNode lst = va[0].listNode();
+        return lst.val;
+    }
+%%%
+
+RestPrim
+%%%
+    public Val apply(Val [] va) {
+        if (va.length != 1)
+            throw new RuntimeException("one argument expected");
+        ListNode lst = va[0].listNode();
+        return lst.listVal;
+    }
+%%%
+
+AddFirstPrim
+%%%
+    public Val apply(Val [] va) {
+        if (va.length != 2)
+            throw new RuntimeException("two arguments expected");
+        Val v = va[0];
+        ListVal lst = va[1].listVal();
+        return new ListNode(v, lst);
+    }
+%%%
+
+LenPrim
+%%%
+    public Val apply(Val [] va) {
+        if (va.length != 1)
+            throw new RuntimeException("one argument expected");
+        ListVal lst = va[0].listVal();
+        return new IntVal(lst.len());
+    }
+
+%%%

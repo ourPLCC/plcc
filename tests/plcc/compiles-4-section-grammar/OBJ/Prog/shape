@@ -1,0 +1,49 @@
+define shape =
+  class
+    field name % the name of this shape (circle, rectangle, square, etc.)
+    % default methods
+    method init = proc() {set name="shape" ; self}
+    method area = proc() 0
+    method show = proc()
+      <self>{putc name ; putc ": area=" ; display .area() ; newline ; self}
+  end
+
+define rectangle =
+  class extends shape
+    field l % length
+    field w % width
+    method init = proc(l,w) {set name="rectangle" ; set <this>l=l ; set <this>w=w ; self}
+    method area = proc() *(l,w)
+  end
+
+define circle =
+  class extends shape
+    field rad % radius
+    method init = proc(rad) {set name="circle" ; set <this>rad=rad ; self}
+    method area = proc() *(3,*(rad,rad)) % a bit of an underestimate
+  end
+
+define square =
+  class extends rectangle
+    field name % shadows the name field in the shape class
+    method init = proc(side) {set name="square" ; .<super>init(side,side)}
+    % area procedure is inherited from the superclass (rectangle)
+  end
+
+define r = .<new rectangle>init(4,5) % a rectangle with length 4 and width 5
+define c = .<new circle>init(2)      % a circle with radius 2
+define sq = .<new square>init(11)    % a square with side 11
+define sh = .<new shape>init()       % a shapeless 'shape'
+
+.<r>show()
+.<c>show()
+.<sq>show()
+.<sh>show()
+
+% another way to do the above without 'define's:
+
+!<new rectangle>init(4,5)>show()!>
+!<new circle>init(2)>show()!>
+!<new square>init(11)>show()!>
+!<new shape>init()>show()!>
+

@@ -1,0 +1,19 @@
+letrec
+  p = proc(n)
+        if =?(n,0)
+        then
+          class
+            static f=0
+          end
+        else if =?(n,1)
+        then
+          class extends .p(0)
+            static f=1
+          end
+        else
+          class extends .p(sub1(n))
+            static f = <superclass>+(f, <superclass>f)
+          end
+in
+  <.p(10)>f
+

@@ -1,0 +1,10 @@
+% a class to compute sums
+define summer =
+  class
+    field sum
+    method init = proc() {set sum=0 ; self}
+    method add = proc(t) {set sum = +(t,sum) ; self}
+    method show = proc() {display sum ; newline ; self}
+  end
+
+!<new summer>init()>add(1)>add(2)>add(3)>show()>add(7)>show()!>

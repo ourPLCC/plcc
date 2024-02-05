@@ -1,0 +1,23 @@
+define append = proc(s, t)
+  if list?(s)
+    then
+      if list?(t)
+        then
+          if s
+            then [first(s), .append(rest(s), t)]
+            else t
+        else nil
+    else nil
+
+define substr1 = proc(s, n)
+  if <=?(n, len(s))
+    then s
+    else .substr1(s, sub1(n))
+
+define substr = proc(s, m, n)
+  if list?(s)
+    then
+      if <=?(m, 0)
+        then .substr1(s, n)
+        else .substr(s, sub1(m), sub1(n))
+    else nil

@@ -1,0 +1,9 @@
+define c =
+  class
+    static odd? = proc(x) if x then .even?(sub1(x)) else 0
+    static even? = proc(x) if x then .odd?(sub1(x)) else 1
+  end
+
+.<c>odd?(1)
+.<c>odd?(0)
+.<c>even?(1000)

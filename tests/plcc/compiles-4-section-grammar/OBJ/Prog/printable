@@ -1,0 +1,15 @@
+define printable =
+  let
+    lst = []
+    x = 126
+  in
+    letrec
+      loop = proc() 
+        if >=?(x,32)
+        then {set lst = addFirst(x, lst) ; set x=sub1(x) ; .loop()}
+        else lst
+    in
+      .loop()
+
+{ display printable ; newline }
+{ putc printable ; newline }
