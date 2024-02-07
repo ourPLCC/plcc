@@ -137,7 +137,7 @@ def plccInit():
     flags['LL1'] = True                 # check for LL(1)
     flags['parser'] = True              # create a parser
     flags['semantics'] = True           # create java semantics routines
-    flags['python_semantics'] = True    # create python semantics routines
+    flags['python_semantics'] = False    # create python semantics routines
     flags['nowrite'] = False            # when True, produce *no* file output
 
 def jsonAstInit():
