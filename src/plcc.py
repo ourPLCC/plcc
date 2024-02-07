@@ -54,6 +54,7 @@ cases = {}          # maps a non-abstract class to its set of case terminals
 rrule = {}          # maps a repeating rule class name to its separator string
                     # (or None)
 stubs = {}          # maps a class name to its parser stub file
+python_stubs = {}
 
 def debug(msg, level=1):
     # print(getFlag('debug'))
@@ -112,7 +113,7 @@ def main():
     lex(nxt)    # lexical analyzer generation
     par(nxt)    # LL(1) check and parser generation
     sem(nxt)    # java semantic actions
-    sempy(nxt)  # python semantics
+    python_sem(nxt)  # python semantics
     done()
 
 def plccInit():
@@ -258,19 +259,6 @@ def lexFinishUp():
     except:
         death(dst + ': error creating destination subdirectory')
 
-    if getFlag('python_semantics'):
-        dstpy = getFlag('python_destdir')
-        if not dstpy:
-            death('illegal destdir flag value')
-        try:
-            os.mkdir(dstpy)
-            debug('[lexFinishUp] ' + dstpy + ': destination subdirectory created')
-        except FileExistsError:
-            debug('[lexFinishUp] ' + dstpy + ': destination subdirectory exists')
-        except:
-            death(dstpy + ': error creating destination subdirectory')
-
-
     if not getFlag('Token'):
         return # do not create any automatically generated scanner-related files
     libplcc = getFlag('libplcc')
@@ -409,6 +397,8 @@ def parFinishUp():
 
     # build parser stub classes
     buildStubs()
+    if getFlag('python_semantics'):
+        python_buildStubs()
     # build the _Start.java file from the start symbol
     buildStart()
 
@@ -650,6 +640,21 @@ def buildStubs():
         debug('[buildStubs] making stub for non-abstract class {}'.format(cls))
         stubs[cls] = makeStub(cls)
 
+def python_buildStubs():
+    global fields, derives, python_stubs
+    for cls in derives:
+        # make parser stubs for all abstract classes
+        if cls in python_stubs:
+            death('duplicate stub for abstract class {}'.format(cls))
+        debug('[buildStubs] making stub for abstract class {}'.format(cls))
+        python_stubs[cls] = python_makeAbstractStub(cls)
+    for cls in fields:
+        # make parser stubs for all non-abstract classes
+        if cls in python_stubs:
+            death('duplicate stub for class {}'.format(cls))
+        debug('[buildStubs] making stub for non-abstract class {}'.format(cls))
+        python_stubs[cls] = python_makeStub(cls)
+
 def makeAbstractStub(base):
     global cases
     caseList = []    # a list of strings,
@@ -688,6 +693,49 @@ public abstract class {base}{ext} /*{base}:class*/ {{
 
 //{base}//
 }}
+""".format(cls=cls,
+           base=base,
+           ext=ext,
+           cases='\n'.join(indent(2, caseList))
+          )
+    return stubString
+
+
+def python_makeAbstractStub(base):
+    global cases
+    caseList = []    # a list of strings,
+                     # either 'case XXX:'
+                     # or '    return Cls.parse(...);'
+    for cls in derives[base]:
+        if len(cases[cls]) == 0:
+            death('class {} is unreachable'.format(cls))
+        for tok in cases[cls]:
+            caseList.append('case {}:'.format(tok))
+        caseList.append('    return {}.parse(scn$,trace$);'.format(cls))
+    if base == nt2cls(startSymbol):
+        ext = '_Start'
+    else:
+        ext = ''
+    stubString = """\
+#{base}:top#
+#{base}:import#
+from ABC import ABC
+
+class {base}({ext}, ABC) #{base}:class# :
+
+    $className = "{base}"
+    def parse(Scan scn$, Trace trace$):
+        Token t$ = scn$.cur()
+        Token.Match match$ = t$.match
+        match match$:
+    {cases}
+        case _:
+            raise PLCCException(
+                "Parse error",
+                "{base} cannot begin with " + t$.errString()
+            )
+
+#{base}#
 """.format(cls=cls,
            base=base,
            ext=ext,
@@ -765,6 +813,73 @@ public class {cls}{ext} /*{cls}:class*/ {{
            params=', '.join(params),
            inits='\n'.join(indent(2, inits)),
            parse=parseString)
+    return stubString
+
+def python_makeStub(cls):
+    global fields, extends, rrule
+    # make a stub for the given non-abstract class
+    debug('[makeStub] making stub for non-abstract class {}'.format(cls))
+    sep = False
+    (lhs, rhs) = fields[cls]
+    ext = '' # assume not an extended class
+    # two cases: either cls is a repeating rule, or it isn't
+    if cls in rrule:
+        ruleType = '**='
+        sep = rrule[cls]
+        (fieldVars, parseString) = makeArbnoParse(cls, rhs, sep)
+        if sep != None:
+            rhs = rhs + ['+{}'.format(sep)]
+    else:
+        ruleType = '::='
+        (fieldVars, parseString) = makeParse(cls, rhs)
+        # two sub-cases: either cls is an extended class (with abstract base class) or it's a base class
+        if cls in extends:
+            ext = extends[cls]
+        else:
+            pass
+    ruleString = '{} {} {}'.format(lhs, ruleType, ' '.join(rhs))
+    # fieldVars = makeVars(cls, rhs)
+    decls = []
+    inits = []
+    params = []
+    for (field, fieldType) in fieldVars:
+        decls.append('{} = None'.format(field))
+        inits.append('self.{} = {}'.format(field, field))
+        params.append('{}'.format(field))
+    debug('[makeStub] cls={} decls={} params={} inits={}'.format(cls, decls, params, inits))
+    debug('[makeStub] rule: {}'.format(ruleString))
+    if cls == nt2cls(startSymbol):
+        ext = '_Start'
+    stubString = """\
+    #{cls}:top#
+    #{cls}:import#
+
+    # {ruleString}
+    class {cls}({ext}) #{cls}:class# :
+
+        $className = "{cls}"
+        $ruleString =
+            "{ruleString}"
+{decls}
+
+        def __init__(self, {params}):
+            #{cls}:init#
+{inits}
+
+        def parse(Scan scn$, Trace trace$):
+            if (trace$ not null):
+                trace$ = trace$.nonterm("{lhs}", scn$.lno)
+{parse}
+
+        #{cls}#
+    """.format(cls=cls,
+            lhs=lhs,
+            ext=ext,
+            ruleString=ruleString,
+            decls='\n'.join(indent(2, decls)),
+            params=', '.join(params),
+            inits='\n'.join(indent(3, inits)),
+            parse=parseString)
     return stubString
 
 def indent(n, iList):
@@ -1036,11 +1151,11 @@ def semFinishUp():
 
 
 
-def sempy(nxt):
-    global stubs, argv
+def python_sem(nxt):
+    global python_stubs, argv
     # print('=== python semantic routines')
     if not getFlag('python_semantics'):
-        sempyFinishUp()
+        python_semFinishUp()
     for line in nxt:
         line = line.strip()
         if len(line) == 0 or line[0] == '#':
@@ -1049,28 +1164,28 @@ def sempy(nxt):
         (cls, _, mod) = line.partition(':')
         # print('>>> cls={} mod={}'.format(cls, mod))
         cls = cls.strip()
-        codeString = pythonGetCode(nxt) # grab the stuff between %%% ... %%%
+        codeString = getCode(nxt) # grab the stuff between %%% ... %%%
         if line[-8:] == ':ignore!':
             continue
         # check to see if line has the form Class:mod
         mod = mod.strip() # mod might be 'import', 'top', etc.
         if mod:
             if cls == '*': # apply the mod substitution to *all* of the stubs
-                for cls in stubs:
-                    stub = stubs[cls]
+                for cls in python_stubs:
+                    stub = python_stubs[cls]
                     repl = '#{}:{}#'.format(cls, mod)
                     stub = stub.replace(repl, '{}\n{}'.format(codeString,repl))
                     repl = "'''{}:{}'''".format(cls, mod)
                     stub = stub.replace(repl, '{} {}'.format(codeString,repl))
                     debug('class {}:\n{}\n'.format(cls, stub))
-                    stubs[cls] = stub
+                    python_stubs[cls] = stub
                 continue
         # if mod == 'ignore!':
         #     continue
         if not isClass(cls):
             deathLNO('{}: ill-defined class name'.format(cls))
-        if cls in stubs:
-            stub = stubs[cls]
+        if cls in python_stubs:
+            stub = python_stubs[cls]
             if mod:
                 repl = '#{}:{}#'.format(cls, mod)
                 stub = stub.replace(repl, '{}\n{}'.format(codeString,repl))
@@ -1080,44 +1195,42 @@ def sempy(nxt):
                 repl = '#{}#'.format(cls)
                 stub = stub.replace(repl, '{}\n\n{}'.format(codeString,repl))
             debug('class {}:\n{}\n'.format(cls, stub))
-            stubs[cls] = stub
+            python_stubs[cls] = stub
         else:
             if mod:
                 deathLNO('no stub for class {} -- cannot replace #{}:{}#'.format(cls, cls, mod))
-            stubs[cls] = codeString
-    sempyFinishUp()
+            python_stubs[cls] = codeString
+    python_semFinishUp()
 
-def pythonGetCode(nxt):
-    code = []
-    for line in nxt:
-        line = line.rstrip()
-        if re.match(r'\s*#', line) or re.match(r'\s*$', line):
-            # skip comments or blank lines
-            continue
-        if re.match(r'%%{', line): # legacy plcc
-            stopMatch = r'%%}'
-            break
-        if re.match(r'%%%', line):
-            stopMatch = r'%%%'
-            break
-        else:
-            deathLNO('expecting a code segment')
-    lineMode = True # switch on line mode
-    for line in nxt:
-        if re.match(stopMatch, line):
-            break
-        code.append(line)
-    else:
-        deathLNO('premature end of file')
-    lineMode = False # switch off line mode
-    str = '\n'.join(code)
-    return str + '\n'
 
-def sempyFinishUp():
+def python_semFinishUp():
     if getFlag('nowrite'):
         return
-    global stubs, STD
-    dst = flags['python_destdir']
+    global python_stubs, STD
+    if not getFlag('python_semantics'):
+        return
+    dstpy = getFlag('python_destdir')
+    if not dstpy:
+        death('illegal destdir flag value')
+    try:
+        os.mkdir(dstpy)
+        debug('[lexFinishUp] ' + dstpy + ': destination subdirectory created')
+    except FileExistsError:
+        debug('[lexFinishUp] ' + dstpy + ': destination subdirectory exists')
+    except:
+        death(dstpy + ': error creating destination subdirectory')
+    print('\nPython source files created:')
+    # print *all* of the generated files
+    for cls in sorted(python_stubs):
+        if cls in STD:
+            death('{}: reserved class name'.format(cls))
+        try:
+            fname = '{}/{}.py'.format(dstpy, cls)
+            with open(fname, 'w') as f:
+                print(python_stubs[cls], end='', file=f)
+        except:
+            death('cannot write to file {}'.format(fname))
+        print('  {}.py'.format(cls))
 
 
 
