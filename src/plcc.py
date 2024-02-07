@@ -397,8 +397,7 @@ def parFinishUp():
 
     # build parser stub classes
     buildStubs()
-    if getFlag('python_semantics'):
-        python_buildStubs()
+    python_buildStubs()
     # build the _Start.java file from the start symbol
     buildStart()
 
@@ -1058,6 +1057,7 @@ def sem(nxt):
             # print('== extend argv by {}'.format(fn))
             continue
         if line == "%":
+            flags['python_semantics'] = True
             break
         if len(line) == 0 or line[0] == '#':
             # skip just comments or blank lines
