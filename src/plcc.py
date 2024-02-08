@@ -720,18 +720,18 @@ def python_makeAbstractStub(base):
 #{base}:import#
 from ABC import ABC
 
-class {base}({ext}, ABC) #{base}:class# :
+class {base}({ext}, ABC): #{base}:class# 
 
-    $className = "{base}"
-    def parse(Scan scn$, Trace trace$):
-        Token t$ = scn$.cur()
-        Token.Match match$ = t$.match
-        match match$:
+    className = "{base}"
+    def parse(Scan scn, Trace trace):
+        Token t = scn.cur()
+        Token.Match match = t.match
+        match match:
     {cases}
         case _:
             raise PLCCException(
                 "Parse error",
-                "{base} cannot begin with " + t$.errString()
+                "{base} cannot begin with " + t.errString()
             )
 
 #{base}#
@@ -856,8 +856,8 @@ def python_makeStub(cls):
     # {ruleString}
     class {cls}({ext}) #{cls}:class# :
 
-        $className = "{cls}"
-        $ruleString =
+        className = "{cls}"
+        ruleString =
             "{ruleString}"
 {decls}
 
@@ -865,9 +865,9 @@ def python_makeStub(cls):
             #{cls}:init#
 {inits}
 
-        def parse(Scan scn$, Trace trace$):
-            if (trace$ not null):
-                trace$ = trace$.nonterm("{lhs}", scn$.lno)
+        def parse(Scan scn, Trace trace):
+            if (trace not null):
+                trace = trace.nonterm("{lhs}", scn.lno)
 {parse}
 
         #{cls}#
