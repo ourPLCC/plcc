@@ -850,27 +850,21 @@ def python_makeStub(cls):
     if cls == nt2cls(startSymbol):
         ext = '_Start'
     stubString = """\
-    #{cls}:top#
-    #{cls}:import#
+#{cls}:top#
+#{cls}:import#
 
-    # {ruleString}
-    class {cls}({ext}) #{cls}:class# :
+# {ruleString}
+class {cls}({ext}): #{cls}:class# 
 
-        className = "{cls}"
-        ruleString =
-            "{ruleString}"
+    className = "{cls}"
+    ruleString = "{ruleString}"
 {decls}
 
-        def __init__(self, {params}):
-            #{cls}:init#
+    def __init__(self, {params}):
+        #{cls}:init#
 {inits}
 
-        def parse(Scan scn, Trace trace):
-            if (trace not null):
-                trace = trace.nonterm("{lhs}", scn.lno)
-{parse}
-
-        #{cls}#
+    #{cls}#
     """.format(cls=cls,
             lhs=lhs,
             ext=ext,
