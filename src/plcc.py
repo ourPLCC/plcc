@@ -1063,6 +1063,13 @@ def sem(nxt):
             continue
         # check to see if line has the form Class:mod
         mod = mod.strip() # mod might be 'import', 'top', etc.
+        if cls in stubs:
+            if mod and mod != 'ignore' and mod != 'top':
+                codeString = '\n\t\t'.join(codeString)
+            else:
+                codeString = '\n\t'.join(codeString)
+        else:
+            codeString = '\n'.join(codeString)
         if mod:
             if cls == '*': # apply the mod substitution to *all* of the stubs
                 for cls in stubs:
@@ -1087,7 +1094,7 @@ def sem(nxt):
                 stub = stub.replace(repl, '{} {}'.format(codeString,repl))
             else: # the default
                 repl = '//{}//'.format(cls)
-                stub = stub.replace(repl, '{}\n\n{}'.format(codeString,repl))
+                stub = stub.replace(repl, '{}\n\n\t{}'.format(codeString,repl))
             debug('class {}:\n{}\n'.format(cls, stub))
             stubs[cls] = stub
         else:
