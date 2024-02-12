@@ -681,7 +681,7 @@ public abstract class {base}{ext} /*{base}:class*/ {{
         Token t$ = scn$.cur();
         Token.Match match$ = t$.match;
         switch(match$) {{
-{cases}
+            {cases}
         default:
             throw new PLCCException(
                 "Parse error",
@@ -690,12 +690,12 @@ public abstract class {base}{ext} /*{base}:class*/ {{
         }}
     }}
 
-//{base}//
+    //{base}//
 }}
 """.format(cls=cls,
            base=base,
            ext=ext,
-           cases='\n'.join(indent(2, caseList))
+           cases='\n\t\t\t'.join(caseList)
           )
     return stubString
 
@@ -718,27 +718,26 @@ def python_makeAbstractStub(base):
     stubString = """\
 #{base}:top#
 #{base}:import#
-from ABC import ABC
 
-class {base}({ext}, ABC): #{base}:class# 
+class {base}({ext}): #{base}:class# 
 
     className = "{base}"
     def parse(Scan scn, Trace trace):
         Token t = scn.cur()
         Token.Match match = t.match
         match match:
-    {cases}
-        case _:
-            raise PLCCException(
-                "Parse error",
-                "{base} cannot begin with " + t.errString()
-            )
+            {cases}
+            case _:
+                raise PLCCException(
+                    "Parse error",
+                    "{base} cannot begin with " + t.errString()
+                )
 
-#{base}#
+    #{base}#
 """.format(cls=cls,
            base=base,
            ext=ext,
-           cases='\n'.join(indent(2, caseList))
+           cases='\n\t\t\t'.join(caseList)
           )
     return stubString
 
@@ -789,28 +788,28 @@ public class {cls}{ext} /*{cls}:class*/ {{
     public static final String $className = "{cls}";
     public static final String $ruleString =
         "{ruleString}";
+        {decls}
 
-{decls}
     public {cls}({params}) {{
-//{cls}:init//
-{inits}
+        //{cls}:init//
+        {inits}
     }}
 
     public static {cls} parse(Scan scn$, Trace trace$) {{
         if (trace$ != null)
             trace$ = trace$.nonterm("{lhs}", scn$.lno);
-{parse}
+        {parse}
     }}
 
-//{cls}//
+    //{cls}//
 }}
 """.format(cls=cls,
            lhs=lhs,
            ext=ext,
            ruleString=ruleString,
-           decls='\n'.join(indent(1, decls)),
+           decls='\t'.join(decls),
            params=', '.join(params),
-           inits='\n'.join(indent(2, inits)),
+           inits='\n\t\t'.join(inits),
            parse=parseString)
     return stubString
 
@@ -858,20 +857,20 @@ class {cls}({ext}): #{cls}:class#
 
     className = "{cls}"
     ruleString = "{ruleString}"
-{decls}
+    {decls}
 
     def __init__(self, {params}):
         #{cls}:init#
-{inits}
+        {inits}
 
     #{cls}#
     """.format(cls=cls,
             lhs=lhs,
             ext=ext,
             ruleString=ruleString,
-            decls='\n'.join(indent(2, decls)),
+            decls='\n\t\t'.join(decls),
             params=', '.join(params),
-            inits='\n'.join(indent(3, inits)),
+            inits='\n\t\t\t'.join(inits),
             parse=parseString)
     return stubString
 
@@ -1100,6 +1099,8 @@ def sem(nxt):
 
 def getCode(nxt):
     code = []
+    ws = 0
+    offset = None
     for line in nxt:
         line = line.rstrip()
         if re.match(r'\s*#', line) or re.match(r'\s*$', line):
@@ -1117,12 +1118,18 @@ def getCode(nxt):
     for line in nxt:
         if re.match(stopMatch, line):
             break
+        if ws == 0:
+            ws = getWS(line)
+        if offset == None:
+            offset = getOffset(line,ws)
+        line = forceIndent(line, ws, offset)
         code.append(line)
     else:
         deathLNO('premature end of file')
     lineMode = False # switch off line mode
-    str = '\n'.join(code)
-    return str + '\n'
+    while len(code[-1]) == 0:
+        code.pop()
+    return code
 
 def semFinishUp():
     if getFlag('nowrite'):
@@ -1163,6 +1170,13 @@ def python_sem(nxt):
             continue
         # check to see if line has the form Class:mod
         mod = mod.strip() # mod might be 'import', 'top', etc.
+        if cls in python_stubs:
+            if mod and mod != 'ignore' and mod != 'top':
+                codeString = '\n\t\t'.join(codeString)
+            else:
+                codeString = '\n\t'.join(codeString)
+        else:
+            codeString = '\n'.join(codeString)
         if mod:
             if cls == '*': # apply the mod substitution to *all* of the stubs
                 for cls in python_stubs:
@@ -1187,7 +1201,7 @@ def python_sem(nxt):
                 stub = stub.replace(repl, '{} {}'.format(codeString,repl))
             else: # the default
                 repl = '#{}#'.format(cls)
-                stub = stub.replace(repl, '{}\n\n{}'.format(codeString,repl))
+                stub = stub.replace(repl, '{}\n\n\t{}'.format(codeString,repl))
             debug('class {}:\n{}\n'.format(cls, stub))
             python_stubs[cls] = stub
         else:
@@ -1450,6 +1464,60 @@ def isTerm(term):
 def nt2cls(nt):
     # return the class name of the nonterminal nt
     return nt[0].upper() + nt[1:]
+
+def forceIndent(ln, ws, offset):
+    check = ln.strip()
+    if len(check) == 0:
+        return ln
+    if ws == 0:
+        return ln
+    wscount = 0
+    numtab = 0
+    for c in ln:
+        if c == ' ':
+            wscount += 1
+        elif c == '\t':
+            numtab += 1
+        else:
+            break
+    line = ln.lstrip()
+    if wscount != 0:
+        tabs = '\t' * ((wscount // ws) - offset)
+    else:
+        tabs = '\t' * (numtab - offset)
+    line = tabs + line
+    return line
+
+def getWS(line):
+    check = line.lstrip()
+    if len(check) == 0 or check[0] == '#':
+        return 0
+    ws = 0
+    for c in line:
+        if c == ' ':
+            ws += 1
+        elif c == '\t':
+            return -1
+        else:
+            break
+    return ws
+
+def getOffset(line, ws):
+    check = line.lstrip()
+    if len(check) == 0 or check[0] == '#':
+        return None
+    wscount = 0
+    tabs = 0
+    for c in line:
+        if c == ' ':
+            wscount += 1
+        elif c == '\t':
+            tabs += 1
+        else:
+            break
+    if ws != 0:
+        tabs = wscount // ws
+    return tabs
 
 if __name__ == '__main__':
     main()
