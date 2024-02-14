@@ -722,16 +722,6 @@ def python_makeAbstractStub(base):
 class {base}({ext}): #{base}:class# 
 
     className = "{base}"
-    def parse(Scan scn, Trace trace):
-        Token t = scn.cur()
-        Token.Match match = t.match
-        match match:
-            {cases}
-            case _:
-                raise PLCCException(
-                    "Parse error",
-                    "{base} cannot begin with " + t.errString()
-                )
 
     #{base}#
 """.format(cls=cls,
@@ -868,9 +858,9 @@ class {cls}({ext}): #{cls}:class#
             lhs=lhs,
             ext=ext,
             ruleString=ruleString,
-            decls='\n\t\t'.join(decls),
+            decls='\n\t'.join(decls),
             params=', '.join(params),
-            inits='\n\t\t\t'.join(inits),
+            inits='\n\t\t'.join(inits),
             parse=parseString)
     return stubString
 
@@ -1131,6 +1121,8 @@ def getCode(nxt):
     else:
         deathLNO('premature end of file')
     lineMode = False # switch off line mode
+    while len(code[0]) == 0:
+        code.pop(0)
     while len(code[-1]) == 0:
         code.pop()
     return code
@@ -1498,7 +1490,7 @@ def removeOffset(ln, offset):
 def getOffset(line):
     check = line.lstrip()
     if len(check) == 0 or check[0] == '#':
-        return 0
+        return None
     ws = 0
     for c in line:
         if c == ' ':
