@@ -829,7 +829,7 @@ def python_makeStub(cls):
     # fieldVars = makeVars(cls, rhs)
     decls = []
     inits = []
-    params = []
+    params = ['self']
     for (field, fieldType) in fieldVars:
         decls.append('{} = None'.format(field))
         inits.append('self.{} = {}'.format(field, field))
@@ -849,7 +849,7 @@ class {cls}({ext}): #{cls}:class#
     ruleString = "{ruleString}"
     {decls}
 
-    def __init__(self, {params}):
+    def __init__({params}):
         #{cls}:init#
         {inits}
 
