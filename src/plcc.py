@@ -1106,7 +1106,6 @@ def sem(nxt):
 
 def getCode(nxt):
     code = []
-    ws = 0
     offset = None
     for line in nxt:
         line = line.rstrip()
@@ -1125,11 +1124,9 @@ def getCode(nxt):
     for line in nxt:
         if re.match(stopMatch, line):
             break
-        if ws == 0:
-            ws = getWS(line)
         if offset == None:
-            offset = getOffset(line,ws)
-        line = forceIndent(line, ws, offset)
+            offset = getOffset(line)
+        line = removeOffset(line, offset)
         code.append(line)
     else:
         deathLNO('premature end of file')
@@ -1472,14 +1469,15 @@ def nt2cls(nt):
     # return the class name of the nonterminal nt
     return nt[0].upper() + nt[1:]
 
-def forceIndent(ln, ws, offset):
+def removeOffset(ln, offset):
     check = ln.strip()
     if len(check) == 0:
         return ln
-    if ws == 0:
+    if offset == 0:
         return ln
     wscount = 0
     numtab = 0
+    indent = ''
     for c in ln:
         if c == ' ':
             wscount += 1
@@ -1489,13 +1487,15 @@ def forceIndent(ln, ws, offset):
             break
     line = ln.lstrip()
     if wscount != 0:
-        tabs = '\t' * ((wscount // ws) - offset)
+        wscount = wscount - offset
+        indent += ' ' * wscount
     else:
-        tabs = '\t' * (numtab - offset)
-    line = tabs + line
+        numtab = numtab - offset
+        indent += '\t' * numtab
+    line = indent + line
     return line
 
-def getWS(line):
+def getOffset(line):
     check = line.lstrip()
     if len(check) == 0 or check[0] == '#':
         return 0
@@ -1508,23 +1508,6 @@ def getWS(line):
         else:
             break
     return ws
-
-def getOffset(line, ws):
-    check = line.lstrip()
-    if len(check) == 0 or check[0] == '#':
-        return None
-    wscount = 0
-    tabs = 0
-    for c in line:
-        if c == ' ':
-            wscount += 1
-        elif c == '\t':
-            tabs += 1
-        else:
-            break
-    if ws != 0:
-        tabs = wscount // ws
-    return tabs
 
 if __name__ == '__main__':
     main()
