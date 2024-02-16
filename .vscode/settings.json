@@ -1,4 +1,5 @@
 {
     "plantuml.server": "https://www.plantuml.com/plantuml",
-    "plantuml.render": "PlantUMLServer"
+    "plantuml.render": "PlantUMLServer",
+    "git.autofetch": false
 }
