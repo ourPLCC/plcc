@@ -6,7 +6,8 @@ PLCC is designed for teaching and learning programming language concepts.
 - [Chat with us on Discord](https://discord.gg/EVtNSxS9E2)
 - [Report a problem or request a feature](https://github.com/ourPLCC/plcc/issues)
 - [Read the paper](docs/PLCC-paper.pdf)
-- [Learn how to contribute](docs/Contributing.md)
+- [Become a developer for this project](docs/Developer.md)
+- [Become a maintain for this project](docs/Maintainer.md)
 
 Related repositories:
 
@@ -120,7 +121,7 @@ you are running in this environment. Including the next line.
 * On Linux, we assume you are running in Bash on a Debian-based Linux
 distributed (this includes Ubuntu) which uses `apt-get` as its package
 manager. If this is not your situation, you will have to adapt the instructions
-appropriately for your environment. 
+appropriately for your environment.
 
 * On macOS, please [install Homebrew](https://brew.sh/).
 
@@ -266,7 +267,7 @@ Java source files created:
 Test the scanner.
 
 ```bash
-$ scan < samples 
+$ scan < samples
    1: WHOLE '3'
    3: MINUS '-'
    3: LP '('
@@ -295,7 +296,7 @@ $ scan < samples
 Test the parser.
 
 ```bash
-$ parse -t -n < samples 
+$ parse -t -n < samples
    1: <prog>
    1: | <exp>WholeExp
    1: | | WHOLE "3"
@@ -341,7 +342,7 @@ OK
 Test the interpreter.
 
 ```bash
-$ rep -n < samples 
+$ rep -n < samples
 3
 1
 2
@@ -461,7 +462,7 @@ or double quotes. Here are some resources on regex.
 
 #### Scan algorithm
 
-Below is PLCC's scan algorithm in pseudo-code. For clarity and simplicity, a couple details related to advanced features have been omitted. 
+Below is PLCC's scan algorithm in pseudo-code. For clarity and simplicity, a couple details related to advanced features have been omitted.
 
 ##### **DEFINE:** *Scan input for tokens.*
 While there is more unscanned input ...
@@ -610,7 +611,7 @@ class SubExp{
     Exp exp2 = Exp.parse(scn$);
     scn$.match(Token.Match.RP);
     return new SubExp(exp1, exp2);
-  }  
+  }
 }
 ```
 
