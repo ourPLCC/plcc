@@ -23,5 +23,5 @@ tasks:
       echo ""
       echo "INSTALLING bats (for testing: https://bats-core.readthedocs.io/en/latest/index.html)"
       sudo apt-get update
-      sudo yes | apt-get install bats
+      sudo (yes | apt-get install bats)
       exec bash
