@@ -1,5 +1,7 @@
 {
     "plantuml.server": "https://www.plantuml.com/plantuml",
     "plantuml.render": "PlantUMLServer",
-    "zenMode.silentNotifications": true
+    "zenMode.silentNotifications": true,
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true
 }
