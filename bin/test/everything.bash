@@ -7,7 +7,7 @@ PROJECT_ROOT="$( cd "${SCRIPT_DIR}/../.." &> /dev/null && pwd )"
 cd "${PROJECT_ROOT}"
 
 for t in bin/test/* ; do
-    if [ "$t" != bin/test/all.bash ] ; then
+    if [ "$t" != bin/test/everything.bash ] ; then
         "$t"
     fi
 done

@@ -3,18 +3,18 @@
 First, thanks for your interest in contributing to this project.
 This guide is a good place to start. Please also [join our Discord server](https://discord.gg/EVtNSxS9E2).
 
-## Contributing with a Fork
+## License
 
-First, because this project is licensed under GPLv3, all contributions must be licensed under the same license.
-By contributing to this project, you agree to the [Developer Certificate of Origin](https://developercertificate.org/); essentially certifying that the work you are submitting may be licensed under this project's license: GPLv3.
+* GPLv3.0 or higher - First, because this project is licensed under GPLv3, all contributions must be licensed under the same license.
+* DCO - By contributing to this project, you agree to the [Developer Certificate of Origin](https://developercertificate.org/); essentially certifying that the work you are submitting may be legally licensed under this project's license: GPLv3.0 or higher.
 
-### Overview
+## Overview
 
-- Never commit to master.
+- Never commit to main.
 - Only commit work to personal feature branches.
-- Always cut feature branches from the most recent version of master.
+- Always cut feature branches from the most recent version of main.
 - Contribute changes by publishing your feature branch and issuing a
-  pull-request to master in the original repository.
+  pull-request to main in the original repository.
 
 There are several ways to contribute. Below I describe two common ways.  The
 first assumes you do not have write privileges to the repository, the second
@@ -23,7 +23,7 @@ those who have been granted write privileges can use the second. If you would
 like to apply for write privileges, please open an issue requesting access, and
 explain why.
 
-### Contributing with a fork
+## Contributing with a fork
 
 This procedure does not require any special privileges to contribute changes.
 
@@ -43,14 +43,14 @@ cd PROJECT
 # 4. Create a remote pointing to the original project (first time only).
 git remote add upstream https://github.com/ourPLCC/PROJECT.git
 
-# 5. Make sure you are on master.
-git checkout master
+# 5. Make sure you are on main.
+git checkout main
 
-# 6. Make sure you have the most recent version of master.
-git pull upstream master
+# 6. Make sure you have the most recent version of main.
+git pull upstream main
 
-# 7. Push the most recent version of master to your fork.
-git push origin master
+# 7. Push the most recent version of main to your fork.
+git push origin main
 
 # 8. Create a feature branch (name your branch something meaningful).
 git checkout -b sj-fix-typo-in-readme
@@ -67,12 +67,12 @@ git commit -v
 # 12. Publish your feature branch
 git push -u origin sj-fix-typo-in-readme
 
-# 13. Return to master branch
-git checkout master
+# 13. Return to main branch
+git checkout main
 ```
 
 14. In your fork on GitHub, create a pull-request from your feature branch
-    (in this case, sj-fix-typo-in-readme) to master in the original project.
+    (in this case, sj-fix-typo-in-readme) to main in the original project.
 
 15. In the pull-request, request a review by placing @ourPLCC/core in a
     comment.
@@ -90,16 +90,16 @@ If you followed the "Contributing with a fork" procedure above, then you
 should be ready to follow these instructions.
 
 ```bash
-git checkout master
-git pull upstream master
-git push origin master
+git checkout main
+git pull upstream main
+git push origin main
 git checkout sj-fix-typo-in-readme
-git merge master
+git merge main
 ```
 
-The last command tries to merge the changes from master into your feature
+The last command tries to merge the changes from main into your feature
 branch (the currently checked out branch).  Your changes may not be compatible
-with the new changes in master. If Git detects a lexical conflict, it will stop
+with the new changes in main. If Git detects a lexical conflict, it will stop
 the process and will expect you to resolve the conflicts. Checkout GitHub's
 documentation on [Resolving a merge conflict using the command
 line](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/resolving-a-merge-conflict-using-the-command-line).
@@ -119,16 +119,6 @@ git push origin sj-fix-typo-in-readme
 This will automatically update the pull-request. Return to the pull-request on
 GitHub and request a review from @ourPLCC/core.
 
-### Updating a pull-request with write privileges
-
-Same as "Updating a pull-request using a fork", except pull changes from origin
-instead of upstream:
-
-```bash
-git checkout master
-git pull origin master
-```
-
 ## Contributing without a Fork
 
 You must have write permissions on this repository to use this workflow.
@@ -147,8 +137,8 @@ You only need to clone the repository once. Or if you ever delete your local clo
 In the commands below, replace `feature` with a short descriptive name for your branch.
 
 ```bash {.line-numbers}
-git switch master
-git pull origin master
+git switch main
+git pull origin main
 git switch -c feature
 vim ... ; mv ... ; mkdir ... ; rm ...
 git add .
@@ -157,20 +147,20 @@ git push -u origin feature
 ... # Navigate to URL printed to create a merge-request.
 ```
 
-- 1-3: Create a new branch based on the most recent copy of `master`.
+- 1-3: Create a new branch based on the most recent copy of `main`.
 - 4: Use your favorite tools to make and test changes.
 - 5-6: Stage and commit your changes.
 - 7-8: Publish your branch and create a pull-request.
 
 ### Update a Feature Branch
 
-If you are asked to update a feature branch with new changes in master.
+If you are asked to update a feature branch with new changes in main.
 
 ```bash {.line-numbers}
-git switch master
-git pull origin master
+git switch main
+git pull origin main
 git switch feature
-git merge master
+git merge main
 vim ... ; mv ... ; mkdir ... ; rm ...
 git add .
 git merge --continue
@@ -186,15 +176,15 @@ git push origin feature
 After your pull-request is merged, you can clean up your local clone as follows.
 
 ```bash {.line-numbers}
-git switch master
-git pull origin master
+git switch main
+git pull origin main
 git branch -d feature
 git push origin --delete feature
 git pull --prune
 ```
 
-- 1-2: Update master with the new changes.
-- 3: Delete the feature branch locally. If this gives you an error, and you're sure your changes are in master, repeat the command with -D (capital d).
+- 1-2: Update main with the new changes.
+- 3: Delete the feature branch locally. If this gives you an error, and you're sure your changes are in main, repeat the command with -D (capital d).
 - 4: Delete the feature branch remotely. If the remote branch was already deleted, you'll get an error which you can safely ignore.
 - 5: Delete the local reference to the remote branch you just deleted.
 - 6: Remove the reference to the remote branch that was just deleted.
@@ -207,12 +197,24 @@ git pull --prune
 * Bash 5+
 * [bats 1.2+](https://bats-core.readthedocs.io/en/latest/index.html).
 
-### Running the tests
-
-Run the tests...
+### Test everything
 
 ```bash
-tests/run
+bin/test/all.bash
+```
+
+### Test functionality
+
+```bash
+bin/test/functionality.bash
+```
+
+### Test other things
+
+See ...
+
+```bash
+ls bin/test/
 ```
 
 ### Running the tests inside the official container.
