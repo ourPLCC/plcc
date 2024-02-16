@@ -2,17 +2,22 @@
 image: gitpod/workspace-full:latest
 
 tasks:
-  - name: Install PLCC
+  - name: Install Dev Environment
     command: |
+      echo "INSTALLING latest JAVA (a PLCC dependency)"
+      sdk install java < /dev/null
+      echo ""
+      echo "INSTALLING PLCC in $GITPOD_REPO_ROOT/src"
       echo 'export LIBPLCC="$GITPOD_REPO_ROOT/src"
       export PATH="$LIBPLCC:$PATH"
       ' >> "$HOME/.bashrc"
-      sdk install java < /dev/null
-      exec bash
-  - name: Install developer tools
-    command: |
+      echo ""
+      echo "INSTALLING reuse (for licenses: https://reuse.software/)"
       pip install --upgrade pip
       pip install pipx
       pipx install reuse
+      echo ""
+      echo "INSTALLING ag (for searching: https://github.com/ggreer/the_silver_searcher)"
       sudo apt-get update
       sudo apt-get install silversearcher-ag
+      exec bash
