@@ -19,5 +19,9 @@ tasks:
       echo ""
       echo "INSTALLING ag (for searching: https://github.com/ggreer/the_silver_searcher)"
       sudo apt-get update
-      sudo apt-get install silversearcher-ag
+      sudo apt-get --no-install-recommends install silversearcher-ag
+      echo ""
+      echo "INSTALLING bats (for testing: https://bats-core.readthedocs.io/en/latest/index.html)"
+      sudo apt-get update
+      sudo apt-get --no-install-recommends install bats
       exec bash
