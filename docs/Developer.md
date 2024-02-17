@@ -200,7 +200,7 @@ git pull --prune
 ### Test everything
 
 ```bash
-bin/test/all.bash
+bin/test/everything.bash
 ```
 
 ### Test functionality
