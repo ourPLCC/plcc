@@ -193,6 +193,8 @@ git pull --prune
 
 ### Dependencies
 
+These are preinstalled in GitPod.
+
 * PLCC
 * Bash 5+
 * [bats 1.2+](https://bats-core.readthedocs.io/en/latest/index.html).
@@ -211,7 +213,7 @@ bin/test/functionality.bash
 
 ### Test other things
 
-See ...
+To learn what other class of tests you can run...
 
 ```bash
 ls bin/test/
