@@ -22,4 +22,6 @@
 
   # Assert success.
   [ "$status" -eq 0 ]
+
+  rm -rf "$BATS_TMPDIR/OBJ"
 }

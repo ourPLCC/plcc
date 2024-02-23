@@ -1041,6 +1041,11 @@ def sem(nxt):
             continue
         if line == "%":
             flags['python_semantics'] = True
+            flags['json_ast'] = True
+            if 'ParseJsonAst' not in STDP:
+                if 'ParseJsonAst' not in STD:
+                    STDP.append('ParseJsonAst')
+                    flags['ParseJsonAst'] = 'ParseJsonAst'
             break
         if len(line) == 0 or line[0] == '#':
             # skip just comments or blank lines
