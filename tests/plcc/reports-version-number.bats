@@ -6,7 +6,7 @@
   echo "OUTPUT: $output"
   echo "ERROR: $error"
 
-  regex='^(v?\d+\.\d+\.\d+(-.*)?)|(Unknown)$'
+  regex='^(v?[0-9]+\.[0-9]+\.[0-9]+(-.*)?)|(Unknown)$'
   [[ "$output" =~ $regex ]]
   [[ "$status" -eq 0 ]]
 }
