@@ -1042,10 +1042,14 @@ def sem(nxt):
         if line == "%":
             flags['python_semantics'] = True
             flags['json_ast'] = True
-            if 'ParseJsonAst' not in STDP:
-                if 'ParseJsonAst' not in STD:
-                    STDP.append('ParseJsonAst')
-                    flags['ParseJsonAst'] = 'ParseJsonAst'
+            dst = getFlag('destdir')
+            libplcc = getFlag('libplcc')
+            std = libplcc + '/Std'
+            debug('[semFinishUp] copying ParseJsonAst from {} to {} ...'.format(std, dst))
+            try:
+                shutil.copy('{}/ParseJsonAst.java'.format(std), '{}/ParseJsonAst.java'.format(dst))
+            except:
+                death('Failure copying ParseJsonAst from {} to {}'.format(std, dst))
             break
         if len(line) == 0 or line[0] == '#':
             # skip just comments or blank lines
