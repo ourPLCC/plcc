@@ -18,7 +18,7 @@ teardown() {
   cd Java
 
   # Compile the Java files.
-  run javac -cp /../../../../../lib/jackson/* *.java
+  run javac -cp "/workspace/plcc/lib/jackson/*" *.java
 
   # Print stdout and stderr for debugging.
   echo "OUTPUT: $output"
