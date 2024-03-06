@@ -4,7 +4,7 @@ teardown() {
   rm -rf "$BATS_TMPDIR/OBJ"
 }
 
-@test "PLCC compiles the OBJ language." {
+@test "PLCC compiles with 4 sections." {
   # Copy the OBJ language to the temp directory for this test
   cp -R "${BATS_TEST_DIRNAME}/OBJ" "${BATS_TMPDIR}"
 
@@ -18,7 +18,7 @@ teardown() {
   cd Java
 
   # Compile the Java files.
-  run javac *.java
+  run javac -cp "/${BATS_TEST_DIRNAME}/../../../lib/jackson/*" *.java
 
   # Print stdout and stderr for debugging.
   echo "OUTPUT: $output"

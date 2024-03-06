@@ -1,0 +1,19 @@
+define c1 = class
+  method m1 = proc() 1
+  method m2 = proc() 100
+  method m3 = proc() send self m2()
+end
+
+define c2 = class extends c1
+  method m2 = proc() 2
+end
+
+define o1 = new c1
+define o2 = new c2
+
+send o1 m1() % => 1
+send o1 m2() % => 100
+send o1 m3() % => 100
+send o2 m1() % => 1 (from c1)
+send o2 m2() % => 2 (from c2)
+send o2 m3() % => 2 (c1's m3 calls c2's m2)

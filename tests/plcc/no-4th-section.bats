@@ -5,7 +5,7 @@ teardown() {
   rm -rf ${BATS_TMPDIR}/Java
 }
 
-@test "PLCC parses." {
+@test "Functions correctly when no 4th section exists." {
   cat << EOF > "$BATS_TMPDIR/grammar"
 A 'A'
 B 'B'
@@ -13,10 +13,11 @@ skip OTHER '.'
 %
 <p> ::= <aaa> B
 <aaa> **= A
+%
 EOF
 
-  RESULT="$(cd "$BATS_TMPDIR" && plccmk -c grammar > /dev/null && echo "A asdf A fdsa A B" | parse -n)"
+  RESULT="$(cd "$BATS_TMPDIR" && plccmk -c grammar)"
 
   echo "RESULT: $RESULT"
-  [[ "$RESULT" =~ .*OK.* ]]
+  [[ ! -d $BATS_TMPDIR/Python ]]
 }

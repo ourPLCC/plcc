@@ -1,0 +1,27 @@
+define point = class
+  field x
+  field y
+  method init = proc(initx,inity)
+    {set x = initx ; set y = inity ; self}
+  method move = proc(dx,dy)
+    {set x = +(x,dx) ; set y = +(y,dy)}
+  method get_location = proc() [x,y]
+end
+
+define colorpoint = class extends point
+  field color
+  method init = proc(x,y,c) {set color = c ; send super init(x,y) ; self}
+  method set_color = proc(c) {set color = c}
+  method get_color = proc() color
+end
+
+define p = .<new point>init(3,4)
+define cp = .<new colorpoint>init(10,20,87)
+send p move(3,4)
+send cp move(10,20)
+
+send p get_location()  % => [6 8]
+send cp get_location() % => [20 40]
+send cp get_color()    % => 87
+
+

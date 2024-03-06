@@ -1,0 +1,38 @@
+% define object = class end
+
+define c1 = class
+  method m1 = proc() .<self>m2()
+  method m2 = proc() 13
+end
+
+define c2 = class extends c1
+  method m1 = proc() 22
+  method m2 = proc() 23
+  method m3 = proc() .<super>m1()
+end
+
+define c3 = class extends c2
+  method m1 = proc() 32
+  method m2 = proc() 33
+end
+
+define o3 = new c3
+.<o3>m3() % => 33
+
+% alternately...
+
+send new
+  class extends
+    class extends
+      class
+        method m1 = proc() send self m2()
+        method m2 = proc() 13
+      end
+      method m1 = proc() 22
+      method m2 = proc() 23
+      method m3 = proc() send super m1()
+    end
+    method m1 = proc() 32
+    method m2 = proc() {@@ ; 33}
+  end
+m3()

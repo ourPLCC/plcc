@@ -1,0 +1,24 @@
+define c1 = class
+  static k = 3
+  field i
+  field j
+  method init = proc(x)
+    {set i = x ; set j = -(0,x) ; self}
+  method up = proc(d)
+    {set j = -(j,d) ; set i = +(i,d)}
+  method toList = proc() [i,j]
+  method ii = proc() i
+  method jj = proc() j
+end
+
+define o1 = <new c1>.init(k)
+% .<o1>init(3)
+send o1 toList()                       % => [3,-3]
+
+{ send o1 up(2)
+; send o1 toList()
+} % => [5,-5]
+
+{ send o1 up(<o1>j)
+; send o1 toList()
+} % => [0,0]

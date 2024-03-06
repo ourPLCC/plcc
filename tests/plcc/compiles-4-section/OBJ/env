@@ -1,0 +1,196 @@
+# Environment-related classes
+Env
+%%%
+import java.util.*;
+
+public abstract class Env {
+
+    public static Env initEnv() {
+        // an environment with an empty local environment
+        return new EnvNode(new Bindings(), new EnvNull());
+    }
+
+    public abstract Ref applyEnvRef(String sym);
+    public abstract void replaceBindings(Bindings bindings);
+    public abstract void add(Binding b);
+    public abstract void addFirst(Binding b);
+
+    public Val applyEnv(String sym) {
+        return applyEnvRef(sym).deRef();
+    }
+
+    public Ref applyEnvRef(Token tok) {
+        return applyEnvRef(tok.toString());
+    }
+
+    public Val applyEnv(Token tok) {
+        return applyEnv(tok.toString());
+    }
+
+    public Env extendEnvRef(Bindings bindings) {
+        return new EnvNode(bindings, this);
+    }
+
+    public abstract String toString(int n);
+}
+%%%
+
+EnvNode
+%%%
+import java.util.*;
+
+public class EnvNode extends Env {
+
+    public Bindings bindings; // list of local bindings
+    public Env env;           // next set of bindings
+    
+    // create an environment 
+    public EnvNode(Bindings bindings, Env env) {
+        this.bindings = bindings;
+        this.env = env;
+    }
+    
+    // find the Ref corresponding to a given id
+    public Ref applyEnvRef(String sym) {
+        // first look in the local bindings
+        for (Binding b : bindings.bindingList) {
+            if (sym.equals(b.id))
+                return b.ref;
+        }
+        // if nothing left, we don't have a match in this list of bindings
+        return env.applyEnvRef(sym);
+    }
+
+    public void replaceBindings(Bindings bindings) {
+        this.bindings = bindings;
+    }
+
+    public String toString(int n) {
+        return n + ":" + bindings.toString() + "\n" + env.toString(n+1);
+    }
+
+    public String toString() {
+        return bindings.toString() + "\n" + env;
+    }
+
+    public void add(Binding b) {
+        bindings.add(b);
+    }
+
+    public void addFirst(Binding b) {
+        bindings.addFirst(b);
+    }
+
+}
+%%%
+
+EnvNull
+%%%
+import java.util.*;
+
+public class EnvNull extends Env {
+
+    // create an environment 
+    public EnvNull() {
+    }
+    
+    // find the Ref corresponding to a given id
+    public Ref applyEnvRef(String sym) {
+        throw new RuntimeException("no binding for "+sym);
+    }
+
+    public void replaceBindings(Bindings bindings) {
+        throw new RuntimeException("no bindings to replace");
+    }
+
+    public void add(Binding b) {
+        throw new RuntimeException("no bindings to add to");
+    }
+
+    public void addFirst(Binding b) {
+        throw new RuntimeException("no bindings to add to");
+    }
+
+    public String toString(int n) {
+        return n + ":\n";
+    }
+
+    public String toString() {
+        return "\n";
+    }
+}
+%%%
+
+Binding
+%%%
+public class Binding {
+
+    public String id;
+    public Ref ref;
+
+    public Binding(String id, Ref ref) {
+        this.id = id;
+        this.ref = ref;
+    }
+
+    public String toString() {
+        return "[" + id + "->" + ref.deRef().toString() + "]";
+    }
+
+}
+%%%
+
+Bindings
+%%%
+import java.util.*;
+
+public class Bindings {
+
+    public List<Binding> bindingList;
+
+    // create an empty list of bindings
+    public Bindings() {
+        bindingList = new ArrayList<Binding>();
+    }
+
+    public Bindings(List<Binding> bindingList) {
+        this.bindingList = bindingList;
+    }
+
+    // idList is a list of Tokens/Strings
+    // refList is a list of Refs
+    public Bindings(List<?> idList, List<Ref> refList) {
+        bindingList = new ArrayList<Binding>();
+        Iterator<?> idIterator = idList.iterator();
+        Iterator<Ref> refIterator = refList.iterator();
+        while (idIterator.hasNext()) {
+            String id = idIterator.next().toString();
+            Ref ref = refIterator.next();
+            bindingList.add(new Binding(id, ref));
+        }
+    }
+
+    public void add(String s, Ref r) {
+        bindingList.add(new Binding(s, r));
+    }
+
+    public void addFirst(Binding b) {
+        bindingList.add(0,b);
+    }
+
+    public void add(Binding b) {
+        bindingList.add(b);
+    }
+
+    public int size() {
+        return bindingList.size();
+    }
+
+    public String toString() {
+        String s = "";
+        for (Binding b : bindingList)
+            s += " " + b;
+        return s;
+    }
+}
+%%%

@@ -1,5 +1,9 @@
 #!/usr/bin/env bats
 
+teardown() {
+  rm -rf ${BATS_TMPDIR}/grammar
+}
+
 @test "PLCC detects illegal tokens." {
   # GIVEN a grammar file with a bad token name
   cat << EOF > "$BATS_TMPDIR/grammar"
@@ -18,7 +22,4 @@ EOF
 
   # AND plcc reports that there is an "illegal token name"
   [[ "$output" = *"illegal token name"* ]]
-
-  # cleanup
-  rm "$BATS_TMPDIR/grammar"
 }

@@ -1,0 +1,8 @@
+define c =
+	let
+	  x = 3
+	in
+	  class
+	    static x = 5
+	    static p = proc(t) t
+	  end

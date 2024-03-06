@@ -1,0 +1,34 @@
+define pair = 
+  class
+    static null = proc() .<new pair>init(nil, nil)
+    field fst
+    field snd
+    method init = proc(x,y) {set fst = x ; set snd = y ; self}
+    method add = proc(t) .<new <myclass>pair>init(t, self)
+    method remove = proc() snd
+    method show = proc()
+      {if fst then {display# fst ; .<snd>show()} else newline ; self}
+  end
+
+display 42 newline
+let
+  t = .<pair>null()
+in
+  { newline
+  ; !< t
+     > add(3)
+     > show()
+     > add(5)
+     > show()
+     > add(11)
+     > show()
+     > remove()
+     > show()
+     > remove()
+     > show()
+     > remove()
+     > show()
+    !>
+  ; nil
+  }
+

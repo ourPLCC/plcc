@@ -1,0 +1,38 @@
+define c = 
+  class
+    static x = 1
+    field y
+    method init = proc(t) {set y=t ; self}
+    method m = proc() 5
+    method n = proc() .<self>m()
+  end
+
+define c1 =
+  class extends c
+    static x = add1(x)
+    field y
+    method init = proc() {set y=3 ; self}
+    method m = proc() 6
+  end
+
+define o = 
+  let
+    x = 4
+  in
+    .<new c>init(x)
+
+define oo = 
+  let
+    x = 4
+  in
+    <new c>.init(x)
+
+define o1 = .<new c1>init()
+
+<c>x
+<c1>x
+<o1>y
+<o>y
+<oo>y
+.<o>n()
+.<o1>n()
