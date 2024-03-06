@@ -1,5 +1,10 @@
 #!/usr/bin/env bats
 
+teardown() {
+  rm -rf ${BATS_TMPDIR}/grammar
+  rm -rf ${BATS_TMPDIR}/Java
+}
+
 @test "PLCC scans." {
   cat << EOF > "$BATS_TMPDIR/grammar"
 skip WHITESPACE '\s'
@@ -20,7 +25,4 @@ EOF
   [[ "$TOKENS" =~ "FOO 'foo'" ]]
   [[ "$TOKENS" =~ "BAR 'bar'" ]]
   [[ "$TOKENS" =~ "ID 'foobar'" ]]
-
-  rm -rf "$BATS_TMPDIR/grammar"
-  rm -rf "$BATS_TMPDIR/Java"
 }

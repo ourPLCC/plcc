@@ -1,5 +1,10 @@
 #!/usr/bin/env bats
 
+teardown() {
+  rm -rf ${BATS_TMPDIR}/grammar
+  rm -rf ${BATS_TMPDIR}/Java
+}
+
 @test "Functions correctly when no 4th section exists." {
   cat << EOF > "$BATS_TMPDIR/grammar"
 A 'A'
@@ -15,7 +20,4 @@ EOF
 
   echo "RESULT: $RESULT"
   [[ ! -d $BATS_TMPDIR/Python ]]
-
-  rm -rf "$BATS_TMPDIR/grammar"
-  rm -rf "$BATS_TMPDIR/Java"
 }

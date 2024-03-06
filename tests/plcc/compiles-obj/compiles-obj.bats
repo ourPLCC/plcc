@@ -1,5 +1,9 @@
 #!/usr/bin/env bats
 
+teardown() {
+  rm -rf "$BATS_TMPDIR/OBJ"
+}
+
 @test "PLCC compiles the OBJ language." {
   # Copy the OBJ language to the temp directory for this test
   cp -R "${BATS_TEST_DIRNAME}/OBJ" "${BATS_TMPDIR}"
@@ -22,6 +26,4 @@
 
   # Assert success.
   [ "$status" -eq 0 ]
-
-  rm -rf "$BATS_TMPDIR/OBJ"
 }

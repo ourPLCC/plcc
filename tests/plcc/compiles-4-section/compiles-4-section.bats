@@ -1,6 +1,10 @@
 #!/usr/bin/env bats
 
-@test "PLCC compiles the OBJ language." {
+teardown() {
+  rm -rf "$BATS_TMPDIR/OBJ"
+}
+
+@test "PLCC compiles with 4 sections." {
   # Copy the OBJ language to the temp directory for this test
   cp -R "${BATS_TEST_DIRNAME}/OBJ" "${BATS_TMPDIR}"
 
@@ -14,7 +18,7 @@
   cd Java
 
   # Compile the Java files.
-  run javac *.java
+  run javac -cp /../../../../../lib/jackson/* *.java
 
   # Print stdout and stderr for debugging.
   echo "OUTPUT: $output"
@@ -22,6 +26,4 @@
 
   # Assert success.
   [ "$status" -eq 0 ]
-
-  rm -rf "$BATS_TMPDIR/OBJ"
 }

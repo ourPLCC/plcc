@@ -1,5 +1,10 @@
 #!/usr/bin/env bats
 
+teardown() {
+  rm -rf ${BATS_TMPDIR}/grammar
+  rm -rf ${BATS_TMPDIR}/Java
+}
+
 @test "PLCC parses." {
   cat << EOF > "$BATS_TMPDIR/grammar"
 A 'A'
@@ -14,7 +19,4 @@ EOF
 
   echo "RESULT: $RESULT"
   [[ "$RESULT" =~ .*OK.* ]]
-
-  rm -rf "$BATS_TMPDIR/grammar"
-  rm -rf "$BATS_TMPDIR/Java"
 }
