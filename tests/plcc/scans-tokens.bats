@@ -1,7 +1,15 @@
 #!/usr/bin/env bats
 
+setup() {
+  mkdir ${BATS_TMPDIR}/scan-test
+}
+
+teardown() {
+  rm -rf ${BATS_TMPDIR}/scan-test
+}
+
 @test "PLCC scans." {
-  cat << EOF > "$BATS_TMPDIR/grammar"
+  cat << EOF > "${BATS_TMPDIR}/scan-test/grammar"
 skip WHITESPACE '\s'
 token FOO 'foo'
 token BAR 'bar'
@@ -11,8 +19,8 @@ EOF
   IN="foo bar \n foobar"
 
   TOKENS="$(
-    cd "$BATS_TMPDIR" &&
-    plccmk -c "$BATS_TMPDIR/grammar" &&
+    cd "${BATS_TMPDIR}/scan-test" &&
+    plccmk -c "grammar" &&
     OUT="$(echo "$IN" | scan)" &&
     echo "$OUT"
   )"
@@ -20,7 +28,4 @@ EOF
   [[ "$TOKENS" =~ "FOO 'foo'" ]]
   [[ "$TOKENS" =~ "BAR 'bar'" ]]
   [[ "$TOKENS" =~ "ID 'foobar'" ]]
-
-  rm -rf "$BATS_TMPDIR/grammar"
-  rm -rf "$BATS_TMPDIR/Java"
 }

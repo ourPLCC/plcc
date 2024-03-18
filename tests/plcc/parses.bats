@@ -1,7 +1,15 @@
 #!/usr/bin/env bats
 
+setup() {
+  mkdir ${BATS_TMPDIR}/parse-test
+}
+
+teardown() {
+  rm -rf ${BATS_TMPDIR}/parse-test
+}
+
 @test "PLCC parses." {
-  cat << EOF > "$BATS_TMPDIR/grammar"
+  cat << EOF > "${BATS_TMPDIR}/parse-test/grammar"
 A 'A'
 B 'B'
 skip OTHER '.'
@@ -10,11 +18,8 @@ skip OTHER '.'
 <aaa> **= A
 EOF
 
-  RESULT="$(cd "$BATS_TMPDIR" && plccmk -c grammar > /dev/null && echo "A asdf A fdsa A B" | parse -n)"
+  RESULT="$(cd "${BATS_TMPDIR}/parse-test" && plccmk -c grammar > /dev/null && echo "A asdf A fdsa A B" | parse -n)"
 
   echo "RESULT: $RESULT"
   [[ "$RESULT" =~ .*OK.* ]]
-
-  rm -rf "$BATS_TMPDIR/grammar"
-  rm -rf "$BATS_TMPDIR/Java"
 }
