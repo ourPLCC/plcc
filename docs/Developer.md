@@ -211,6 +211,20 @@ bin/test/everything.bash
 bin/test/functionality.bash
 ```
 
+### Test languages
+
+Check if our changes work with ourPLCC/languages:
+
+```bash
+bin/test/languages.bash
+```
+
+Test a specific version (git tag, branch, or commit hash) of ourPLCC/languages:
+
+```bash
+LANGUAGES_VESRION=v1.0.1 bin/test/languages.bash
+```
+
 ### Test other things
 
 To learn what other class of tests you can run...

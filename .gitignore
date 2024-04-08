@@ -1,3 +1,6 @@
+# This is created by bin/test/languages.bash. But should not be committed.
+languages/
+
 # PLCC places generated Java files in directories named Java. Ignore them.
 Java/
 
