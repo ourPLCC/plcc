@@ -1,0 +1,12 @@
+define x = 2
+define c = 
+  let
+    x = 3
+  in
+    class
+      field z
+      method init = proc(w) {set z=w ; self}
+    end
+
+<<new c>.init(x)>z
+<.<new c>init(x)>z

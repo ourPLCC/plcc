@@ -30,5 +30,5 @@ teardown() {
   echo "ERROR: $error"
 
   # Assert success.
-  [ "$status" -eq 0 ]
+  [[ "$status" -eq 0 ]]
 }

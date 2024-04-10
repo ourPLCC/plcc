@@ -1,0 +1,119 @@
+%% A class that implement Lists, similar
+%% to the built-in list structure in OBJ.
+
+define lst =
+  class
+
+    %% a list node -- represents a list with "real" first and rest items
+    static lstNode =
+      class extends myclass
+
+        field fst
+        field rst
+        field siz
+
+        %% return a new list with only those elements of this list
+        %% that f says is not false
+        method filter = proc(f)
+          let
+            filtered = .<rst>filter(f) % recursive call
+          in
+            if .f(fst)
+            then .<filtered>add(fst)
+            else filtered
+
+        %% return a new list by appending this list to l
+        method append = proc(l) !<rst>append(l)>add(fst)!>
+
+        %% return a new list by appending this list to itself
+	method double = proc() .<self>append(self)
+
+        %% sort this lst, returning a new lst
+        %% uses quicksort, with the fst element of the lst as pivot
+        method sort = proc()
+          let
+            %% sort everything in rst less than the pivot
+            lt = !<rst>filter(proc(t) <?(t, fst))>sort()!>           
+            %% sort everything in rst greater than or equal to the pivot
+            %% and add the pivot to the resulting list
+            ge = !<rst>filter(proc(t) >=?(t, fst))>sort()>add(fst)!>
+          in
+            %% combine the two halves into a single sorted list
+           .<lt>append(ge)
+
+%%%%%%%%% The above 'let' can be written as a "one-liner":
+%%        !<rst> filter(proc(t) <?(t, fst))
+%%             > sort()
+%%             > append(!<rst>filter(proc(t) >=?(t, fst))
+%%                           >sort()
+%%                           >add(fst)
+%%                      !>)
+%%        !>
+
+        %% initialize this lstNode
+        method init = proc(fst,rst)
+          { set <self>fst = fst
+          ; set <self>rst = rst
+          ; set siz = add1(.<rst>size())
+          ; self
+          }
+
+        %% the size of this list
+        method size = proc() siz
+
+        method null? = proc() 0 %% is this null?  NO!
+
+        %% display this list in the form [x,y,z,...]
+        method show = proc()
+          { .show1("[")
+          ; putc "]"
+          ; newline
+          ; self
+          }
+
+        %% a helper method for show
+        method show1 = proc(pre)
+          { putc pre
+          ; display fst
+          ; .<rst>show1(",")
+          }
+
+        %% return a new list by applying f
+        %% to all of the elements of this list
+        method map = proc(f) !<rst>map(f)>add(.f(fst))!>
+
+        %% create a built-in list [...] from this lst object
+        method toList = proc() addFirst(fst, .<rst>toList())
+          
+      end %% of class lstNode
+
+    %% the empty list class -- no first and rest items
+    static lstNull =
+      class extends myclass
+            
+        method filter = proc(f) self
+        method append = proc(ys) ys
+        method double = proc() self
+        method sort = proc() self
+        method null? = proc() 1 %% is this null?  YES!
+        method show = proc() { putc "[]" ; newline ; self }
+        method show1 = proc(pre) nil 
+        method map = proc(f) self
+        method size = proc() 0
+        method toList = proc () []
+           
+      end %% of class lstNull
+
+    %% the empty list (a singleton in the lst class)
+    static null = new lstNull
+
+    %% create a 'lst' object from a built-in list [...]
+    static fromList = proc(list) % list is a 'built-in' list
+      if list
+      then .<new lstNode>init(first(list), .fromList(rest(list)))
+      else null
+
+    %% add a value to this lst object, returning a new lst
+    method add = proc(t) .<new lstNode>init(t,self)
+
+  end %% of class lst

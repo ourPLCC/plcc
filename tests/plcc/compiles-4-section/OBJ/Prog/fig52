@@ -1,0 +1,31 @@
+define node = class
+  method sum = proc() 0
+end
+
+define interior_node = class extends node
+  field left
+  field right
+  method init = proc(l,r)
+    { set left = l ; set right = r ; self}
+  method sum = proc()
+    +(.<left>sum(), .<right>sum())
+end
+
+define leaf_node = class extends node
+  field value
+  method init = proc(v)
+    {set value = v ; self}
+  method sum = proc() value
+end
+
+define o1 =
+  .<new interior_node>init
+  ( .<new interior_node>init
+    ( .<new leaf_node>init(3)
+    , .<new leaf_node>init(4)
+    )
+  , .<new leaf_node>init(5)
+  )
+
+.<o1>sum()    % => 12
+send o1 sum() % => 12

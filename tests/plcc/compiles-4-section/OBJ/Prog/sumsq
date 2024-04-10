@@ -1,0 +1,68 @@
+% the obj must have the following zero-arity methods defined on it:
+%   test?  - returns true to continue 'while' processing
+%   do     - carry out one execution of the 'while' body
+%   ans    - evaluates the final anss at the conclusion of the 'while'
+define while = proc(obj)
+  <obj>
+    letrec
+      loop = proc()
+        if .test?()
+          then {.do() ; .loop()}
+          else .ans()
+      in
+        .loop()
+
+% a class that generates objects to compute
+% the sum of squares: 1*1+2*2+...+10*10
+define sumsq =
+  class
+    field x
+    field sum
+    field limit
+    method init = proc(v)
+      { set x = 0
+      ; set sum = 0
+      ; set limit = v
+      ; self
+      }
+    method do = proc()
+      { set sum = +(sum,*(x,x))
+      ;  set x = add1(x)
+      }
+    method test? = proc() <=?(x,limit)
+    method ans = proc() sum
+  end
+
+% compute the sum of squares determined by an instance of the sumsq class
+.while(.<new sumsq>init(10))
+
+% Now compute the sum of squares with a locally defined object
+.while(
+  let
+    x = 0
+    sum = 0
+    limit = 10
+  in
+    let
+      do = proc() {set sum = +(sum,*(x,x)) ; set x = add1(x)}
+      test? = proc() <=?(x, limit)
+      ans = proc() sum
+    in
+      @ % an object!!
+)
+
+% compute the sum of squares with a locally defined proc
+let
+  sumsq = proc(limit)
+    let
+      x = 0
+      sum = 0
+    in
+      let
+        do = proc() {set sum = +(sum,*(x,x)) ; set x = add1(x)}
+        test? = proc() <=?(x, limit)
+        ans = proc() sum
+      in
+        @
+in
+  .while(.sumsq(10))
