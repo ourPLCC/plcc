@@ -1,15 +1,11 @@
 #!/usr/bin/env bats
 
-setup() {
-  mkdir ${BATS_TMPDIR}/scan-test
-}
-
-teardown() {
-  rm -rf ${BATS_TMPDIR}/scan-test
-}
+load '../relocate_to_temp.bash'
 
 @test "PLCC scans." {
-  cat << EOF > "${BATS_TMPDIR}/scan-test/grammar"
+  relocate_to_temp
+
+  cat << EOF > grammar
 skip WHITESPACE '\s'
 token FOO 'foo'
 token BAR 'bar'
@@ -19,8 +15,7 @@ EOF
   IN="foo bar \n foobar"
 
   TOKENS="$(
-    cd "${BATS_TMPDIR}/scan-test" &&
-    plccmk -c "grammar" &&
+    plccmk -c grammar &&
     OUT="$(echo "$IN" | scan)" &&
     echo "$OUT"
   )"
