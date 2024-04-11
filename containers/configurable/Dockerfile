@@ -11,9 +11,22 @@ RUN apt-get update \
         build-essential libssl-dev zlib1g-dev \
         libbz2-dev libreadline-dev libsqlite3-dev curl \
         libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev \
-        git curl bash zip sudo bats \
+        git curl bash zip sudo \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+ARG BATS_VERSION=v1.11.0
+RUN apt-get update \
+    && apt-get install -y \
+        git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && git clone https://github.com/bats-core/bats-core.git \
+    && cd bats-core \
+    && git checkout $BATS_VERSION \
+    && ./install.sh /usr/local \
+    && cd .. \
+    && rm -rf bats-core
 
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
