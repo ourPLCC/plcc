@@ -1,15 +1,11 @@
 #!/usr/bin/env bats
 
-setup() {
-  mkdir ${BATS_TMPDIR}/parse-test
-}
-
-teardown() {
-  rm -rf ${BATS_TMPDIR}/parse-test
-}
+load '../relocate_to_temp.bash'
 
 @test "PLCC parses." {
-  cat << EOF > "${BATS_TMPDIR}/parse-test/grammar"
+  relocate_to_temp
+
+  cat << EOF > grammar
 A 'A'
 B 'B'
 skip OTHER '.'
@@ -18,7 +14,7 @@ skip OTHER '.'
 <aaa> **= A
 EOF
 
-  RESULT="$(cd "${BATS_TMPDIR}/parse-test" && plccmk -c grammar > /dev/null && echo "A asdf A fdsa A B" | parse -n)"
+  RESULT="$(plccmk -c grammar > /dev/null && echo "A asdf A fdsa A B" | parse -n)"
 
   echo "RESULT: $RESULT"
   [[ "$RESULT" =~ .*OK.* ]]
