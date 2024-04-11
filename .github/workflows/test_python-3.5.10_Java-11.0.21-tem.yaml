@@ -34,5 +34,5 @@ jobs:
             python --version
             java --version
             javac --version
-            /home/tester/.plcc/tests/run
+            /home/tester/.plcc/bin/test/functionality.bash
           shell: bash
