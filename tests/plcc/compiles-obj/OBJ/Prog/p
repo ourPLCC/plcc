@@ -1,6 +1,0 @@
-let
-  x = 3
-in
-  <class
-    static y = x
-  end>y

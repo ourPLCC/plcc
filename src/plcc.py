@@ -24,7 +24,12 @@ import os
 import io
 import shutil
 import tempfile
+
+from langs.java import spec as java_spec
+from langs.python import spec as python_spec
+
 argv = sys.argv[1:] # skip over the command-line argument
+
 
 # current file information
 Fname = ''          # current file name (STDIN if standard input)
@@ -54,6 +59,7 @@ cases = {}          # maps a non-abstract class to its set of case terminals
 rrule = {}          # maps a repeating rule class name to its separator string
                     # (or None)
 stubs = {}          # maps a class name to its parser stub file
+python_stubs = {}
 
 def debug(msg, level=1):
     # print(getFlag('debug'))
@@ -111,7 +117,9 @@ def main():
     nxt = nextLine()     # nxt is the next line generator
     lex(nxt)    # lexical analyzer generation
     par(nxt)    # LL(1) check and parser generation
-    sem(nxt)    # semantic actions
+    sem(nxt, stubs, **java_spec)
+    sem(nxt, python_stubs, **python_spec)
+    done()
 
 def plccInit():
     global flags, argv, STD, STDT, STDP
@@ -127,13 +135,15 @@ def plccInit():
     flags['libplcc'] = LIBPLCC()
     flags['Token'] = True         # generate scanner-related files
     # behavior-related flags
-    flags['debug'] = 0            # default debug value
-    flags['destdir'] = 'Java'     # the default destination directory
-    flags['pattern'] = True       # create a scanner that uses re. patterns
-    flags['LL1'] = True           # check for LL(1)
-    flags['parser'] = True        # create a parser
-    flags['semantics'] = True     # create semantics routines
-    flags['nowrite'] = False      # when True, produce *no* file output
+    flags['debug'] = 0                  # default debug value
+    flags['destdir'] = 'Java'           # the default destination directory
+    flags['python_destdir'] = 'Python'  # default destination for fourth section semantics (Python)
+    flags['pattern'] = True             # create a scanner that uses re. patterns
+    flags['LL1'] = True                 # check for LL(1)
+    flags['parser'] = True              # create a parser
+    flags['semantics'] = True           # create java semantics routines
+    flags['python_semantics'] = True    # create python semantics routines
+    flags['nowrite'] = False            # when True, produce *no* file output
 
 def jsonAstInit():
     global flags, STD, STDP
@@ -253,6 +263,7 @@ def lexFinishUp():
         debug('[lexFinishUp] ' + dst + ': destination subdirectory exists')
     except:
         death(dst + ': error creating destination subdirectory')
+
     if not getFlag('Token'):
         return # do not create any automatically generated scanner-related files
     libplcc = getFlag('libplcc')
@@ -329,6 +340,7 @@ def par(nxt):
         processRule(line, rno)
     parFinishUp()
 
+
 def parFinishUp():
     global STDP, startSymbol, nonterms, extends, derives, rules
     if not rules:
@@ -390,7 +402,8 @@ def parFinishUp():
                 death('Failure copying {} from {} to {}'.format(fname, std, dst))
 
     # build parser stub classes
-    buildStubs()
+    buildStubs(stubs, **java_spec)
+    buildStubs(python_stubs, **python_spec)
     # build the _Start.java file from the start symbol
     buildStart()
 
@@ -474,12 +487,6 @@ def processRule(line, rno):
         derives[base].update({cls})
     else:
         derives[base] = {cls}
-
-# def saveFields(cls, lhs, rhs):
-#     global fields
-#     if cls in fields:
-#         deathLNO('class {} is already defined'.format(cls))
-#    fields[cls] = (lhs, rhs)
 
 def saveRule(nt, lhs, cls, rhs):
     """ construct a tuple of the form (nt, tnts) where nt is the LHS nonterm
@@ -617,22 +624,41 @@ def saveCases(cls, fst):
     # print('### class={} cases={}'.format(cls, ' '.join(fst)))
     cases[cls] = fst
 
-def buildStubs():
-    global fields, derives, stubs
+def buildStubs(
+        stubs,
+        abstractStubFormatString,
+        stubFormatString,
+        extendFormatString,
+        declFormatString,
+        initFormatString,
+        paramFormatString,
+        **ignored_kwargs):
+    global fields, derives
     for cls in derives:
         # make parser stubs for all abstract classes
         if cls in stubs:
             death('duplicate stub for abstract class {}'.format(cls))
         debug('[buildStubs] making stub for abstract class {}'.format(cls))
-        stubs[cls] = makeAbstractStub(cls)
+        stubs[cls] = makeAbstractStub(cls, abstractStubFormatString,
+            ext=' extends _Start',
+            caseIndentLevel=2)
     for cls in fields:
         # make parser stubs for all non-abstract classes
         if cls in stubs:
             death('duplicate stub for class {}'.format(cls))
         debug('[buildStubs] making stub for non-abstract class {}'.format(cls))
-        stubs[cls] = makeStub(cls)
+        stubs[cls] = makeStub(cls, stubFormatString,
+            extendFormatString,
+            declFormatString,
+            initFormatString,
+            paramFormatString)
 
-def makeAbstractStub(base):
+
+def makeAbstractStub(
+        base,
+        formatString,
+        ext=' extends _Start',
+        caseIndentLevel=2):
     global cases
     caseList = []    # a list of strings,
                      # either 'case XXX:'
@@ -643,41 +669,17 @@ def makeAbstractStub(base):
         for tok in cases[cls]:
             caseList.append('case {}:'.format(tok))
         caseList.append('    return {}.parse(scn$,trace$);'.format(cls))
-    if base == nt2cls(startSymbol):
-        ext = ' extends _Start'
-    else:
+    if base != nt2cls(startSymbol):
         ext = ''
-    stubString = """\
-//{base}:top//
-//{base}:import//
-import java.util.*;
-
-public abstract class {base}{ext} /*{base}:class*/ {{
-
-    public static final String $className = "{base}";
-    public static {base} parse(Scan scn$, Trace trace$) {{
-        Token t$ = scn$.cur();
-        Token.Match match$ = t$.match;
-        switch(match$) {{
-{cases}
-        default:
-            throw new PLCCException(
-                "Parse error",
-                "{base} cannot begin with " + t$.errString()
-            );
-        }}
-    }}
-
-//{base}//
-}}
-""".format(cls=cls,
+    stubString = formatString.format(cls=cls,
            base=base,
            ext=ext,
-           cases='\n'.join(indent(2, caseList))
+           cases='\n'.join(indent(caseIndentLevel, caseList))
           )
     return stubString
 
-def makeStub(cls):
+def makeStub(cls, formatString, extendFormatString, declFormatString,
+        initFormatString, paramFormatString):
     global fields, extends, rrule
     # make a stub for the given non-abstract class
     debug('[makeStub] making stub for non-abstract class {}'.format(cls))
@@ -696,56 +698,27 @@ def makeStub(cls):
         (fieldVars, parseString) = makeParse(cls, rhs)
         # two sub-cases: either cls is an extended class (with abstract base class) or it's a base class
         if cls in extends:
-            # ext = 'extends ' + extends[cls] + ' '
-            ext = ' extends {}'.format(extends[cls])
-        else:
-            pass
+            ext = extendFormatString.format(cls=extends[cls])
     ruleString = '{} {} {}'.format(lhs, ruleType, ' '.join(rhs))
     # fieldVars = makeVars(cls, rhs)
     decls = []
     inits = []
     params = []
     for (field, fieldType) in fieldVars:
-        decls.append('public {} {};'.format(fieldType, field))
-        inits.append('this.{} = {};'.format(field, field))
-        params.append('{} {}'.format(fieldType, field))
+        decls.append(declFormatString.format(fieldType=fieldType, field=field))
+        inits.append(initFormatString.format(field=field))
+        params.append(paramFormatString.format(fieldType=fieldType, field=field))
     debug('[makeStub] cls={} decls={} params={} inits={}'.format(cls, decls, params, inits))
     debug('[makeStub] rule: {}'.format(ruleString))
     if cls == nt2cls(startSymbol):
-        ext = ' extends _Start'
-    stubString = """\
-//{cls}:top//
-//{cls}:import//
-import java.util.*;
-
-// {ruleString}
-public class {cls}{ext} /*{cls}:class*/ {{
-
-    public static final String $className = "{cls}";
-    public static final String $ruleString =
-        "{ruleString}";
-
-{decls}
-    public {cls}({params}) {{
-//{cls}:init//
-{inits}
-    }}
-
-    public static {cls} parse(Scan scn$, Trace trace$) {{
-        if (trace$ != null)
-            trace$ = trace$.nonterm("{lhs}", scn$.lno);
-{parse}
-    }}
-
-//{cls}//
-}}
-""".format(cls=cls,
+        ext = extendFormatString.format(cls='_Start')
+    stubString = formatString.format(cls=cls,
            lhs=lhs,
            ext=ext,
            ruleString=ruleString,
-           decls='\n'.join(indent(1, decls)),
+           decls='\n'.join(indent(1,decls)),
            params=', '.join(params),
-           inits='\n'.join(indent(2, inits)),
+           inits='\n'.join(indent(2,inits)),
            parse=parseString)
     return stubString
 
@@ -910,11 +883,45 @@ public abstract class _Start {{
     print(startString, file=startFile)
     startFile.close()
 
-def sem(nxt):
-    global stubs, argv
+def semFinishUp(stubs, destFlag='destdir', ext='.java'):
+    if getFlag('nowrite'):
+        return
+    global STD
+    dst = getFlag(destFlag)
+    if not dst:
+        death('illegal destdir flag value')
+    try:
+        os.mkdir(dst)
+        debug('[semFinishUp] ' + dst + ': destination subdirectory created')
+    except FileExistsError:
+        debug('[semFinishUp] ' + dst + ': destination subdirectory exists')
+    except:
+        death(dst + ': error creating destination subdirectory')
+    print('\n{} source files created:'.format(dst))
+    # print *all* of the generated files
+    for cls in sorted(stubs):
+        if cls in STD:
+            death('{}: reserved class name'.format(cls))
+        try:
+            fname = '{}/{}{}'.format(dst, cls, ext)
+            with open(fname, 'w') as f:
+                print(stubs[cls], end='', file=f)
+        except:
+            death('cannot write to file {}'.format(fname))
+        print('  {}{}'.format(cls, ext))
+
+def sem(nxt, stubs,
+        semFlag,
+        lineComment,
+        blockCommentStart,
+        blockCommentEnd,
+        destFlag,
+        fileExt,
+        **ignored_kwargs):
+    global argv
     # print('=== semantic routines')
-    if not getFlag('semantics'):
-        semFinishUp()
+    if not getFlag(semFlag):
+        semFinishUp(stubs, destFlag, fileExt)
         done()
     for line in nxt:
         line = line.strip()
@@ -924,6 +931,8 @@ def sem(nxt):
             argv.extend(fn)
             # print('== extend argv by {}'.format(fn))
             continue
+        if line == "%":
+            break
         if len(line) == 0 or line[0] == '#':
             # skip just comments or blank lines
             continue
@@ -935,42 +944,48 @@ def sem(nxt):
             continue
         # check to see if line has the form Class:mod
         mod = mod.strip() # mod might be 'import', 'top', etc.
+        if cls in stubs:
+            if mod and mod != 'ignore' and mod != 'top':
+                codeString = '\n'.join(indent(2,codeString))
+            else:
+                codeString = '\n'.join(indent(1,codeString))
+        else:
+            codeString = '\n'.join(codeString)
         if mod:
             if cls == '*': # apply the mod substitution to *all* of the stubs
                 for cls in stubs:
                     stub = stubs[cls]
-                    repl = '//{}:{}//'.format(cls, mod)
+                    repl = '{}{}:{}{}'.format(lineComment,cls,mod,lineComment)
                     stub = stub.replace(repl, '{}\n{}'.format(codeString,repl))
-                    repl = '/*{}:{}*/'.format(cls, mod)
+                    repl = "{}{}:{}{}".format(blockCommentStart, cls, mod, blockCommentEnd)
                     stub = stub.replace(repl, '{} {}'.format(codeString,repl))
                     debug('class {}:\n{}\n'.format(cls, stub))
                     stubs[cls] = stub
                 continue
-        # if mod == 'ignore!':
-        #     continue
         if not isClass(cls):
             deathLNO('{}: ill-defined class name'.format(cls))
         if cls in stubs:
             stub = stubs[cls]
             if mod:
-                repl = '//{}:{}//'.format(cls, mod)
+                repl = '{}{}:{}{}'.format(lineComment,cls,mod,lineComment)
                 stub = stub.replace(repl, '{}\n{}'.format(codeString,repl))
-                repl = '/*{}:{}*/'.format(cls, mod)
+                repl = '{}{}:{}{}'.format(blockCommentStart,cls,mod,blockCommentEnd)
                 stub = stub.replace(repl, '{} {}'.format(codeString,repl))
             else: # the default
-                repl = '//{}//'.format(cls)
+                repl = '{}{}{}'.format(lineComment,cls,lineComment)
                 stub = stub.replace(repl, '{}\n\n{}'.format(codeString,repl))
             debug('class {}:\n{}\n'.format(cls, stub))
             stubs[cls] = stub
         else:
             if mod:
-                deathLNO('no stub for class {} -- cannot replace //{}:{}//'.format(cls, cls, mod))
+                deathLNO('no stub for class {} -- cannot replace {}{}:{}{}'.format(cls,lineComment,cls,mod,lineComment))
             stubs[cls] = codeString
-    semFinishUp()
-    done()
+    semFinishUp(stubs, destFlag, fileExt)
+
 
 def getCode(nxt):
     code = []
+    offset = None
     for line in nxt:
         line = line.rstrip()
         if re.match(r'\s*#', line) or re.match(r'\s*$', line):
@@ -988,30 +1003,19 @@ def getCode(nxt):
     for line in nxt:
         if re.match(stopMatch, line):
             break
+        if offset == None:
+            offset = getOffset(line)
+        line = removeOffset(line, offset)
         code.append(line)
     else:
         deathLNO('premature end of file')
     lineMode = False # switch off line mode
-    str = '\n'.join(code)
-    return str + '\n'
-
-def semFinishUp():
-    if getFlag('nowrite'):
-        return
-    global stubs, STD
-    dst = flags['destdir']
-    print('\nJava source files created:')
-    # print *all* of the generated files
-    for cls in sorted(stubs):
-        if cls in STD:
-            death('{}: reserved class name'.format(cls))
-        try:
-            fname = '{}/{}.java'.format(dst, cls)
-            with open(fname, 'w') as f:
-                print(stubs[cls], end='', file=f)
-        except:
-            death('cannot write to file {}'.format(fname))
-        print('  {}.java'.format(cls))
+    if len(code)>0 :
+        while len(code[0]) == 0:
+            code.pop(0)
+        while len(code[-1]) == 0:
+            code.pop()
+    return code
 
 
 #####################
@@ -1234,6 +1238,20 @@ def isTerm(term):
 def nt2cls(nt):
     # return the class name of the nonterminal nt
     return nt[0].upper() + nt[1:]
+
+def removeOffset(ln, offset):
+    check = ln.strip()
+    if len(check) == 0:
+        return ln
+    s = re.sub(offset,"",ln,count=1)
+    return s
+
+def getOffset(line):
+    check = line.lstrip()
+    if len(check) == 0 or check[0] == '#':
+        return None
+    s = re.search(r"\S", line).start()
+    return line[0:s]
 
 if __name__ == '__main__':
     main()
