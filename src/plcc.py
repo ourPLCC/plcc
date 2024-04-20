@@ -1028,7 +1028,7 @@ def done():
 def nextLine():
     # create a generator to get the next line in the current input file
     global Lno, Fname, Line
-    global stack # used for '#include ...' processing
+    global stack # used for '%include ...' processing
     global argv  # file arguments
     global nlgen # next line generator for Fname
     maxStack = 4 # maximum #include stacking level
@@ -1059,9 +1059,9 @@ def nextLine():
                 if lineMode:
                     pass # don't process #include directives  when in line mode
                 else:
-                    if Line[:8] == '#include':
+                    if Line[:8] in ['#include', '%include']:
                         ary = Line.split(None, maxsplit = 1)
-                        if len(ary) == 2 and ary[0] == '#include':
+                        if len(ary) == 2 and ary[0] in ['#include', '%include']:
                             if len(stack) >= maxStack:
                                 death('max #include nesting depth exceeded')
                             debug('include directive: {} {}'
