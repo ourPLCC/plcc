@@ -1,5 +1,12 @@
 #!/bin/bash
 
+if [[ -z "${CLASSPATH:-}" ]] ; then
+    CLASSPATH="./Java"
+    export CLASSPATH
+else
+    CLASSPATH="./Java:${CLASSPATH}"
+fi
+
 [ -d "${PWD}/Java" ] || {
     echo "Java directory missing" >&2
     exit 1
@@ -10,4 +17,4 @@
     exit 2
 }
 
-java -cp ./Java Rep $*
+java Rep $*
