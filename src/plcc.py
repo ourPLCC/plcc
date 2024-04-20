@@ -925,12 +925,6 @@ def sem(nxt, stubs,
         done()
     for line in nxt:
         line = line.strip()
-        if line[:7] == 'include':
-            # add file names to be processed
-            fn = line[7:].split()
-            argv.extend(fn)
-            # print('== extend argv by {}'.format(fn))
-            continue
         if line == "%":
             break
         if len(line) == 0 or line[0] == '#':
@@ -1031,12 +1025,12 @@ def nextLine():
     global stack # used for '%include ...' processing
     global argv  # file arguments
     global nlgen # next line generator for Fname
-    maxStack = 4 # maximum #include stacking level
+    maxStack = 4 # maximum %include stacking level
     stack = []
     # debug('...here...')
     while True:
         if len(stack) > 0:
-            # pop any #include parent off the stack (stack is initially empty)
+            # pop any %include parent off the stack (stack is initially empty)
             (Fname, Lno, nlgen) = stack.pop()
             debug('back to reading from file ' + Fname)
         elif len(argv) > 0:
@@ -1055,15 +1049,15 @@ def nextLine():
                 Line = Line.rstrip()
                 debug('[{}]: {}'.format(Fname, Line))
                 # Line is the next line in this file
-                # first handle '#include ...' directives
+                # first handle '%include ...' directives
                 if lineMode:
-                    pass # don't process #include directives  when in line mode
+                    pass # don't process %include directives  when in line mode
                 else:
-                    if Line[:8] in ['#include', '%include']:
+                    if Line[:8] == '%include':
                         ary = Line.split(None, maxsplit = 1)
-                        if len(ary) == 2 and ary[0] in ['#include', '%include']:
+                        if len(ary) == 2 and ary[0] == '%include':
                             if len(stack) >= maxStack:
-                                death('max #include nesting depth exceeded')
+                                death('max %include nesting depth exceeded')
                             debug('include directive: {} {}'
                                   .format(ary[0],ary[1]))
                             # ary[1] must be a filename
@@ -1073,7 +1067,7 @@ def nextLine():
                             nlgen = nextLineGen(Fname)
                             continue
                         else:
-                            death(line + ': invalid #include directive')
+                            death(line + ': invalid %include directive')
                 line = Line.rstrip()
                 debug('{:4} [{}] {}'.format(Lno,Fname,Line), level=2)
                 yield line
