@@ -28,7 +28,7 @@ RUN addgroup -S my && adduser -S my -G my
 
 # Copy over plcc from downloader stage.
 COPY --chown=plcc:plcc . /plcc
-ENV PATH="/plcc/src:${PATH}" LIBPLCC="/plcc/src"
+ENV PATH="/plcc/src/plcc/bin:${PATH}"
 
 # Change user to dev.
 WORKDIR /workdir

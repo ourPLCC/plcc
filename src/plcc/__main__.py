@@ -21,12 +21,13 @@
 import sys
 import re
 import os
+import pathlib
 import io
 import shutil
 import tempfile
 
-from langs.java import spec as java_spec
-from langs.python import spec as python_spec
+from plcc.java import spec as java_spec
+from plcc.python import spec as python_spec
 
 argv = sys.argv[1:] # skip over the command-line argument
 
@@ -72,10 +73,7 @@ def debug2(msg):
     debug(msg, level=2)
 
 def LIBPLCC():
-    try:
-        return os.environ['LIBPLCC']
-    except KeyError:
-        death("undefined LIBPLCC environment variable -- quitting")
+    return str(pathlib.Path(__file__).parent)
 
 def main():
     global argv
@@ -108,8 +106,8 @@ def main():
 
     # Handle --version option.
     if 'version' in flags and flags['version']:
-        import version
-        print(version.get_version())
+        import plcc.version
+        print(plcc.version.get_version())
         sys.exit(0)
 
     jsonAstInit()
@@ -257,7 +255,7 @@ def lexFinishUp():
     if not dst:
         death('illegal destdir flag value')
     try:
-        os.mkdir(dst)
+        os.mkdir(str(dst))
         debug('[lexFinishUp] ' + dst + ': destination subdirectory created')
     except FileExistsError:
         debug('[lexFinishUp] ' + dst + ': destination subdirectory exists')
@@ -267,15 +265,13 @@ def lexFinishUp():
     if not getFlag('Token'):
         return # do not create any automatically generated scanner-related files
     libplcc = getFlag('libplcc')
-    if not libplcc:
-        death('illegal libplcc flag value')
-    std = libplcc + '/Std'
+    std = pathlib.Path(libplcc) / 'lib' / 'Std'
     try:
-        os.mkdir(std)
+        os.mkdir(str(std))
     except FileExistsError:
         pass
     except:
-        death(std + ': cannot access directory')
+        death(str(std) + ': cannot access directory')
     fname = '{}/{}'.format(dst, 'Token.java')
     try:
         tokenFile = open(fname, 'w')
@@ -392,7 +388,7 @@ def parFinishUp():
     # copy the Std parser-related files
     dst = getFlag('destdir')
     libplcc = getFlag('libplcc')
-    std = libplcc + '/Std'
+    std = pathlib.Path(libplcc) / 'lib' / 'Std'
     for fname in STDP:
         if getFlag(fname):
             debug('[parFinishUp] copying {} from {} to {} ...'.format(fname, std, dst))
@@ -891,7 +887,7 @@ def semFinishUp(stubs, destFlag='destdir', ext='.java'):
     if not dst:
         death('illegal destdir flag value')
     try:
-        os.mkdir(dst)
+        os.mkdir(str(dst))
         debug('[semFinishUp] ' + dst + ': destination subdirectory created')
     except FileExistsError:
         debug('[semFinishUp] ' + dst + ': destination subdirectory exists')

@@ -7,10 +7,8 @@ tasks:
       echo "INSTALLING latest JAVA (a PLCC dependency)"
       sdk install java < /dev/null
       echo ""
-      echo "INSTALLING PLCC in $GITPOD_REPO_ROOT/src"
-      echo 'export LIBPLCC="$GITPOD_REPO_ROOT/src"
-      export PATH="$LIBPLCC:$PATH"
-      ' >> "$HOME/.bashrc"
+      echo "INSTALLING PLCC from source"
+      echo 'export PATH="$GITPOD_REPO_ROOT/src/plcc/bin:$PATH"' >> "$HOME/.bashrc"
       echo ""
       echo "INSTALLING reuse (for licenses: https://reuse.software/)"
       pip install --upgrade pip

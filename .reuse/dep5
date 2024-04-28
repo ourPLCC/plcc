@@ -15,6 +15,6 @@ Copyright:
   Copyright (C) 2023  PLCC Community <https://discord.gg/EVtNSxS9E2>
 License: GPL-3.0-or-later
 
-Files: lib/jackson/*
+Files: plcc/lib/jackson/*
 Copyright: Copyright 2007-, Tatu Saloranta (tatu.saloranta@iki.fi)
 License: Apache-2.0

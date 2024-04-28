@@ -47,8 +47,9 @@ image: gitpod/workspace-full:latest
 tasks:
   - name: Install PLCC
     command: |
-        /bin/bash -c "$(\curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" \
-          >> ~/.bashrc
+        /bin/bash -c "$(\
+          \curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash \
+        )" >> ~/.bashrc
         exec bash
 ```
 
