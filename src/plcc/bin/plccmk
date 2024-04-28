@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}" )/common.bash" && init
+
+if [[ "${1:-}" == "-c" ]]
+then
+        rm -f Java/*.java Java/*.class
+        shift
+fi
+
+if [ $# -eq 0 ]
+then
+        DEFAULT=spec
+        [ -f "$DEFAULT" ] || DEFAULT=grammar
+        set - $DEFAULT
+fi
+
+plcc "$@"
+(cd ./Java ; javac *.java)

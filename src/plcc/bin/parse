@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}" )/common.bash" && init
+
+assert_file_exists Java/Parse.class
+
+if  echo "$*" | grep -- "--json_ast" &> /dev/null
+then
+
+    ARGS=()
+    while [ $# -gt 0 ] ; do
+        case "$1" in
+            --json_ast)
+                shift
+            ;;
+            *)
+                ARGS+=("$1")
+                shift
+            ;;
+        esac
+    done
+
+    if ! java ParseJsonAst "${ARGS[@]}" ; then
+        >&2 echo "Did you forget to pass --json_ast to plccmk?"
+        exit 1
+    fi
+else
+    java Parse "$@"
+fi

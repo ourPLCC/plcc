@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}" )/common.bash" && init
+
+assert_file_exists Java/Rep.class
+java Rep "$@"
