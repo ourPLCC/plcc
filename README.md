@@ -31,7 +31,7 @@ and (2) the ability to provide your class/developers a consistent development
 environment with no installation necessary.
 
 Having your students/developers perform native installations on their
-individual machines can lead to unexpected challenges do to the variety of
+individual machines can lead to unexpected challenges due to the variety of
 different environments this creates. This can be mitigated by having your
 IT staff install PLCC on a shared server or into a computer lab and having
 your students/developers use those if their native install stops working
