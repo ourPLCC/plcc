@@ -13,7 +13,7 @@ Related repositories:
 
 - [ourPLCC/languages](https://github.com/ourPLCC/languages): Languages implemented in PLCC.
 - [ourPLCC/course](https://github.com/ourPLCC/course): Course materials for
-  teaching a Programming Languages course the uses PLCC.
+  teaching a Programming Languages course that uses PLCC.
 
 ## Options for Installation and Use
 
