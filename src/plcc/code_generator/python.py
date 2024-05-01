@@ -39,10 +39,7 @@ class {cls}({ext}): #{cls}:class#
     "declFormatString" : '{field} = None',
     "initFormatString" : 'self.{field} = {field}',
     "paramFormatString" : '{field}',
-    "semFlag" : 'python_semantics',
     "lineComment" : '#',
     "blockCommentStart" : "'''",
     "blockCommentEnd" : "'''",
-    "destFlag" : 'python_destdir',
-    "fileExt" : '.py'
 }

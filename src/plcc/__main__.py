@@ -117,8 +117,8 @@ def main():
     lex(nxt)    # lexical analyzer generation
     stubs, python_stubs = par(nxt)    # LL(1) check and parser generation
 
-    sem(nxt, stubs, JavaCodeGenerator(stubs), **java_spec)
-    sem(nxt, python_stubs, PythonCodeGenerator(python_stubs), **python_spec)
+    sem(nxt, stubs, JavaCodeGenerator(stubs), destFlag='destdir', semFlag='semantics', fileExt='.java')
+    sem(nxt, python_stubs, PythonCodeGenerator(python_stubs), destFlag='python_destdir', semFlag='python_semantics', fileExt='.py')
     done()
 
 def plccInit():
@@ -910,14 +910,7 @@ def semFinishUp(stubs, destFlag='destdir', ext='.java'):
             death('cannot write to file {}'.format(fname))
         print('  {}{}'.format(cls, ext))
 
-def sem(nxt, stubs, codeGenerator,
-        semFlag,
-        lineComment,
-        blockCommentStart,
-        blockCommentEnd,
-        destFlag,
-        fileExt,
-        **ignored_kwargs):
+def sem(nxt, stubs, codeGenerator, semFlag, destFlag, fileExt):
     global argv
     # print('=== semantic routines')
     if not getFlag(semFlag):

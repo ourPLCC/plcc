@@ -64,10 +64,7 @@ public class {cls}{ext} /*{cls}:class*/ {{
     "declFormatString" : 'public {fieldType} {field};',
     "initFormatString" : 'this.{field} = {field};',
     "paramFormatString" : '{fieldType} {field}',
-    "semFlag" : 'semantics',
     "lineComment" : '//',
     "blockCommentStart" : "/*",
     "blockCommentEnd" : "*/",
-    "destFlag" : 'destdir',
-    "fileExt" : '.java'
 }
