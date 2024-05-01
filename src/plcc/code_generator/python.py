@@ -2,7 +2,7 @@ from .base import CodeGenerator
 
 
 class PythonCodeGenerator(CodeGenerator):
-    def __init__(self, stubs):
+    def __init__(self, stubs={}):
         super().__init__(spec, stubs)
 
 

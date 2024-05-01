@@ -117,8 +117,8 @@ def main():
     lex(nxt)    # lexical analyzer generation
     stubs, python_stubs = par(nxt)    # LL(1) check and parser generation
 
-    sem(nxt, stubs, JavaCodeGenerator(stubs), destFlag='destdir', semFlag='semantics', fileExt='.java')
-    sem(nxt, python_stubs, PythonCodeGenerator(python_stubs), destFlag='python_destdir', semFlag='python_semantics', fileExt='.py')
+    sem(nxt, JavaCodeGenerator(stubs), destFlag='destdir', semFlag='semantics', fileExt='.java')
+    sem(nxt, PythonCodeGenerator(python_stubs), destFlag='python_destdir', semFlag='python_semantics', fileExt='.py')
     done()
 
 def plccInit():
@@ -400,12 +400,15 @@ def parFinishUp():
             except:
                 death('Failure copying {} from {} to {}'.format(fname, std, dst))
 
-    # build parser stub classes
-    stubs = buildStubs(**java_spec)
-    python_stubs = buildStubs(**python_spec)
+    javaCodeGenerator = JavaCodeGenerator()
+    buildStubs(javaCodeGenerator)
+
+    pythonCodeGenerator = PythonCodeGenerator()
+    buildStubs(pythonCodeGenerator)
+
     # build the _Start.java file from the start symbol
     buildStart()
-    return (stubs, python_stubs)
+    return (javaCodeGenerator.getStubs(), pythonCodeGenerator.getStubs())
 
 def processRule(line, rno):
     global STD, startSymbol, fields, rules, rrule, nonterm, extends, derives
@@ -624,35 +627,22 @@ def saveCases(cls, fst):
     # print('### class={} cases={}'.format(cls, ' '.join(fst)))
     cases[cls] = fst
 
-def buildStubs(
-        abstractStubFormatString,
-        stubFormatString,
-        extendFormatString,
-        declFormatString,
-        initFormatString,
-        paramFormatString,
-        **ignored_kwargs):
+def buildStubs(codeGenerator):
     global fields, derives
-    stubs = {}
     for cls in derives:
         # make parser stubs for all abstract classes
-        if cls in stubs:
+        if cls in codeGenerator.getStubs():
             death('duplicate stub for abstract class {}'.format(cls))
         debug('[buildStubs] making stub for abstract class {}'.format(cls))
-        stubs[cls] = makeAbstractStub(cls, abstractStubFormatString,
+        codeGenerator._stubs[cls] = makeAbstractStub(cls, codeGenerator._spec['abstractStubFormatString'],
             ext=' extends _Start',
             caseIndentLevel=2)
     for cls in fields:
         # make parser stubs for all non-abstract classes
-        if cls in stubs:
+        if cls in codeGenerator.getStubs():
             death('duplicate stub for class {}'.format(cls))
         debug('[buildStubs] making stub for non-abstract class {}'.format(cls))
-        stubs[cls] = makeStub(cls, stubFormatString,
-            extendFormatString,
-            declFormatString,
-            initFormatString,
-            paramFormatString)
-    return stubs
+        makeStub(codeGenerator, cls)
 
 def makeAbstractStub(
         base,
@@ -678,14 +668,13 @@ def makeAbstractStub(
           )
     return stubString
 
-def makeStub(cls, formatString, extendFormatString, declFormatString,
-        initFormatString, paramFormatString):
+def makeStub(codeGenerator, cls):
     global fields, extends, rrule
     # make a stub for the given non-abstract class
     debug('[makeStub] making stub for non-abstract class {}'.format(cls))
     sep = False
     (lhs, rhs) = fields[cls]
-    ext = '' # assume not an extended class
+    extClass = '' # assume not an extended class
     # two cases: either cls is a repeating rule, or it isn't
     if cls in rrule:
         ruleType = '**='
@@ -698,29 +687,9 @@ def makeStub(cls, formatString, extendFormatString, declFormatString,
         (fieldVars, parseString) = makeParse(cls, rhs)
         # two sub-cases: either cls is an extended class (with abstract base class) or it's a base class
         if cls in extends:
-            ext = extendFormatString.format(cls=extends[cls])
+            extClass = extends[cls]
     ruleString = '{} {} {}'.format(lhs, ruleType, ' '.join(rhs))
-    # fieldVars = makeVars(cls, rhs)
-    decls = []
-    inits = []
-    params = []
-    for (field, fieldType) in fieldVars:
-        decls.append(declFormatString.format(fieldType=fieldType, field=field))
-        inits.append(initFormatString.format(field=field))
-        params.append(paramFormatString.format(fieldType=fieldType, field=field))
-    debug('[makeStub] cls={} decls={} params={} inits={}'.format(cls, decls, params, inits))
-    debug('[makeStub] rule: {}'.format(ruleString))
-    if cls == nt2cls(startSymbol):
-        ext = extendFormatString.format(cls='_Start')
-    stubString = formatString.format(cls=cls,
-           lhs=lhs,
-           ext=ext,
-           ruleString=ruleString,
-           decls='\n'.join(indent(1,decls)),
-           params=', '.join(params),
-           inits='\n'.join(indent(2,inits)),
-           parse=parseString)
-    return stubString
+    codeGenerator.addStub(cls, fieldVars, startSymbol, lhs, extClass, ruleString, parseString)
 
 def indent(n, iList):
     ### make a new list with the old list items prepended with 4*n spaces
@@ -910,10 +879,11 @@ def semFinishUp(stubs, destFlag='destdir', ext='.java'):
             death('cannot write to file {}'.format(fname))
         print('  {}{}'.format(cls, ext))
 
-def sem(nxt, stubs, codeGenerator, semFlag, destFlag, fileExt):
+def sem(nxt, codeGenerator, semFlag, destFlag, fileExt):
     global argv
     # print('=== semantic routines')
     if not getFlag(semFlag):
+        stubs = codeGenerator.getStubs()
         semFinishUp(stubs, destFlag, fileExt)
         done()
     for line in nxt:
