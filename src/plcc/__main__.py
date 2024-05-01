@@ -26,8 +26,11 @@ import io
 import shutil
 import tempfile
 
-from plcc.java import spec as java_spec
-from plcc.python import spec as python_spec
+from plcc.code_generator.java import spec as java_spec
+from plcc.code_generator.java import JavaCodeGenerator
+
+from plcc.code_generator.python import spec as python_spec
+from plcc.code_generator.python import PythonCodeGenerator
 
 argv = sys.argv[1:] # skip over the command-line argument
 
@@ -59,8 +62,6 @@ cases = {}          # maps a non-abstract class to its set of case terminals
                     # for use in a switch
 rrule = {}          # maps a repeating rule class name to its separator string
                     # (or None)
-stubs = {}          # maps a class name to its parser stub file
-python_stubs = {}
 
 def debug(msg, level=1):
     # print(getFlag('debug'))
@@ -114,9 +115,10 @@ def main():
 
     nxt = nextLine()     # nxt is the next line generator
     lex(nxt)    # lexical analyzer generation
-    par(nxt)    # LL(1) check and parser generation
-    sem(nxt, stubs, **java_spec)
-    sem(nxt, python_stubs, **python_spec)
+    stubs, python_stubs = par(nxt)    # LL(1) check and parser generation
+
+    sem(nxt, stubs, JavaCodeGenerator(stubs), **java_spec)
+    sem(nxt, python_stubs, PythonCodeGenerator(python_stubs), **python_spec)
     done()
 
 def plccInit():
@@ -334,14 +336,15 @@ def par(nxt):
             break
         rno += 1
         processRule(line, rno)
-    parFinishUp()
+    stubs, python_stubs = parFinishUp()
+    return stubs, python_stubs
 
 
 def parFinishUp():
     global STDP, startSymbol, nonterms, extends, derives, rules
     if not rules:
         print('No grammar rules')
-        return
+        return ({}, {})
     debug('[parFinishUp] par: finishing up...')
     # check to make sure all RHS nonterms appear as the LHS of at least one rule
     for nt in nonterms:
@@ -398,10 +401,11 @@ def parFinishUp():
                 death('Failure copying {} from {} to {}'.format(fname, std, dst))
 
     # build parser stub classes
-    buildStubs(stubs, **java_spec)
-    buildStubs(python_stubs, **python_spec)
+    stubs = buildStubs(**java_spec)
+    python_stubs = buildStubs(**python_spec)
     # build the _Start.java file from the start symbol
     buildStart()
+    return (stubs, python_stubs)
 
 def processRule(line, rno):
     global STD, startSymbol, fields, rules, rrule, nonterm, extends, derives
@@ -621,7 +625,6 @@ def saveCases(cls, fst):
     cases[cls] = fst
 
 def buildStubs(
-        stubs,
         abstractStubFormatString,
         stubFormatString,
         extendFormatString,
@@ -630,6 +633,7 @@ def buildStubs(
         paramFormatString,
         **ignored_kwargs):
     global fields, derives
+    stubs = {}
     for cls in derives:
         # make parser stubs for all abstract classes
         if cls in stubs:
@@ -648,7 +652,7 @@ def buildStubs(
             declFormatString,
             initFormatString,
             paramFormatString)
-
+    return stubs
 
 def makeAbstractStub(
         base,
@@ -906,7 +910,7 @@ def semFinishUp(stubs, destFlag='destdir', ext='.java'):
             death('cannot write to file {}'.format(fname))
         print('  {}{}'.format(cls, ext))
 
-def sem(nxt, stubs,
+def sem(nxt, stubs, codeGenerator,
         semFlag,
         lineComment,
         blockCommentStart,
@@ -924,7 +928,7 @@ def sem(nxt, stubs,
         if line == "%":
             break
         if len(line) == 0 or line[0] == '#':
-            # skip just comments or blank lines
+            # skip comments or blank lines
             continue
         (cls, _, mod) = line.partition(':')
         # print('>>> cls={} mod={}'.format(cls, mod))
@@ -934,42 +938,9 @@ def sem(nxt, stubs,
             continue
         # check to see if line has the form Class:mod
         mod = mod.strip() # mod might be 'import', 'top', etc.
-        if cls in stubs:
-            if mod and mod != 'ignore' and mod != 'top':
-                codeString = '\n'.join(indent(2,codeString))
-            else:
-                codeString = '\n'.join(indent(1,codeString))
-        else:
-            codeString = '\n'.join(codeString)
-        if mod:
-            if cls == '*': # apply the mod substitution to *all* of the stubs
-                for cls in stubs:
-                    stub = stubs[cls]
-                    repl = '{}{}:{}{}'.format(lineComment,cls,mod,lineComment)
-                    stub = stub.replace(repl, '{}\n{}'.format(codeString,repl))
-                    repl = "{}{}:{}{}".format(blockCommentStart, cls, mod, blockCommentEnd)
-                    stub = stub.replace(repl, '{} {}'.format(codeString,repl))
-                    debug('class {}:\n{}\n'.format(cls, stub))
-                    stubs[cls] = stub
-                continue
-        if not isClass(cls):
-            deathLNO('{}: ill-defined class name'.format(cls))
-        if cls in stubs:
-            stub = stubs[cls]
-            if mod:
-                repl = '{}{}:{}{}'.format(lineComment,cls,mod,lineComment)
-                stub = stub.replace(repl, '{}\n{}'.format(codeString,repl))
-                repl = '{}{}:{}{}'.format(blockCommentStart,cls,mod,blockCommentEnd)
-                stub = stub.replace(repl, '{} {}'.format(codeString,repl))
-            else: # the default
-                repl = '{}{}{}'.format(lineComment,cls,lineComment)
-                stub = stub.replace(repl, '{}\n\n{}'.format(codeString,repl))
-            debug('class {}:\n{}\n'.format(cls, stub))
-            stubs[cls] = stub
-        else:
-            if mod:
-                deathLNO('no stub for class {} -- cannot replace {}{}:{}{}'.format(cls,lineComment,cls,mod,lineComment))
-            stubs[cls] = codeString
+        codeGenerator.addCodeToClass(cls, mod, codeString)
+
+    stubs = codeGenerator.getStubs()
     semFinishUp(stubs, destFlag, fileExt)
 
 

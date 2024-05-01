@@ -1,3 +1,11 @@
+from .base import CodeGenerator
+
+
+class JavaCodeGenerator(CodeGenerator):
+    def __init__(self, stubs):
+        super().__init__(spec, stubs)
+
+
 spec = {
     "abstractStubFormatString" : """\
 //{base}:top//
