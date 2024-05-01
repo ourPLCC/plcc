@@ -1,0 +1,34 @@
+[project]
+name = "plcc"
+version = "8.0.0"
+description = "Programming Languages Compiler Compiler"
+authors = [
+    {name = "Tim Fossum", email = "fossum@halsum.org"},
+    {name = "Stoney Jackson", email = "dr.stoney@gmail.com"}
+]
+dependencies = []
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "GPL-3.0-or-later"}
+
+
+[project.scripts]
+plcc = "plcc.__main__:main"
+
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
+
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "pytest>=8.2.0",
+]
+
+[tool.pdm.scripts]
+test = "pytest"

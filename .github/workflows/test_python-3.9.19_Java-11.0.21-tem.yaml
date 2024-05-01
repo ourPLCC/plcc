@@ -1,12 +1,12 @@
 ---
-name: test_python-3.5.10_Java-11.0.21-tem
+name: test_python-3.9.19_Java-11.0.21-tem
 
 on:
   pull_request:
 
 jobs:
   build:
-    name: test_python-3.5.10_Java-11.0.21-tem
+    name: test_python-3.9.19_Java-11.0.21-tem
     runs-on: ubuntu-latest
     steps:
       -
@@ -22,7 +22,7 @@ jobs:
           push: false
           build-args: |
             JAVA_VERSION=11.0.21-tem
-            PYTHON_VERSION=3.5.10
+            PYTHON_VERSION=3.9.19
       -
         name: Test
         uses: addnab/docker-run-action@v3

@@ -13,7 +13,7 @@ Related repositories:
 
 - [ourPLCC/languages](https://github.com/ourPLCC/languages): Languages implemented in PLCC.
 - [ourPLCC/course](https://github.com/ourPLCC/course): Course materials for
-  teaching a Programming Languages course that uses PLCC.
+  teaching a Programming Languages course the uses PLCC.
 
 ## Options for Installation and Use
 
@@ -24,7 +24,7 @@ may help you determine which option is best for you and your class.
 | ------ | ------------------- | ----------------------- | ---------- |
 | GitPod |  Web Browser | * Account on GitPod <br> * Account on hosting service (GitLab/GitHub/Bitbucket) <br> * Knowledge of above and Git | Yes |
 | Docker | Docker Desktop | Minimal understanding of Docker | Yes |
-| Native | * Bash/Linux-like environment <br> * Java >= 11 <br> * Python >= 3.5 | System administration knowledge | No |
+| Native | * Bash/Linux-like environment <br> * Java >= 11 <br> * Python >= 3.9 | System administration knowledge | No |
 
 The advantages of GitPod or Docker are (1) few or no software dependencies
 and (2) the ability to provide your class/developers a consistent development
@@ -141,7 +141,7 @@ and use it to install Java.
 
 ### Install Python
 
-Check if you have Python >= 3.5
+Check if you have Python >= 3.9
 
 ```bash
 python3 --version
