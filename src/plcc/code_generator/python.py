@@ -2,7 +2,7 @@ from .base import CodeGenerator
 
 
 class PythonCodeGenerator(CodeGenerator):
-    def __init__(self, stubs={}):
+    def __init__(self, stubs=None):
         super().__init__(stubs)
 
     def getLineComment(self):
