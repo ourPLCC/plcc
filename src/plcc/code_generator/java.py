@@ -7,6 +7,7 @@ class JavaCodeGenerator(CodeGenerator):
 
 
 spec = {
+    
     "abstractStubFormatString" : """\
 //{base}:top//
 //{base}:import//

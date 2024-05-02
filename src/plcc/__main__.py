@@ -26,10 +26,7 @@ import io
 import shutil
 import tempfile
 
-from plcc.code_generator.java import spec as java_spec
 from plcc.code_generator.java import JavaCodeGenerator
-
-from plcc.code_generator.python import spec as python_spec
 from plcc.code_generator.python import PythonCodeGenerator
 
 argv = sys.argv[1:] # skip over the command-line argument
