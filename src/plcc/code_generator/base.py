@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 
 
-class Base(ABC):
+class CodeGenerator(ABC):
+    def __init__(self, stubs):
+        self._stubs = stubs.copy() if stubs is not None else {}
+
     @abstractmethod
     def getLineComment(self):
         ...
@@ -38,11 +41,6 @@ class Base(ABC):
     def makeAbstractStub(self, cls, base, ext, cases):
         ...
 
-
-class CodeGenerator(Base):
-    def __init__(self, stubs):
-        self._stubs = stubs.copy() if stubs is not None else {}
-
     def addCodeToClass(self, cls, hook, code):
         code = self._indentCode(cls, hook, code)
         if self._shouldApplyToAllStubs(cls, hook):
@@ -55,13 +53,12 @@ class CodeGenerator(Base):
             self._createStub(cls, code)
 
     def _indentCode(self, cls, hook, code):
-        if self._stubExists(cls):
-            if hook and hook != 'ignore' and hook != 'top':
-                return '\n'.join(indent(2,code))
-            else:
-                return '\n'.join(indent(1,code))
-        else:
+        if not self._stubExists(cls):
             return '\n'.join(code)
+        if hook and hook not in ['ignore', 'top']:
+            return '\n'.join(indent(2,code))
+        else:
+            return '\n'.join(indent(1,code))
 
     def _shouldApplyToAllStubs(self, cls, hook):
         return hook and cls == '*'
@@ -102,24 +99,32 @@ class CodeGenerator(Base):
         return '{}{}{}'.format(self.getLineComment(),cls,self.getLineComment())
 
     def addStub(self, cls, fieldVars, startSymbol, lhs, extClass, ruleString, parseString):
-        decls = []
-        inits = []
-        params = []
-        for (field, fieldType) in fieldVars:
-            decls.append(self.makeFieldDeclaration(type=fieldType, name=field))
-            inits.append(self.makeFieldInitializer(name=field))
-            params.append(self.makeParameterDeclaration(type=fieldType, name=field))
-        if cls == nt2cls(startSymbol):
+        decls = self._makeFieldDeclarations(fieldVars)
+        inits = self._makeFieldInitializations(fieldVars)
+        params = self._makeParameterDeclarations(fieldVars)
+        ext = self._makeExtendsClause(cls, startSymbol, extClass)
+        self._stubs[cls] = self.makeStub(cls,lhs,ext,ruleString,decls,params,inits,parseString)
+
+    def _makeFieldDeclarations(self, fieldVars):
+        decls = [self.makeFieldDeclaration(t, n) for (n, t) in fieldVars]
+        return '\n'.join(indent(1,decls))
+
+    def _makeFieldInitializations(self, fieldVars):
+        inits = [self.makeFieldInitializer(n) for (n, _) in fieldVars]
+        return '\n'.join(indent(2,inits))
+
+    def _makeParameterDeclarations(self, fieldVars):
+        params = [self.makeParameterDeclaration(t, n) for (n, t) in fieldVars]
+        return ', '.join(params)
+
+    def _makeExtendsClause(self, cls, startSymbol, extClass):
+        if cls == nonterminal2Class(startSymbol):
             ext = self.makeExtendsClause('_Start')
         elif extClass != '':
             ext = self.makeExtendsClause(extClass)
         else:
             ext = ''
-        decls='\n'.join(indent(1,decls))
-        params=', '.join(params)
-        inits='\n'.join(indent(2,inits))
-        stubString = self.makeStub(cls,lhs,ext,ruleString,decls,params,inits,parseString)
-        self._stubs[cls] = stubString
+        return ext
 
     def addAbstractStub(self, base, derives, cases, startSymbol, caseIndentLevel, ext):
         caseList = []    # a list of strings,
@@ -129,7 +134,7 @@ class CodeGenerator(Base):
             for tok in cases[cls]:
                 caseList.append('case {}:'.format(tok))
             caseList.append('    return {}.parse(scn$,trace$);'.format(cls))
-        if base != nt2cls(startSymbol):
+        if base != nonterminal2Class(startSymbol):
             ext = ''
         cases='\n'.join(indent(caseIndentLevel, caseList))
         stubString = self.makeAbstractStub(cls, base, ext, cases)
@@ -139,19 +144,13 @@ class CodeGenerator(Base):
         return self._stubs.copy()
 
 
-def indent(n, iList):
-    ### make a new list with the old list items prepended with 4*n spaces
-    indentString = '    '*n
-    newList = []
-    for item in iList:
-        newList.append('{}{}'.format(indentString, item))
-    # print('### str={}'.format(str))
-    return newList
+def indent(level, iList):
+    indent = '    ' * level
+    return [f'{indent}{item}' for item in iList]
 
 
-def nt2cls(nt):
-    # return the class name of the nonterminal nt
-    return nt[0].upper() + nt[1:]
+def nonterminal2Class(nonterminal):
+    return nonterminal.capitalize()
 
 
 class StubDoesNotExistForHookException(Exception):
