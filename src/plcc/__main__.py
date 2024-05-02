@@ -28,6 +28,7 @@ import tempfile
 
 from plcc.code_generator.java import JavaCodeGenerator
 from plcc.code_generator.python import PythonCodeGenerator
+from plcc.code_generator.base import StubDoesNotExistForHookException
 
 argv = sys.argv[1:] # skip over the command-line argument
 
@@ -894,7 +895,11 @@ def sem(nxt, codeGenerator, semFlag, destFlag, fileExt):
             continue
         # check to see if line has the form Class:mod
         mod = mod.strip() # mod might be 'import', 'top', etc.
-        codeGenerator.addCodeToClass(cls, mod, codeString)
+        try:
+            codeGenerator.addCodeToClass(cls, mod, codeString)
+        except StubDoesNotExistForHookException as e:
+            deathLNO(str(e))
+
 
     stubs = codeGenerator.getStubs()
     semFinishUp(stubs, destFlag, fileExt)

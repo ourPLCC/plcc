@@ -50,7 +50,7 @@ class CodeGenerator(Base):
         elif self._stubExists(cls):
             self._insertIntoExistingStub(cls, hook, code)
         elif hook:
-            raise StubDoesNotExistForHookException(self._makeLineCommentInsertionHook(cls, hook))
+            raise StubDoesNotExistForHookException(cls, hook)
         else:
             self._createStub(cls, code)
 
@@ -155,4 +155,6 @@ def nt2cls(nt):
 
 
 class StubDoesNotExistForHookException(Exception):
-    pass
+    def __init__(self, cls, hook):
+        super().__init__(f'no stub for hook {cls}:{hook}')
+
