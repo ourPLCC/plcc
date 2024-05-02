@@ -3,22 +3,31 @@ from .base import CodeGenerator
 
 class PythonCodeGenerator(CodeGenerator):
     def __init__(self, stubs={}):
-        super().__init__(spec, stubs)
+        super().__init__(stubs)
 
+    def getLineComment(self):
+        return '#'
 
-spec = {
-    "abstractStubFormatString" : """\
-#{base}:top#
-#{base}:import#
+    def getBlockCommentStart(self):
+        return "'''"
 
-class {base}({ext}): #{base}:class#
+    def getBlockCommentEnd(self):
+        return "'''"
 
-    className = "{base}"
+    def makeFieldDeclaration(self, type, name):
+        return f'name = None'
 
-    #{base}#
-""",
+    def makeFieldInitializer(self, name):
+        return f'self.{name} = {name}'
 
-    "stubFormatString" : """\
+    def makeParameterDeclaration(self, type, name):
+        return f'{name}'
+
+    def makeExtendsClause(self, type):
+        return f'{type}'
+
+    def makeStub(self, cls, lhs, ext, ruleString, decls, params, inits, parse):
+        return f"""\
 #{cls}:top#
 #{cls}:import#
 
@@ -34,12 +43,16 @@ class {cls}({ext}): #{cls}:class#
 {inits}
 
 #{cls}#
-""",
-    "extendFormatString" : '{cls}',
-    "declFormatString" : '{field} = None',
-    "initFormatString" : 'self.{field} = {field}',
-    "paramFormatString" : '{field}',
-    "lineComment" : '#',
-    "blockCommentStart" : "'''",
-    "blockCommentEnd" : "'''",
-}
+"""
+
+    def makeAbstractStub(self, cls, base, ext, cases):
+        return f"""\
+#{base}:top#
+#{base}:import#
+
+class {base}({ext}): #{base}:class#
+
+    className = "{base}"
+
+    #{base}#
+"""

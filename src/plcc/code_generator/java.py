@@ -3,37 +3,31 @@ from .base import CodeGenerator
 
 class JavaCodeGenerator(CodeGenerator):
     def __init__(self, stubs=None):
-        super().__init__(spec, stubs)
+        super().__init__(stubs)
 
+    def getLineComment(self):
+        return '//'
 
-spec = {
-    
-    "abstractStubFormatString" : """\
-//{base}:top//
-//{base}:import//
-import java.util.*;
+    def getBlockCommentStart(self):
+        return "/*"
 
-public abstract class {base}{ext} /*{base}:class*/ {{
+    def getBlockCommentEnd(self):
+        return "*/"
 
-    public static final String $className = "{base}";
-    public static {base} parse(Scan scn$, Trace trace$) {{
-        Token t$ = scn$.cur();
-        Token.Match match$ = t$.match;
-        switch(match$) {{
-{cases}
-        default:
-            throw new PLCCException(
-                "Parse error",
-                "{base} cannot begin with " + t$.errString()
-            );
-        }}
-    }}
+    def makeFieldDeclaration(self, type, name):
+        return f'public {type} {name};'
 
-//{base}//
-}}
-""",
+    def makeFieldInitializer(self, name):
+        return f'this.{name} = {name};'
 
-    "stubFormatString" : """\
+    def makeParameterDeclaration(self, type, name):
+        return f'{type} {name}'
+
+    def makeExtendsClause(self, type):
+        return f' extends {type}'
+
+    def makeStub(self, cls, lhs, ext, ruleString, decls, params, inits, parse):
+        return f"""\
 //{cls}:top//
 //{cls}:import//
 import java.util.*;
@@ -60,12 +54,31 @@ public class {cls}{ext} /*{cls}:class*/ {{
 
 //{cls}//
 }}
-""",
-    "extendFormatString" : ' extends {cls}',
-    "declFormatString" : 'public {fieldType} {field};',
-    "initFormatString" : 'this.{field} = {field};',
-    "paramFormatString" : '{fieldType} {field}',
-    "lineComment" : '//',
-    "blockCommentStart" : "/*",
-    "blockCommentEnd" : "*/",
-}
+"""
+
+    def makeAbstractStub(self, cls, base, ext, cases):
+        return f"""\
+//{base}:top//
+//{base}:import//
+import java.util.*;
+
+public abstract class {base}{ext} /*{base}:class*/ {{
+
+    public static final String $className = "{base}";
+    public static {base} parse(Scan scn$, Trace trace$) {{
+        Token t$ = scn$.cur();
+        Token.Match match$ = t$.match;
+        switch(match$) {{
+{cases}
+        default:
+            throw new PLCCException(
+                "Parse error",
+                "{base} cannot begin with " + t$.errString()
+            );
+        }}
+    }}
+
+//{base}//
+}}
+"""
+
