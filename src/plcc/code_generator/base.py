@@ -38,7 +38,7 @@ class CodeGenerator(ABC):
         ...
 
     @abstractmethod
-    def makeAbstractStub(self, cls, base, ext, cases):
+    def makeAbstractStub(self, base, ext, cases):
         ...
 
     def addCodeToClass(self, cls, hook, code):
@@ -56,9 +56,9 @@ class CodeGenerator(ABC):
         if not self._stubExists(cls):
             return '\n'.join(code)
         if hook and hook not in ['ignore', 'top']:
-            return '\n'.join(indent(2,code))
+            return '\n'.join(indentStrings(2,code))
         else:
-            return '\n'.join(indent(1,code))
+            return '\n'.join(indentStrings(1,code))
 
     def _shouldApplyToAllStubs(self, cls, hook):
         return hook and cls == '*'
@@ -107,11 +107,11 @@ class CodeGenerator(ABC):
 
     def _makeFieldDeclarations(self, fieldVars):
         decls = [self.makeFieldDeclaration(t, n) for (n, t) in fieldVars]
-        return '\n'.join(indent(1,decls))
+        return '\n'.join(indentStrings(1,decls))
 
     def _makeFieldInitializations(self, fieldVars):
         inits = [self.makeFieldInitializer(n) for (n, _) in fieldVars]
-        return '\n'.join(indent(2,inits))
+        return '\n'.join(indentStrings(2,inits))
 
     def _makeParameterDeclarations(self, fieldVars):
         params = [self.makeParameterDeclaration(t, n) for (n, t) in fieldVars]
@@ -119,34 +119,37 @@ class CodeGenerator(ABC):
 
     def _makeExtendsClause(self, cls, startSymbol, extClass):
         if cls == nonterminal2Class(startSymbol):
-            ext = self.makeExtendsClause('_Start')
+            return self.makeExtendsClause('_Start')
         elif extClass != '':
-            ext = self.makeExtendsClause(extClass)
+            return self.makeExtendsClause(extClass)
         else:
-            ext = ''
-        return ext
+            return ''
 
     def addAbstractStub(self, base, derives, cases, startSymbol, caseIndentLevel, ext):
-        caseList = []    # a list of strings,
-                        # either 'case XXX:'
-                        # or '    return Cls.parse(...);'
+        ext = '' if base != nonterminal2Class(startSymbol) else ext
+        cases = self._makeCases(derives, base, cases, caseIndentLevel)
+        self._stubs[base] = self.makeAbstractStub(base, ext, cases)
+
+    def _makeCases(self, derives, base, cases, caseIndentLevel):
+        caseList = []
         for cls in derives[base]:
             for tok in cases[cls]:
                 caseList.append('case {}:'.format(tok))
-            caseList.append('    return {}.parse(scn$,trace$);'.format(cls))
-        if base != nonterminal2Class(startSymbol):
-            ext = ''
-        cases='\n'.join(indent(caseIndentLevel, caseList))
-        stubString = self.makeAbstractStub(cls, base, ext, cases)
-        self._stubs[base] = stubString
+            caseList.append(indent(1, f'return {cls}.parse(scn$,trace$);'))
+        cases='\n'.join(indentStrings(caseIndentLevel, caseList))
+        return cases
 
     def getStubs(self):
         return self._stubs.copy()
 
 
-def indent(level, iList):
+def indentStrings(level, iList):
+    return [indent(level, item) for item in iList]
+
+
+def indent(level, item):
     indent = '    ' * level
-    return [f'{indent}{item}' for item in iList]
+    return f'{indent}{item}'
 
 
 def nonterminal2Class(nonterminal):
@@ -156,4 +159,3 @@ def nonterminal2Class(nonterminal):
 class StubDoesNotExistForHookException(Exception):
     def __init__(self, cls, hook):
         super().__init__(f'no stub for hook {cls}:{hook}')
-

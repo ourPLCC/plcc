@@ -56,7 +56,7 @@ public class {cls}{ext} /*{cls}:class*/ {{
 }}
 """
 
-    def makeAbstractStub(self, cls, base, ext, cases):
+    def makeAbstractStub(self, base, ext, cases):
         return f"""\
 //{base}:top//
 //{base}:import//
