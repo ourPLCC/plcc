@@ -634,7 +634,9 @@ def buildStubs(codeGenerator):
         if cls in codeGenerator.getStubs():
             death('duplicate stub for abstract class {}'.format(cls))
         debug('[buildStubs] making stub for abstract class {}'.format(cls))
-        codeGenerator._stubs[cls] = makeAbstractStub(cls, codeGenerator._spec['abstractStubFormatString'],
+        makeAbstractStub(
+            codeGenerator,
+            cls,
             ext=' extends _Start',
             caseIndentLevel=2)
     for cls in fields:
@@ -645,28 +647,22 @@ def buildStubs(codeGenerator):
         makeStub(codeGenerator, cls)
 
 def makeAbstractStub(
+        codeGenerator,
         base,
-        formatString,
         ext=' extends _Start',
         caseIndentLevel=2):
     global cases
-    caseList = []    # a list of strings,
-                     # either 'case XXX:'
-                     # or '    return Cls.parse(...);'
     for cls in derives[base]:
         if len(cases[cls]) == 0:
             death('class {} is unreachable'.format(cls))
-        for tok in cases[cls]:
-            caseList.append('case {}:'.format(tok))
-        caseList.append('    return {}.parse(scn$,trace$);'.format(cls))
-    if base != nt2cls(startSymbol):
-        ext = ''
-    stubString = formatString.format(cls=cls,
-           base=base,
-           ext=ext,
-           cases='\n'.join(indent(caseIndentLevel, caseList))
-          )
-    return stubString
+    codeGenerator.addAbstractStub(
+        base,
+        derives,
+        cases,
+        startSymbol,
+        caseIndentLevel,
+        ext
+    )
 
 def makeStub(codeGenerator, cls):
     global fields, extends, rrule

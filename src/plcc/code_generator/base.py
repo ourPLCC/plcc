@@ -62,6 +62,23 @@ class CodeGenerator():
             parse=parseString)
         self._stubs[cls] = stubString
 
+    def addAbstractStub(self, base, derives, cases, startSymbol, caseIndentLevel, ext):
+        caseList = []    # a list of strings,
+                        # either 'case XXX:'
+                        # or '    return Cls.parse(...);'
+        for cls in derives[base]:
+            for tok in cases[cls]:
+                caseList.append('case {}:'.format(tok))
+            caseList.append('    return {}.parse(scn$,trace$);'.format(cls))
+        if base != nt2cls(startSymbol):
+            ext = ''
+        stubString = self._spec['abstractStubFormatString'].format(cls=cls,
+            base=base,
+            ext=ext,
+            cases='\n'.join(indent(caseIndentLevel, caseList))
+            )
+        self._stubs[base] = stubString
+
     def getStubs(self):
         return self._stubs.copy()
 
