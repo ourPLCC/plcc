@@ -41,6 +41,14 @@ class CodeGenerator(ABC):
     def makeAbstractStub(self, base, ext, cases):
         ...
 
+    @abstractmethod
+    def makeCase(self, value):
+        ...
+
+    @abstractmethod
+    def makeParseCaseReturn(self, cls):
+        ...
+
     def addCodeToClass(self, cls, hook, code):
         code = self._indentCode(cls, hook, code)
         if self._shouldApplyToAllStubs(cls, hook):
@@ -127,15 +135,15 @@ class CodeGenerator(ABC):
 
     def addAbstractStub(self, base, derives, cases, startSymbol, caseIndentLevel, ext):
         ext = '' if base != nonterminal2Class(startSymbol) else ext
-        cases = self._makeCases(derives, base, cases, caseIndentLevel)
+        cases = self._makeParsingCases(derives[base], cases, caseIndentLevel)
         self._stubs[base] = self.makeAbstractStub(base, ext, cases)
 
-    def _makeCases(self, derives, base, cases, caseIndentLevel):
+    def _makeParsingCases(self, derives, cases, caseIndentLevel):
         caseList = []
-        for cls in derives[base]:
+        for cls in derives:
             for tok in cases[cls]:
-                caseList.append('case {}:'.format(tok))
-            caseList.append(indent(1, f'return {cls}.parse(scn$,trace$);'))
+                caseList.append(self.makeCase(tok))
+                caseList.append(indent(1, self.makeParseCaseReturn(cls)))
         cases='\n'.join(indentStrings(caseIndentLevel, caseList))
         return cases
 
@@ -143,13 +151,13 @@ class CodeGenerator(ABC):
         return self._stubs.copy()
 
 
-def indentStrings(level, iList):
-    return [indent(level, item) for item in iList]
+def indentStrings(level, strings):
+    return [indent(level, item) for item in strings]
 
 
-def indent(level, item):
+def indent(level, string):
     indent = '    ' * level
-    return f'{indent}{item}'
+    return f'{indent}{string}'
 
 
 def nonterminal2Class(nonterminal):

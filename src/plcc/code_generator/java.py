@@ -26,6 +26,12 @@ class JavaCodeGenerator(CodeGenerator):
     def makeExtendsClause(self, type):
         return f' extends {type}'
 
+    def makeCase(self, value):
+        return f'case {value}:'
+
+    def makeParseCaseReturn(self, cls):
+        return f'return {cls}.parse(scn$,trace$);'
+
     def makeStub(self, cls, lhs, ext, ruleString, decls, params, inits, parse):
         return f"""\
 //{cls}:top//
