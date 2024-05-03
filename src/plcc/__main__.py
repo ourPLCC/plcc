@@ -398,11 +398,12 @@ def parFinishUp(java, python):
             except:
                 death('Failure copying {} from {} to {}'.format(fname, std, dst))
 
-    buildStubsAndStart(java, python)
+    buildStubsAndStart(java, python, fields, derives, cases, startSymbol)
 
-def buildStubsAndStart(java, python):
-    buildStubs(java)
-    buildStubs(python)
+
+def buildStubsAndStart(java, python, fields, derives, cases, startSymbol):
+    buildStubs(java, fields, derives, cases, startSymbol)
+    buildStubs(python, fields, derives, cases, startSymbol)
     buildStart()
 
 
@@ -623,42 +624,31 @@ def saveCases(cls, fst):
     # print('### class={} cases={}'.format(cls, ' '.join(fst)))
     cases[cls] = fst
 
-def buildStubs(stubs):
-    global fields, derives
+class DuplicateAbstractStubException(Exception):
+    pass
+
+class UnreachableClassException(Exception):
+    pass
+
+class DuplicateStubException(Exception):
+    pass
+
+def buildStubs(stubs, fields, derives, cases, startSymbol):
     for cls in derives:
         # make parser stubs for all abstract classes
         if cls in stubs.getStubs():
-            death('duplicate stub for abstract class {}'.format(cls))
-        debug('[buildStubs] making stub for abstract class {}'.format(cls))
-        makeAbstractStub(
-            stubs,
-            cls,
-            ext=' extends _Start',
-            caseIndentLevel=2)
+            raise DuplicateAbstractStubException(f'{cls}')
+        for c in derives[cls]:
+            if len(cases[c]) == 0:
+                raise UnreachableClassException(f'{c}')
+        stubs.addAbstractStub(cls, derives, cases, startSymbol, caseIndentLevel=2, ext=' extends _Start')
+
     for cls in fields:
         # make parser stubs for all non-abstract classes
         if cls in stubs.getStubs():
-            death('duplicate stub for class {}'.format(cls))
-        debug('[buildStubs] making stub for non-abstract class {}'.format(cls))
+            raise DuplicateStubException(f'{cls}')
         makeStub(stubs, cls)
 
-def makeAbstractStub(
-        stubs,
-        base,
-        ext=' extends _Start',
-        caseIndentLevel=2):
-    global cases
-    for cls in derives[base]:
-        if len(cases[cls]) == 0:
-            death('class {} is unreachable'.format(cls))
-    stubs.addAbstractStub(
-        base,
-        derives,
-        cases,
-        startSymbol,
-        caseIndentLevel,
-        ext
-    )
 
 def makeStub(stubs, cls):
     global fields, extends, rrule
