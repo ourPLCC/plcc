@@ -32,4 +32,9 @@ tasks:
         && sudo ./install.sh /usr/local \
         && cd .. \
         && sudo rm -rf bats-core
+      echo ""
+      echo "INSTALLING PDM"
+      curl -sSL https://pdm-project.org/install-pdm.py | python3 -
+      echo "export PATH=/workspace/.pyenv_mirror/user/current/bin:\$PATH" >> ~/.bashrc
       exec bash
+      pdm install
