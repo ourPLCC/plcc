@@ -113,10 +113,11 @@ def main():
 
     nxt = nextLine()     # nxt is the next line generator
     lex(nxt)    # lexical analyzer generation
-    stubs, python_stubs = par(nxt)    # LL(1) check and parser generation
-
-    sem(nxt, JavaCodeGenerator(stubs), destFlag='destdir', semFlag='semantics', fileExt='.java')
-    sem(nxt, PythonCodeGenerator(python_stubs), destFlag='python_destdir', semFlag='python_semantics', fileExt='.py')
+    javaCodeGenerator = JavaCodeGenerator()
+    pythonCodeGenerator = PythonCodeGenerator()
+    par(nxt, javaCodeGenerator, pythonCodeGenerator)    # LL(1) check and parser generation
+    sem(nxt, javaCodeGenerator, destFlag='destdir', semFlag='semantics', fileExt='.java')
+    sem(nxt, pythonCodeGenerator, destFlag='python_destdir', semFlag='python_semantics', fileExt='.py')
     done()
 
 def plccInit():
@@ -320,7 +321,7 @@ def lexFinishUp():
             except:
                 death('Failure copying {} from {} to {}'.format(fname, std, dst))
 
-def par(nxt):
+def par(nxt, javaCodeGenerator, pythonCodeGenerator):
     debug('[par] processing grammar rule lines')
     if not getFlag('parser'):
         done()
@@ -334,15 +335,14 @@ def par(nxt):
             break
         rno += 1
         processRule(line, rno)
-    stubs, python_stubs = parFinishUp()
-    return stubs, python_stubs
+    parFinishUp(javaCodeGenerator, pythonCodeGenerator)
 
 
-def parFinishUp():
+def parFinishUp(javaCodeGenerator, pythonCodeGenerator):
     global STDP, startSymbol, nonterms, extends, derives, rules
     if not rules:
         print('No grammar rules')
-        return ({}, {})
+        return
     debug('[parFinishUp] par: finishing up...')
     # check to make sure all RHS nonterms appear as the LHS of at least one rule
     for nt in nonterms:
@@ -398,15 +398,11 @@ def parFinishUp():
             except:
                 death('Failure copying {} from {} to {}'.format(fname, std, dst))
 
-    javaCodeGenerator = JavaCodeGenerator()
     buildStubs(javaCodeGenerator)
-
-    pythonCodeGenerator = PythonCodeGenerator()
     buildStubs(pythonCodeGenerator)
 
     # build the _Start.java file from the start symbol
     buildStart()
-    return (javaCodeGenerator.getStubs(), pythonCodeGenerator.getStubs())
 
 def processRule(line, rno):
     global STD, startSymbol, fields, rules, rrule, nonterm, extends, derives
