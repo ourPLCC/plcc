@@ -26,9 +26,9 @@ import io
 import shutil
 import tempfile
 
-from plcc.code_generator.java import JavaCodeGenerator
-from plcc.code_generator.python import PythonCodeGenerator
-from plcc.code_generator.base import StubDoesNotExistForHookException
+from plcc.stubs.java import JavaStubs
+from plcc.stubs.python import PythonStubs
+from plcc.stubs.stubs import StubDoesNotExistForHookException
 
 argv = sys.argv[1:] # skip over the command-line argument
 
@@ -113,11 +113,11 @@ def main():
 
     nxt = nextLine()     # nxt is the next line generator
     lex(nxt)    # lexical analyzer generation
-    javaCodeGenerator = JavaCodeGenerator()
-    pythonCodeGenerator = PythonCodeGenerator()
-    par(nxt, javaCodeGenerator, pythonCodeGenerator)    # LL(1) check and parser generation
-    sem(nxt, javaCodeGenerator, destFlag='destdir', semFlag='semantics', fileExt='.java')
-    sem(nxt, pythonCodeGenerator, destFlag='python_destdir', semFlag='python_semantics', fileExt='.py')
+    java = JavaStubs()
+    python = PythonStubs()
+    par(nxt, java, python)    # LL(1) check and parser generation
+    sem(nxt, java, destFlag='destdir', semFlag='semantics', fileExt='.java')
+    sem(nxt, python, destFlag='python_destdir', semFlag='python_semantics', fileExt='.py')
     done()
 
 def plccInit():
@@ -321,7 +321,7 @@ def lexFinishUp():
             except:
                 death('Failure copying {} from {} to {}'.format(fname, std, dst))
 
-def par(nxt, javaCodeGenerator, pythonCodeGenerator):
+def par(nxt, java, python):
     debug('[par] processing grammar rule lines')
     if not getFlag('parser'):
         done()
@@ -335,10 +335,10 @@ def par(nxt, javaCodeGenerator, pythonCodeGenerator):
             break
         rno += 1
         processRule(line, rno)
-    parFinishUp(javaCodeGenerator, pythonCodeGenerator)
+    parFinishUp(java, python)
 
 
-def parFinishUp(javaCodeGenerator, pythonCodeGenerator):
+def parFinishUp(java, python):
     global STDP, startSymbol, nonterms, extends, derives, rules
     if not rules:
         print('No grammar rules')
@@ -398,11 +398,13 @@ def parFinishUp(javaCodeGenerator, pythonCodeGenerator):
             except:
                 death('Failure copying {} from {} to {}'.format(fname, std, dst))
 
-    buildStubs(javaCodeGenerator)
-    buildStubs(pythonCodeGenerator)
+    buildStubsAndStart(java, python)
 
-    # build the _Start.java file from the start symbol
+def buildStubsAndStart(java, python):
+    buildStubs(java)
+    buildStubs(python)
     buildStart()
+
 
 def processRule(line, rno):
     global STD, startSymbol, fields, rules, rrule, nonterm, extends, derives
@@ -621,27 +623,27 @@ def saveCases(cls, fst):
     # print('### class={} cases={}'.format(cls, ' '.join(fst)))
     cases[cls] = fst
 
-def buildStubs(codeGenerator):
+def buildStubs(stubs):
     global fields, derives
     for cls in derives:
         # make parser stubs for all abstract classes
-        if cls in codeGenerator.getStubs():
+        if cls in stubs.getStubs():
             death('duplicate stub for abstract class {}'.format(cls))
         debug('[buildStubs] making stub for abstract class {}'.format(cls))
         makeAbstractStub(
-            codeGenerator,
+            stubs,
             cls,
             ext=' extends _Start',
             caseIndentLevel=2)
     for cls in fields:
         # make parser stubs for all non-abstract classes
-        if cls in codeGenerator.getStubs():
+        if cls in stubs.getStubs():
             death('duplicate stub for class {}'.format(cls))
         debug('[buildStubs] making stub for non-abstract class {}'.format(cls))
-        makeStub(codeGenerator, cls)
+        makeStub(stubs, cls)
 
 def makeAbstractStub(
-        codeGenerator,
+        stubs,
         base,
         ext=' extends _Start',
         caseIndentLevel=2):
@@ -649,7 +651,7 @@ def makeAbstractStub(
     for cls in derives[base]:
         if len(cases[cls]) == 0:
             death('class {} is unreachable'.format(cls))
-    codeGenerator.addAbstractStub(
+    stubs.addAbstractStub(
         base,
         derives,
         cases,
@@ -658,7 +660,7 @@ def makeAbstractStub(
         ext
     )
 
-def makeStub(codeGenerator, cls):
+def makeStub(stubs, cls):
     global fields, extends, rrule
     # make a stub for the given non-abstract class
     debug('[makeStub] making stub for non-abstract class {}'.format(cls))
@@ -679,7 +681,7 @@ def makeStub(codeGenerator, cls):
         if cls in extends:
             extClass = extends[cls]
     ruleString = '{} {} {}'.format(lhs, ruleType, ' '.join(rhs))
-    codeGenerator.addStub(cls, fieldVars, startSymbol, lhs, extClass, ruleString, parseString)
+    stubs.addStub(cls, fieldVars, startSymbol, lhs, extClass, ruleString, parseString)
 
 def indent(n, iList):
     ### make a new list with the old list items prepended with 4*n spaces
@@ -869,11 +871,11 @@ def semFinishUp(stubs, destFlag='destdir', ext='.java'):
             death('cannot write to file {}'.format(fname))
         print('  {}{}'.format(cls, ext))
 
-def sem(nxt, codeGenerator, semFlag, destFlag, fileExt):
+def sem(nxt, stubs, semFlag, destFlag, fileExt):
     global argv
     # print('=== semantic routines')
     if not getFlag(semFlag):
-        stubs = codeGenerator.getStubs()
+        stubs = stubs.getStubs()
         semFinishUp(stubs, destFlag, fileExt)
         done()
     for line in nxt:
@@ -892,12 +894,12 @@ def sem(nxt, codeGenerator, semFlag, destFlag, fileExt):
         # check to see if line has the form Class:mod
         mod = mod.strip() # mod might be 'import', 'top', etc.
         try:
-            codeGenerator.addCodeToClass(cls, mod, codeString)
+            stubs.addCodeToClass(cls, mod, codeString)
         except StubDoesNotExistForHookException as e:
             deathLNO(str(e))
 
 
-    stubs = codeGenerator.getStubs()
+    stubs = stubs.getStubs()
     semFinishUp(stubs, destFlag, fileExt)
 
 

@@ -1,7 +1,7 @@
-from .base import CodeGenerator
+from .stubs import Stubs
 
 
-class PythonCodeGenerator(CodeGenerator):
+class PythonStubs(Stubs):
     def __init__(self, stubs=None):
         super().__init__(stubs)
 

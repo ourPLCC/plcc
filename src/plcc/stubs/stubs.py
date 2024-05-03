@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class CodeGenerator(ABC):
+class Stubs(ABC):
     def __init__(self, stubs):
         self._stubs = stubs.copy() if stubs is not None else {}
 
