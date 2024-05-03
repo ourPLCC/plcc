@@ -661,7 +661,8 @@ def makeStub(stubs, cls):
     if cls in rrule:
         ruleType = '**='
         sep = rrule[cls]
-        (fieldVars, parseString) = makeArbnoParse(cls, rhs, sep)
+        arbno = parseArbno(cls, rhs, cases)
+        (fieldVars, parseString) = makeArbnoParse(cls, arbno, sep)
         if sep != None:
             rhs = rhs + ['+{}'.format(sep)]
     else:
@@ -712,25 +713,41 @@ def makeParse(cls, rhs):
     parseString = '\n'.join(indent(2, parseList))
     return (fieldVars, parseString)
 
-def makeArbnoParse(cls, rhs, sep):
+
+def parseArbno(cls, rhs, cases):
+    rhsString = ' '.join(rhs)
+    fieldSet = set() # the set of field variable names for this RHS
+    itemTntFields = []
+    for item in rhs:
+        (tnt, field) = defangRHS(item)
+        if tnt is not None:
+            field += 'List'
+            if field in fieldSet:
+                deathLNO(
+                    'duplicate field name {} in RHS rule {}'.format(field, rhsString))
+            fieldSet.update({field})
+        itemTntFields.append( (item, tnt, field) )
+    if len(cases[cls]) == 0:
+        deathLNO('class {} is unreachable'.format(cls))
+    return itemTntFields
+
+
+def makeArbnoParse(cls, arbno, sep):
     # print('%%%%%% cls={} rhs="{}" sep={}'.format(cls, ' '.join(rhs), sep))
     global cases
     inits = []       # initializes the List fields
     args = []        # the arguments to pass to the constructor
     loopList = []    # the match/parse code in the Arbno loop
     fieldVars = []   # the field variable names (all Lists), to be returned
-    fieldSet = set() # the set of field variable names for this RHS
-    rhsString = ' '.join(rhs)
     # rhs = rhs[:-1]   # remove the last item from the grammar rule (which has an underscore item)
     # create the parse statements to be included in the loop
     switchCases = [] # the token cases in the switch statement
-    for item in rhs:
-        (tnt, field) = defangRHS(item)
+
+    for item, tnt, field in arbno:
         if tnt == None:
             loopList.append('scn$.match(Token.Match.{}, trace$);'.format(item))
             continue
         # field is either derived from tnt or is an annotated field name
-        field += 'List'
         if isTerm(tnt):
             # a token
             baseType = 'Token'
@@ -742,16 +759,10 @@ def makeArbnoParse(cls, rhs, sep):
         else:
             pass # cannot get here
         args.append(field)
-        if field in fieldSet:
-            deathLNO(
-                'duplicate field name {} in RHS rule {}'.format(field, rhsString))
-        fieldSet.update({field})
         fieldType = 'List<{}>'.format(baseType)
         fieldVars.append((field, fieldType))
         inits.append('{} {} = new ArrayList<{}>();'.format(fieldType, field, baseType))
     switchCases = []
-    if len(cases[cls]) == 0:
-        deathLNO('class {} is unreachable'.format(cls))
     for item in cases[cls]:
         switchCases.append('case {}:'.format(item))
     returnItem = 'return new {}({});'.format(cls, ', '.join(args))
