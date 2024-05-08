@@ -1,9 +1,8 @@
-class Specification:
-    def __init__(self, lexicalSpec, syntacticSpec, semanticSpecInJava, semanticSpecInPython):
-        self._lexicalSpecification = lexicalSpec
-        self._syntacticSpecification = syntacticSpec
-        self._semanticSpecificationInJava = semanticSpecInJava
-        self._semanticSpecificationInPython = semanticSpecInPython
+class Spec:
+    def __init__(self, lexicalSpec, syntacticSpec, semanticSpecs):
+        self._lexicalSpec = lexicalSpec
+        self._syntacticSpec = syntacticSpec
+        self._semanticSpecs = semanticSpecs
 
-    def getTermSpecification(self):
-        return self._lexicalSpecification.getTermSpecifications()
+    def getTermSpecs(self):
+        return self._lexicalSpec.getTermSpecs()

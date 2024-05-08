@@ -1,5 +1,3 @@
-
-class SemanticParser:
-
-    def parse(self, lines):
+class SemanticSpec():
+    def __init__(self):
         ...
