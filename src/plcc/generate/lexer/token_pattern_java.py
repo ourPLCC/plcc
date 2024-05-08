@@ -1,23 +1,37 @@
+from .file import File
+
+
+class TokenPatternJava(File):
+    def __init__(self):
+        super().__init__('Token.java')
+        self._termSpecs = None
+
+    def setTerminalSpecifications(self, termSpecs):
+        self._termSpecs = termSpecs
+
+    def buildContents(self):
+        enumDeclarations = self._buildEnumDeclarations(termSpecs)
+        self.contents =  f'''\
 import java.util.*;
 import java.util.regex.*;
 
 // Token class with match patterns (used with the built-in Scan class)
-public class Token {
+public class Token {{
 
     // patternFail is set to an error message string
     // if there are pattern compile errors
     public static String patternFail = null; //
     public static final Match $eof = Match.$EOF;
 
-    public enum TokType {
+    public enum TokType {{
         TOKEN,
         SKIP,
         LINE_TOGGLE,
         SPECIAL;
-    }
+    }}
 
-    public enum Match {
-%%Match%%
+    public enum Match {{
+{enumDeclarations}
         $ERROR (null),
         $EOF (null),
         $LINE (null);
@@ -27,103 +41,103 @@ public class Token {
         public Pattern cPattern = null; // compiled pattern
 
         // a SPECIAL token type or a TOKEN/LINE_TOGGLE
-        Match(String pattern) {
+        Match(String pattern) {{
             this(pattern, null);
-        } 
+        }}
 
         // legacy ??
-        Match(String pattern, boolean skip) {
+        Match(String pattern, boolean skip) {{
             this(pattern, TokType.SKIP);
-        }
+        }}
 
-        Match(String pattern, TokType tokType) {
-            if (pattern != null) {
-                if (tokType == TokType.SKIP) {
+        Match(String pattern, TokType tokType) {{
+            if (pattern != null) {{
+                if (tokType == TokType.SKIP) {{
                     this.tokType = TokType.SKIP;
-                } else if (pattern.length() >= 2 &&
-                           pattern.substring(0,2).equals("^^")) {
+                }} else if (pattern.length() >= 2 &&
+                           pattern.substring(0,2).equals("^^")) {{
                     pattern = pattern.substring(1);
                     this.tokType = TokType.LINE_TOGGLE;
-                } else {
+                }} else {{
                     this.tokType = TokType.TOKEN;
-                }
+                }}
                 this.pattern = pattern;
-                try {
+                try {{
                     this.cPattern = Pattern.compile(pattern, Pattern.DOTALL);
-                } catch (PatternSyntaxException e) {
-                    if (patternFail == null) {
+                }} catch (PatternSyntaxException e) {{
+                    if (patternFail == null) {{
                         patternFail = "Lexical specification errors() for";
-                    }
+                    }}
                     patternFail += (" " +this);
                     this.cPattern = null;
-                }
-            } else {
+                }}
+            }} else {{
                 this.tokType = TokType.SPECIAL; // SPECIAL
-            }
-        }
+            }}
+        }}
 
         // Use this to force loading Match class to compile patterns.
-        public static String init() {
+        public static String init() {{
             return patternFail; // returns null if no errors
-        }
-    }
+        }}
+    }}
 
     public Match match;      // token match
     public String str;       // this token's lexeme
     public int lno;          // the line number where this token was found
     public String line;      // the text line where this token appears
 
-    public Token() {
+    public Token() {{
         match = null;
         str = null;
         lno = 0;
         line = null;
-    }
+    }}
 
-    public Token(Match match, String str, int lno, String line) {
+    public Token(Match match, String str, int lno, String line) {{
         this.match = match;
         this.str = str;
         this.lno = lno;
         this.line = line;
-    }
+    }}
 
-    public Token(Match match, String str) {
+    public Token(Match match, String str) {{
         this(match, str, 0, null);
-    }
+    }}
 
-    public String toString() {
+    public String toString() {{
         return str;
-    }
+    }}
 
-    public String errString() {
-        switch(match) {
+    public String errString() {{
+        switch(match) {{
         case $EOF:
         case $ERROR:
             return str;
         default:
             return match.toString(); // just the match name
-        }
-    }
+        }}
+    }}
 
-    public boolean isEOF() {
+    public boolean isEOF() {{
         return this.match == $eof;
-    }
+    }}
 
-    public static void main(String [] args) {
+    public static void main(String [] args) {{
         String msg = Match.init();
-        if (msg != null) {
+        if (msg != null) {{
             System.out.println(msg);
             System.exit(1);
-        }
-        for (Match match: Match.values()) {
-            if (match.tokType == TokType.SPECIAL) {
+        }}
+        for (Match match: Match.values()) {{
+            if (match.tokType == TokType.SPECIAL) {{
                 System.out.println(
                     String.format("special "+match.toString())
                 );
                 continue; // not a real token
-            }
+            }}
             String what = "??";
-            switch(match.tokType) {
+            switch(match.tokType) {{
                 case SKIP:
                     what = "skip";
                     break;
@@ -133,13 +147,24 @@ public class Token {
                 case LINE_TOGGLE:
                     what = "token (line toggle)";
                     break;
-            }
+            }}
             System.out.println(
                 String.format("%s %s '%s'",what,match.toString(),match.pattern)
             );
-        }
-    }
+        }}
+    }}
 
 //Token//
 
-}
+}}
+'''
+
+    def _buildEnumDeclarations(self, termSpecs):
+        lineSeparator = ',\n'
+        endPunctuation = ''
+        lines = [f'{ts}' for ts in termSpecs]
+        lines = indentLines(2, lines)
+        string = lineSeparator.join(lines)
+        string += endPunctuation()
+        return string
+

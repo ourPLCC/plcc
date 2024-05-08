@@ -26,11 +26,15 @@ import io
 import shutil
 import tempfile
 
+import plcc.version
+from plcc.cl import CommandLineProcessor
+from plcc.parse.reader import SpecificationReader
+
 from plcc.stubs.java import JavaStubs
 from plcc.stubs.python import PythonStubs
 from plcc.stubs.stubs import StubDoesNotExistForHookException
 
-argv = sys.argv[1:] # skip over the command-line argument
+from plcc.specification_file import SpecificationParser
 
 
 # current file information
@@ -74,252 +78,92 @@ def debug2(msg):
 def LIBPLCC():
     return str(pathlib.Path(__file__).parent)
 
-def main():
-    global argv
-    plccInit()
-    while argv:
-        if argv[0] == '--':
-            # just continue with the rest of the command line
-            argv = argv[1:]
-            break
-        (flag, ee, val) = argv[0].partition("=")
-        # print('>>> flag={} val={}'.format(flag, val))
-        flag = flag.strip()
-        if  flag[:2] == '--':
-            key = flag[2:].strip()
-            if key == '':
-                # no key
-                death('illegal command line parameter')
-            val = val.strip()
-            if ee:
-                # map key to val, using processFlag
-                try:
-                    processFlag('{}={}'.format(key, val))
-                except Exception as msg:
-                    death(msg)
-            else:
-                processFlag(key)
-            argv = argv[1:]
-        else:
-            break
 
-    # Handle --version option.
-    if 'version' in flags and flags['version']:
-        import plcc.version
+class Main():
+    def __init__(self):
+        self._STDT = ['ILazy','IMatch','IScan','ITrace', 'Trace', 'PLCCException', 'Scan']
+        self._STDP = ['ProcessFiles','Parse','Rep','ParseJsonAst']
+        self._STD = self._STDT + self._STDP
+        self._STD.append('Token')
+        self._flags = self._getDefaultFlags()
+        self._specificationFilePath = None
+
+    def _getDefaultFlags(self):
+        # file-related flags -- can be overwritten
+        # by a grammar file '!flag=...' spec
+        # or by a '--flag=...' command line argument
+        flags = {}
+        for fname in self._STD:
+            flags[fname] = fname
+        flags['libplcc'] = LIBPLCC()
+        flags['Token'] = True         # generate scanner-related files
+        # behavior-related flags
+        flags['debug'] = 0                  # default debug value
+        flags['destdir'] = 'Java'           # the default destination directory
+        flags['python_destdir'] = 'Python'  # default destination for fourth section semantics (Python)
+        flags['pattern'] = True             # create a scanner that uses re. patterns
+        flags['LL1'] = True                 # check for LL(1)
+        flags['parser'] = True              # create a parser
+        flags['semantics'] = True           # create java semantics routines
+        flags['python_semantics'] = True    # create python semantics routines
+        flags['nowrite'] = False            # when True, produce *no* file output
+        flags['version'] = False            # when True, print the version and exit.
+        return flags
+
+    def main(self, argv):
+        try:
+            self._processCommandLine(argv)
+            if self._flags['version']:
+                self._printVersion()
+            else:
+                self._loadSpecification()
+                self._generateLanguageSystem()
+        except ParseException as e:
+            self._handleParseException(e)
+        except Exception as e:
+            self._handleException(e)
+
+    def _processCommandLine(self, argv):
+        cl = CommandLineProcessor()
+        cl.process(argv)
+        fs = cl.getFlags()
+        self._flags.update(fs)
+        self._specificationFilePath = cl.getSpecificationFilePath()
+
+    def _printVersion(self):
         print(plcc.version.get_version())
-        sys.exit(0)
 
-    jsonAstInit()
+    def _loadSpecification(self):
+        plcc.spec.load.Loader().load(self._specificationFilePath)
 
-    nxt = nextLine()     # nxt is the next line generator
-    lex(nxt)    # lexical analyzer generation
-    java = JavaStubs()
-    python = PythonStubs()
-    par(nxt, java, python)    # LL(1) check and parser generation
-    sem(nxt, java, destFlag='destdir', semFlag='semantics', fileExt='.java')
-    sem(nxt, python, destFlag='python_destdir', semFlag='python_semantics', fileExt='.py')
-    done()
+    def _generateLanguageSystem(self):
+        builder = Builder()
+        builder.build(self._specification)
 
-def plccInit():
-    global flags, argv, STD, STDT, STDP
-    STDT = ['ILazy','IMatch','IScan','ITrace', 'Trace', 'PLCCException', 'Scan']
-    STDP = ['ProcessFiles','Parse','Rep']
-    STD = STDT + STDP
-    STD.append('Token')
-    # file-related flags -- can be overwritten
-    # by a grammar file '!flag=...' spec
-    # or by a '--flag=...' command line argument
-    for fname in STD:
-        flags[fname] = fname
-    flags['libplcc'] = LIBPLCC()
-    flags['Token'] = True         # generate scanner-related files
-    # behavior-related flags
-    flags['debug'] = 0                  # default debug value
-    flags['destdir'] = 'Java'           # the default destination directory
-    flags['python_destdir'] = 'Python'  # default destination for fourth section semantics (Python)
-    flags['pattern'] = True             # create a scanner that uses re. patterns
-    flags['LL1'] = True                 # check for LL(1)
-    flags['parser'] = True              # create a parser
-    flags['semantics'] = True           # create java semantics routines
-    flags['python_semantics'] = True    # create python semantics routines
-    flags['nowrite'] = False            # when True, produce *no* file output
+        if self._flags['nowrite']:
+            return
+        if not self._flags['Token']:
+            return # do not create any automatically generated scanner-related files
 
-def jsonAstInit():
-    global flags, STD, STDP
-    if 'json_ast' in flags and flags['json_ast']:
-        if 'ParseJsonAst' not in STDP:
-            if 'ParseJsonAst' not in STD:
-                STDP.append('ParseJsonAst')
-                flags['ParseJsonAst'] = 'ParseJsonAst'
+        generator.generate(builder)
 
-def lex(nxt):
-    # print('=== lexical specification')
-    # Handle any flags appearing at beginning of lexical spec section;
-    # turn off when all flags have been processed
-    flagSwitch = True # turn off after all the flags have been processed
-    for line in nxt:
-        line = re.sub(r'\s+#.*', '', line)   # remove trailing comments ...
-        # NOTE: a token that has a substring like this ' #' will mistakenly be
-        # considered as a comment. Use '[ ]#' instead
-        line = line.strip()
-        if len(line) == 0: # skip empty lines
-            continue
-        if line[0] == '#': # skip comments
-            continue
-        if line[0] == '!': # handle a PLCC compile-time flag
-            if flagSwitch:
-                line = line[1:]
-                # print ('>>> flag line: {}'.format(line))
-                try:
-                    processFlag(line)
-                except Exception as msg:
-                    deathLNO(msg)
-                continue
-            else:
-                deathLNO('all PLCC flags must occur before token/skip specs')
-        flagSwitch = False # stop accepting compile-time flags
-        if line == '%':
-            break; # end of lexical specification section
-        # print ('>>> {}'.format(line))
-        jpat = '' # the Java regular expression pattern for this skip/term
-        pFlag = getFlag('pattern')
-        # only process patterns if the 'pattern' flag is True
-        if pFlag:
-            # handle capturing the match part and replacing with empty string
-            def qsub(match):
-                nonlocal jpat
-                if match:
-                    jpat = match.group(1)
-                    # print('>>> match found: jpat={}'.format(jpat))
-                return ''
-            pat = r"\s'(.*)'$"
-            # print('>>> q1 pat={}'.format(pat))
-            line = re.sub(pat, qsub, line)
-            if jpat:
-                # add escapes to make jpat into a Java string
-                jpat = re.sub(r'\\', r'\\\\', jpat)
-                jpat = re.sub('"', r'\\"', jpat)
-                # print('>>> q1 match found: line={} jpat={}'.format(line,jpat))
-                pass
-            else:
-                pat = r'\s"(.*)"$'
-                # print('>>> q2 pat={}'.format(pat))
-                line = re.sub(pat, qsub, line)
-                if jpat:
-                    # print('>>> q2 match found: line={} jpat={}'.format(line,jpat))
-                    pass
-                else:
-                    deathLNO('No legal pattern found!')
-            jpat = '"' + jpat + '"'  # quotify
-            # print('>>> line={} jpat={}'.format(line,jpat))
-            # make sure there are no spurious single
-            # or double quotes remaining in line
-            if re.search("[\"']", line):
-                deathLNO('Puzzling skip/token pattern specification')
-        # next determine if it's a skip or token specification
-        result = line.split()
-        rlen = len(result)
-        if rlen >= 3:
-            deathLNO('Illegal skip/token specification')
-        if rlen == 0:
-            deathLNO('No skip/token symbol')
-        if rlen == 1:
-            result = ['token'] + result # defaults to a token
-        what = result[0]  # 'skip' or 'token'
-        name = result[1]  # the term/skip name
-        if not isTerm(name):
-            deathLNO(name + ': illegal token name')
-        if name in term:
-            deathLNO(name + ': duplicate token/skip name')
-        term.update({name})
-        if what == 'skip':
-            skip = ', TokType.SKIP'   # Java constant
-        elif what == 'token':
-            skip = ''
-        else:
-            deathLNO('No skip/token specification found')
-        if pFlag:
-            push(termSpecs, '{} ({}{})'.format(name, jpat, skip))
-        else:
-            push(termSpecs, name)
-    lexFinishUp()
 
-def lexFinishUp():
-    global termSpecs, STDT
-    if len(termSpecs) == 0:
-        death('No tokens specified -- quitting')
-    # first create the destination (Java) directory if necessary
-    if getFlag('nowrite'):
-        # don't write any files
-        return
-    dst = getFlag('destdir')
-    if not dst:
-        death('illegal destdir flag value')
-    try:
-        os.mkdir(str(dst))
-        debug('[lexFinishUp] ' + dst + ': destination subdirectory created')
-    except FileExistsError:
-        debug('[lexFinishUp] ' + dst + ': destination subdirectory exists')
-    except:
-        death(dst + ': error creating destination subdirectory')
+    def _orphans_from_old_main():
+        java = JavaStubs()
+        python = PythonStubs()
+        par(nxt, java, python)    # LL(1) check and parser generation
+        sem(nxt, java, destFlag='destdir', semFlag='semantics', fileExt='.java')
+        sem(nxt, python, destFlag='python_destdir', semFlag='python_semantics', fileExt='.py')
+        done()
 
-    if not getFlag('Token'):
-        return # do not create any automatically generated scanner-related files
-    libplcc = getFlag('libplcc')
-    std = pathlib.Path(libplcc) / 'lib' / 'Std'
-    try:
-        os.mkdir(str(std))
-    except FileExistsError:
-        pass
-    except:
-        death(str(std) + ': cannot access directory')
-    fname = '{}/{}'.format(dst, 'Token.java')
-    try:
-        tokenFile = open(fname, 'w')
-    except:
-        death('Cannot open ' + fname + ' for writing')
-    if getFlag('pattern'):
-        # use the Token.pattern library file to create Token.java
-        fname = 'Token.pattern'
-        try:
-            tokenTemplate = open('{}/{}'.format(std, fname))
-        except:
-            death(fname + ': cannot read library file')
-        for line in tokenTemplate:
-            # note that line keeps its trailing newline
-            if re.match('^%%Match%%', line):
-                for ts in termSpecs:
-                    print('        ' + ts + ',', file=tokenFile)
-            else:
-                print(line, file=tokenFile, end='')
-        tokenTemplate.close()
-    else:
-        # use the Token.template file to create Token.java
-        fname = 'Token.template'
-        try:
-            tokenTemplate = open('{}/{}'.format(std, fname))
-        except:
-            death(fname + ': cannot read library file')
-        for line in tokenTemplate:
-            # note that line keeps its trailing newline
-            if re.match('^%%Match%%', line):
-                tssep = ''
-                for ts in termSpecs:
-                    print(tssep + '        ' + ts, file=tokenFile, end='')
-                    tssep = ',\n'
-                print(';', file=tokenFile)
-            else:
-                print(line, file=tokenFile, end='')
-        tokenTemplate.close()
-    tokenFile.close()
-    # copy the Std token-related library files to the destination directory
-    for fname in STDT:
-        if getFlag(fname):
-            debug('[lexFinishUp] copying {} from {} to {} ...'.format(fname, std, dst))
-            try:
-                shutil.copy('{}/{}.java'.format(std, fname), '{}/{}.java'.format(dst, fname))
-            except:
-                death('Failure copying {} from {} to {}'.format(fname, std, dst))
+    def _handleParseException(self, exception):
+        m = f'{self._line.line:4} [{self._line.file}]: {self._message}\nline: {self._line.text}'
+        print(m, file=sys.stderr)
+        sys.exit(1)
+
+    def _handleException(self, exception):
+        print(str(exception), file=sys.stderr)
+        sys.exit(1)
 
 def par(nxt, java, python):
     debug('[par] processing grammar rule lines')
@@ -1021,35 +865,6 @@ def nextLineGen(fname):
         yield Line
     f.close
 
-def processFlag(flagSpec):
-    global flags
-    # flagSpec has been stripped
-    (key,ee,val) = flagSpec.partition('=')
-    key = key.rstrip()
-    if re.match(r'[a-zA-Z]\w*$', key) == None:
-        raise Exception('malformed flag specification: !' + flagSpec)
-    val = val.lstrip()
-    # '!key' makes key true, whereas '!key=' makes key false
-    if ee == '':     # missing '='
-        val = True
-    elif val == '':  # empty val
-        val = False
-    # treat the debug flag specially
-    if key == 'debug':
-        if val == False:
-            val = 0
-        elif val == True:
-            val = 1
-        else:
-            try:
-                val = int(val)
-                if val < 0:
-                    val = 0
-            except:
-                # deathLNO('improper debug flag value')
-                raise Exception('improper debug flag value')
-    flags[key] = val
-    # print(flags)
 
 def getFlag(s):
     global flags
@@ -1059,8 +874,7 @@ def getFlag(s):
         return None
 
 def death(msg):
-    print(msg, file=sys.stderr)
-    exit(1)
+    raise Exception(msg)
 
 def deathLNO(msg):
     global Lno, Fname, Line
