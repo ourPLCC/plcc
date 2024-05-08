@@ -1,14 +1,16 @@
 from .error import ParseError
 
 
-def parseSyntacticSpec(sectionLines):
-    p = SyntacticParser()
+def parseSyntacticSpec(sectionLines, lexicalSpec):
+    p = SyntacticParser(lexicalSpec)
     p.parse(sectionLines)
     return p.getSyntacticSpec()
 
 
 class SyntacticParser():
-    def __init__(self):
+    def __init__(self, lexicalSpec):
+        self._lexicalSpec = lexicalSpec
+
         self._reservedNames = [
             'ILazy',
             'IMatch',
@@ -34,6 +36,7 @@ class SyntacticParser():
                             # one for each grammar rule
         self._terminalSet = set()
         self._nonterminalSet = set()
+
 
     def parse(self, sectionLines):
         for line_obj in sectionLines:
@@ -214,17 +217,12 @@ class SyntacticParser():
         else: # item must be a bare token
             if not self._isTerm(item):
                 raise Exception(f'malformed BNF item {item}')
-            if not item in self._terminalSet:
+            if not self._lexicalSpec.isTerminal(item):
                 raise Exception(f'unknown token name "{item}" in BNF rule')
             return (None, None)
 
     def _isTerm(self, term):
         return re.match(r'[A-Z][A-Z\d_$]*$', term) or term == '$LINE'
-
-    def _isNonterm(self, nt):
-        if nt == 'void' or len(nt) == 0:
-            return False
-        return re.match(r'[a-z]\w*#?$', nt)
 
     def _isClass(self, cls):
         return re.match(r'[A-Z][\$\w]*$', cls) or cls == 'void'
@@ -235,6 +233,7 @@ class SyntacticParser():
     def _nt2cls(self, nt):
         # return the class name of the nonterminal nt
         return nt[0].upper() + nt[1:]
+
 
     def getSyntacticSpec(self):
         return SyntacticSpec()

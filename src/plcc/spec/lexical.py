@@ -1,8 +1,7 @@
 class LexicalSpec():
-    def __init__(self, termSpecs):
-        self._termSpecs = termSpecs
+    def __init__(self, termSpecs, termSet):
+        self._termSpecs = termSpecs.copy()
+        self._termSet = termSet.copy()
 
-    def getTermSpecs(self):
-        return self._termSpecs
-
-
+    def isTerminal(self, candidate):
+        return candidate in self._termSet

@@ -14,7 +14,7 @@ def parseSpec(specLines):
         lexicalSpec = parseLexicalSpec(section)
     if sections:
         section = sections.pop(0)
-        syntacticSpec = parseSyntacticSpec(section)
+        syntacticSpec = parseSyntacticSpec(section, lexicalSpec)
     while sections:
         section = sections.pop(0)
         s = parseSemantics(section)

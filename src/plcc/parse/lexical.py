@@ -1,12 +1,12 @@
 import re
 
 from .error import ParseError
-from .spec import LexicalSpec
+from ..lexical import LexicalSpec
 
 
 def parseLexicalSpec(sectionLines):
-    termSpecs = parse(sectionLines)
-    return LexicalSpec(termSpecs)
+    termSpecs, termSet = parse(sectionLines)
+    return LexicalSpec(termSpecs, termSet)
 
 
 def parse(sectionLines):
@@ -15,7 +15,7 @@ def parse(sectionLines):
     considered as a comment. Use '[ ]#' instead.
     '''
     shouldProcessPatterns = True
-    term = set()
+    termSet = set()
     termSpecs = []
 
     # Handle any flags appearing at beginning of lexical spec section;
@@ -80,9 +80,9 @@ def parse(sectionLines):
         name = result[1]  # the term/skip name
         if not isTerm(name):
             raise ParseError(line_obj, f'{name}: illegal token name')
-        if name in term:
+        if name in termSet:
             raise ParseError(line_obj, f'{name}: duplicate token/skip name')
-        term.update({name})
+        termSet.update({name})
         if what == 'skip':
             skip = ', TokType.SKIP'   # Java constant
         elif what == 'token':
@@ -93,4 +93,4 @@ def parse(sectionLines):
             push(termSpecs, '{} ({}{})'.format(name, jpat, skip))
         else:
             termSpecs.append(name)
-    return termSpecs
+    return termSpecs, termSet
