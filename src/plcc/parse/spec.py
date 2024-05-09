@@ -4,6 +4,9 @@ from .syntactic import parseSyntacticSpec
 from .semantic import parseSemanticSpec
 
 
+from ..spec.spec import Spec
+
+
 def parseSpec(specLines):
     sections = parseSections(lines)
     lexicalSpec = None

@@ -181,20 +181,6 @@ def push(struct, item):
     struct.append(item)
 
 
-def removeOffset(ln, offset):
-    check = ln.strip()
-    if len(check) == 0:
-        return ln
-    s = re.sub(offset,"",ln,count=1)
-    return s
-
-def getOffset(line):
-    check = line.lstrip()
-    if len(check) == 0 or check[0] == '#':
-        return None
-    s = re.search(r"\S", line).start()
-    return line[0:s]
-
 class CommandLineProcessor():
     def __init__(self):
         self._flags = {}

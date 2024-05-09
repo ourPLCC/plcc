@@ -1,5 +1,6 @@
 import re
 
+
 from .error import ParseError
 from ..lexical import LexicalSpec
 

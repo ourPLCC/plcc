@@ -23,14 +23,12 @@ class Lexer():
     def _copyFiles(self):
         for file in files('.lib'):
             if file.is_file():
+                f = file.as_file()
                 try:
-                    f = file.as_file()
                     shutil.copy(f, self._destinationDirectory / f.name)
                 except:
-                    f = fname
-                    s = str(self._sourceDirectory)
                     d = str(self._destinationDirectory)
-                    raise Exception(f'Failure copying {f} from {s} to {d}')
+                    raise Exception(f'Failure copying {f} to {d}')
 
     def _createTokenFile(self):
         self._builder.getTokenFile().write(self._destinationDirectory)

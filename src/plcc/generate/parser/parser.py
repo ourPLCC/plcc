@@ -1,39 +1,57 @@
-def _orphans_from_old_parFinishUp():
-
-    if getFlag('nowrite'):
-        return
-    # copy the Std parser-related files
-    dst = getFlag('destdir')
-    libplcc = getFlag('libplcc')
-    std = pathlib.Path(libplcc) / 'lib' / 'Std'
-    for fname in STDP:
-        if getFlag(fname):
-            debug('[parFinishUp] copying {} from {} to {} ...'.format(fname, std, dst))
-            try:
-                shutil.copy('{}/{}.java'.format(std, fname), '{}/{}.java'.format(dst, fname))
-            except:
-                death('Failure copying {} from {} to {}'.format(fname, std, dst))
-
-    buildStubsAndStart(java, python, fields, derives, cases, startSymbol)
+from importlib.resource import files
 
 
-def buildStubsAndStart(java, python, fields, derives, cases, startSymbol):
-    buildStubs(java, fields, derives, cases, startSymbol)
-    buildStubs(python, fields, derives, cases, startSymbol)
-    buildStart()
+def generateParser(spec, destPath):
+    g = ParserGenerator()
+    g.initSpec(spec)
+    g.initDestinationPath(destPath)
+    g.generate()
 
 
+class ParserGenerator():
+    def __init__(self):
+        self._spec = None
+        self._destinationPath = None
 
+    def initSpec(self, spec):
+        self._spec = spec
 
+    def initDestinationPath(self, destPath):
+        self._destinationPath = destPath
 
-class DuplicateAbstractStubException(Exception):
-    pass
+    def generate(self):
+        self._copyFiles()
+        self._composeStaticParseMethods()
+        self._composeAstClassesWithParseMethods()
+        self._composeStartClass()
+        self._generateAstClasses()
+        self._generateStartClass()
 
-class UnreachableClassException(Exception):
-    pass
+    def _copyFiles(self):
+        for file in files('.lib'):
+            if file.is_file():
+                f = file.as_file()
+                try:
+                    shutil.copy(f, self._destinationDirectory / f.name)
+                except:
+                    d = str(self._destinationDirectory)
+                    raise Exception(f'Failure copying {f} to {d}')
 
-class DuplicateStubException(Exception):
-    pass
+    def _composeStaticParseMethods(self):
+        ...
+
+    def _composeAstClassesWithParseMethods(self):
+        ...
+
+    def _composeStartClass(self):
+        ...
+
+    def _generateAstClasses(self):
+        ...
+
+    def _generateStartClass(self):
+        ...
+
 
 def buildStubs(stubs, fields, derives, cases, startSymbol):
     for cls in derives:
@@ -133,6 +151,8 @@ def parseArbno(cls, rhs, cases):
         deathLNO('class {} is unreachable'.format(cls))
     return itemTntFields
 
+
+##### KEEP BELOW HERE FOR NOW
 
 def makeArbnoParse(cls, arbno, sep):
     # print('%%%%%% cls={} rhs="{}" sep={}'.format(cls, ' '.join(rhs), sep))

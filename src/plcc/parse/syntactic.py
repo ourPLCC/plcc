@@ -1,10 +1,13 @@
 from .error import ParseError
+from ..spec.syntactic import SyntacticSpec
 
 
 def parseSyntacticSpec(sectionLines, lexicalSpec):
     p = SyntacticParser(lexicalSpec)
     p.parse(sectionLines)
-    return p.getSyntacticSpec()
+    spec = p.getSyntacticSpec()
+    spec.validate()
+    return spec
 
 
 class SyntacticParser():
@@ -79,7 +82,7 @@ class SyntacticParser():
             if sep[0] == '+':
                 # must be a separated list
                 sep = sep[1:]   # remove the leading '+' from the separator
-                if not self._isTerm(sep):
+                if not self._isValidTerm(sep):
                     raise Exception(f'separator {sep} in repeating rule must be a bare Token')
                 rhs.pop()       # remove separator from the rhs list
             else:
@@ -108,7 +111,7 @@ class SyntacticParser():
         if cls == 'void':
             # this rule is *generated* by a repeating rule,
             # so there are no further class-related actions to do
-            saveRule(nt, lhs, None, rhs)
+            self._saveRule(nt, lhs, None, rhs)
             return
         if self._startSymbol == '':
             self._startSymbol = nt   # the first lhs nonterm is the start symbol
@@ -157,10 +160,10 @@ class SyntacticParser():
         # lhs must be either <nt> or <nt>:?cls
         # where nt is a nonterminal and cls is a class name
         nt, cls = self._defang(lhs)
-        if not self._isNonterm(nt):
+        if not self._isValidNonterminal(nt):
             raise Exception(f'illegal nonterminal "<{nt}>" in BNF LHS {lhs}')
         # nt must be a nonterm here
-        if cls != None and not self._isClass(cls):
+        if cls != None and not self._isValidClass(cls):
             raise Exception(f'illegal class name "{cls}" in BNF LHS {lhs}')
         return (nt, cls)
 
@@ -174,14 +177,14 @@ class SyntacticParser():
         if tnt == None:
             # item is a bare token
             return (None, None)
-        if field != None and not self._isID(field):
+        if field != None and not self._isValidID(field):
             raise Exception(f'illegal field name "{field}" in BNF RHS item {item}')
         # at this point, tnt is either a token or nonterm
-        if self._isTerm(tnt):
+        if self._isValidTerm(tnt):
             # tnt is a token
             if field == None:
                 field = tnt.lower() # derive the field name from the token name
-        elif self._isNonterm(tnt):
+        elif self._isValidNonterminal(tnt):
             # tnt is a nonterminal
             if field == None:
                 field = tnt # set the field name to the nonterminal name
@@ -198,7 +201,7 @@ class SyntacticParser():
             yyy = m.group(2)
             if xxx == '':
                 xxx = '$LINE';
-            elif self._isTerm(xxx) or self._isNonterm(xxx):
+            elif self._isValidTerm(xxx) or self._isValidNonterminal(xxx):
                 pass
             else:
                 raise Exception(f'malformed "<{xxx}>" in BNF item {item}')
@@ -209,35 +212,160 @@ class SyntacticParser():
                 yyy = yyy[1:] # ditch the ':' part of yyy
             if yyy == '':
                 raise Exception(f'missing annotation in BNF item {item}')
-            if self._isClass(yyy) or self._isID(yyy):
+            if self._isValidClass(yyy) or self._isValidID(yyy):
                 pass
             else:
                 raise Exception(f'malformed annotation "{yyy}" in BNF item {item}')
             return (xxx, yyy)
         else: # item must be a bare token
-            if not self._isTerm(item):
+            if not self._isValidTerm(item):
                 raise Exception(f'malformed BNF item {item}')
             if not self._lexicalSpec.isTerminal(item):
                 raise Exception(f'unknown token name "{item}" in BNF rule')
             return (None, None)
 
-    def _isTerm(self, term):
+    def _isValidTerm(self, term):
         return re.match(r'[A-Z][A-Z\d_$]*$', term) or term == '$LINE'
 
-    def _isClass(self, cls):
+    def _isValidClass(self, cls):
         return re.match(r'[A-Z][\$\w]*$', cls) or cls == 'void'
 
-    def _isID(self, item):
+    def _isValidID(self, item):
         return re.match(r'[a-z]\w*#?$', item)
+
+    def _isValidNonterminal(self, nt):
+        if nt == 'void' or len(nt) == 0:
+            return False
+        return re.match(r'[a-z]\w*#?$', nt)
 
     def _nt2cls(self, nt):
         # return the class name of the nonterminal nt
         return nt[0].upper() + nt[1:]
 
-
     def getSyntacticSpec(self):
-        return SyntacticSpec()
+        spec = SyntacticSpec()
+        spec.initDerives(self._derives)
+        spec.initExtends(self._extends)
+        spec.initNonterminals(self._nonterminalSet)
+        spec.initRules(self._rules)
+        spec.initStartSymbol(self._startSymbol)
+        return spec
 
 
-class SyntacticSpec:
-    ...
+
+
+def buildStubs(stubs, fields, derives, cases, startSymbol):
+    for cls in derives:
+        # make parser stubs for all abstract classes
+        if cls in stubs.getStubs():
+            raise DuplicateAbstractStubException(f'{cls}')
+        for c in derives[cls]:
+            if len(cases[c]) == 0:
+                raise UnreachableClassException(f'{c}')
+        stubs.addAbstractStub(cls, derives, cases, startSymbol, caseIndentLevel=2, ext=' extends _Start')
+
+    for cls in fields:
+        # make parser stubs for all non-abstract classes
+        if cls in stubs.getStubs():
+            raise DuplicateStubException(f'{cls}')
+        makeStub(stubs, cls)
+
+
+def makeStub(stubs, cls):
+    global fields, extends, rrule
+    # make a stub for the given non-abstract class
+    debug('[makeStub] making stub for non-abstract class {}'.format(cls))
+    sep = False
+
+    (lhs, rhs) = fields[cls]
+    # parsed_fields[cls]
+
+    extClass = '' # assume not an extended class
+    # two cases: either cls is a repeating rule, or it isn't
+    if cls in rrule:
+        ruleType = '**='
+        sep = rrule[cls]
+        arbno = parseArbno(cls, rhs, cases)
+        (fieldVars, parseString) = makeArbnoParse(cls, arbno, sep)
+        if sep != None:
+            rhs = rhs + ['+{}'.format(sep)]
+    else:
+        ruleType = '::='
+        (fieldVars, parseString) = makeParse(cls, rhs)
+        # two sub-cases: either cls is an extended class (with abstract base class) or it's a base class
+        if cls in extends:
+            extClass = extends[cls]
+    ruleString = '{} {} {}'.format(lhs, ruleType, ' '.join(rhs))
+    stubs.addStub(cls, fieldVars, startSymbol, lhs, extClass, ruleString, parseString)
+
+def indent(n, iList):
+    ### make a new list with the old list items prepended with 4*n spaces
+    indentString = '    '*n
+    newList = []
+    for item in iList:
+        newList.append('{}{}'.format(indentString, item))
+    # print('### str={}'.format(str))
+    return newList
+
+def makeParse(cls, rhs):
+    args = []
+    parseList = []
+    fieldVars = []
+    fieldSet = set()
+    rhsString = ' '.join(rhs)
+    for item in rhs:
+        (tnt, field) = defangRHS(item)
+        if tnt == None:
+            # item must be a bare token -- just match it
+            parseList.append('scn$.match(Token.Match.{}, trace$);'.format(item))
+            continue
+        if field in fieldSet:
+            deathLNO('duplicate field name {} in rule RHS {}'.format(field, rhsString))
+        fieldSet.update({field})
+        args.append(field)
+        if isTerm(tnt):
+            fieldType = 'Token'
+            parseList.append(
+                'Token {} = scn$.match(Token.Match.{}, trace$);'.format(field, tnt))
+        else:
+            fieldType = nt2cls(tnt)
+            parseList.append(
+                '{} {} = {}.parse(scn$, trace$);'.format(fieldType, field, fieldType))
+        fieldVars.append((field, fieldType))
+    parseList.append('return new {}({});'.format(cls, ', '.join(args)))
+    debug('[makeParse] parseList={}'.format(parseList))
+    parseString = '\n'.join(indent(2, parseList))
+    return (fieldVars, parseString)
+
+
+    def parseArbno(cls, rhs, cases):
+        rhsString = ' '.join(rhs)
+        fieldSet = set() # the set of field variable names for this RHS
+        itemTntFields = []
+        for item in rhs:
+            (tnt, field) = defangRHS(item)
+            if tnt is not None:
+                field += 'List'
+                if field in fieldSet:
+                    deathLNO(
+                        'duplicate field name {} in RHS rule {}'.format(field, rhsString))
+                fieldSet.update({field})
+            itemTntFields.append( (item, tnt, field) )
+        if len(cases[cls]) == 0:
+            deathLNO('class {} is unreachable'.format(cls))
+        return itemTntFields
+
+
+@dataclass
+class TNT:
+    original: str
+    tnt: str
+    field: str
+
+
+@dataclass
+class Rule:
+    lhs_tnt: TNT
+    type: str
+    rhs_tnts: [TNT]
+    sep: str
