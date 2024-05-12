@@ -28,6 +28,7 @@ distribution = true
 [tool.pdm.dev-dependencies]
 dev = [
     "pytest>=8.2.0",
+    "pyfakefs>=5.4.1",
 ]
 
 [tool.pdm.scripts]

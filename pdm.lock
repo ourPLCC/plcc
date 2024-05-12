@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:9cbdf5f4062678ffa98b0311c1562499ee0587cfd6cdc96d211e8d735bbd4263"
+content_hash = "sha256:5c4238793acbb6b8c2fb668e78691832dc662028638b9613c0c9fd62a46f3031"
 
 [[package]]
 name = "colorama"
@@ -62,6 +62,17 @@ groups = ["dev"]
 files = [
     {file = "pluggy-1.5.0-py3-none-any.whl", hash = "sha256:44e1ad92c8ca002de6377e165f3e0f1be63266ab4d554740532335b9d75ea669"},
     {file = "pluggy-1.5.0.tar.gz", hash = "sha256:2cffa88e94fdc978c4c574f15f9e59b7f4201d439195c3715ca9e2486f1d0cf1"},
+]
+
+[[package]]
+name = "pyfakefs"
+version = "5.4.1"
+requires_python = ">=3.7"
+summary = "pyfakefs implements a fake file system that mocks the Python file system modules."
+groups = ["dev"]
+files = [
+    {file = "pyfakefs-5.4.1-py3-none-any.whl", hash = "sha256:21d6a3276d9c964510c85cef0c568920d53ec9033da9b2a2c616489cedbe700a"},
+    {file = "pyfakefs-5.4.1.tar.gz", hash = "sha256:20cb51e860c2f3ff83859162ad5134bb8b0a1e7a81df0a18cfccc4862d0d9dcc"},
 ]
 
 [[package]]
