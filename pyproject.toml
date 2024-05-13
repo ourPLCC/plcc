@@ -29,6 +29,7 @@ distribution = true
 dev = [
     "pytest>=8.2.0",
     "pyfakefs>=5.4.1",
+    "mypy>=1.10.0",
 ]
 
 [tool.pdm.scripts]

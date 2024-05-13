@@ -1,13 +1,14 @@
+from __future__ import annotations
 from dataclasses import dataclass, replace
 
 
 @dataclass(frozen=True)
 class Line:
-    path: str = None
-    number: int = None
-    string: str = None
+    path: str
+    number: int
+    string: str
     isInBlock: bool = False
 
-    def markIsInBlock(self):
+    def markIsInBlock(self) -> Line:
         return replace(self, isInBlock=True)
 
