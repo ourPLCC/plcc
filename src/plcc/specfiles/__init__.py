@@ -1,6 +1,10 @@
 from __future__ import annotations
 import pathlib
 from typing import Iterator, Iterable
+import gettext
+
+
+_ = gettext.gettext
 
 
 from .lines import Line
@@ -37,11 +41,11 @@ class SpecFile(Iterable[Line]):
 
     def _must_be_a_str(self, x: str) -> None:
         if not isinstance(x, str):
-            raise TypeError('Must be a str.')
+            raise TypeError(_('Must be a str.'))
 
     def _must_contain_a_non_whitespace(self, x: str) -> None:
         if x.strip() == '':
-            raise ValueError('Must contain a non-whitespace.')
+            raise ValueError(_('Must contain a non-whitespace.'))
 
     def __iter__(self) -> Iterator[Line]:
         return self
