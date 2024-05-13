@@ -9,9 +9,10 @@ from .lines import Line
 
 
 class Includer(Iterable[Line]):
-    def __init__(self, blockMarker: BlockMarker, includePattern: str = r'^%include\s+(.+)(#.*)?'):
+    def __init__(self, blockMarker: BlockMarker, includePattern: str):
         self._includePattern = includePattern
         self._includeStack = [blockMarker.getPath()]
+        self._blockMarker = blockMarker
         self._lines = self._readLines(blockMarker)
 
     def _readLines(self, file: Iterator[Line]) -> Iterator[Line]:
@@ -40,7 +41,7 @@ class Includer(Iterable[Line]):
 
     def _includeFile(self, includePath: str) -> Iterator[Line]:
         self._includeStack.append(includePath)
-        yield from self._readLines(BlockMarker(File(includePath)))
+        yield from self._readLines(self._blockMarker.new(File(includePath)))
         self._includeStack.pop()
 
     def __iter__(self) -> Iterator[Line]:

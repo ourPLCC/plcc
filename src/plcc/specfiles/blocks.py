@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Iterator, Optional, Iterable
 
 
@@ -6,14 +7,8 @@ from .lines import Line
 
 
 class BlockMarker(Iterable[Line]):
-    def __init__(self, file: File, brackets: Optional[dict[str,str]] = None):
-        if brackets is not None:
-            self._brackets = brackets
-        else:
-            self._brackets = {
-                '%%%': '%%%',
-                '%%{': '%%}'
-            }
+    def __init__(self, file: File, brackets: dict[str,str]):
+        self._brackets = brackets
         self._file = file
         self._isInBlock = False
         self._closing = ''
@@ -34,3 +29,6 @@ class BlockMarker(Iterable[Line]):
 
     def getPath(self) -> str:
         return self._file.getPath()
+
+    def new(self, file: File) -> BlockMarker:
+        return type(self)(file, self._brackets)

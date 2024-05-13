@@ -1,3 +1,4 @@
+from __future__ import annotations
 import pathlib
 from typing import Iterator, Iterable
 
@@ -8,13 +9,26 @@ from .blocks import BlockMarker
 from .includes import Includer, CircularIncludeException
 
 
+def default_specfile(path: str) -> SpecFile:
+    return SpecFile(
+                path,
+                brackets = {
+                    '%%%': '%%%',
+                    '%%{': '%%}'
+                },
+                includePattern = r'^%include\s+(.+)(#.*)?'
+            )
+
 class SpecFile(Iterable[Line]):
-    def __init__(self, pathString: str):
+    def __init__(self,
+                pathString: str,
+                brackets: dict[str,str],
+                includePattern: str):
         self._validate_pathString(pathString)
         pathString = str(pathlib.Path(pathString).resolve())
         file = File(pathString)
-        blockMarker = BlockMarker(file)
-        includer = Includer(blockMarker)
+        blockMarker = BlockMarker(file, brackets)
+        includer = Includer(blockMarker, includePattern)
         self._lines = includer
 
     def _validate_pathString(self, pathString: str) -> None:
