@@ -7,13 +7,13 @@ import gettext
 _ = gettext.gettext
 
 
-from .lines import Line
-from .files import File
-from .blocks import BlockMarker
-from .includes import Includer, CircularIncludeException
+from .line import Line
+from .file import File
+from .block import BlockMarker
+from .include import Includer, CircularIncludeException
 
 
-def default_specfile(path: str) -> SpecFile:
+def specfile(path: str) -> SpecFile:
     return SpecFile(
                 path,
                 brackets = {

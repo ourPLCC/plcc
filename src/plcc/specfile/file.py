@@ -2,7 +2,7 @@ import pathlib
 from typing import Iterator, Iterable
 
 
-from .lines import Line
+from .line import Line
 
 
 class File:

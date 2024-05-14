@@ -1,9 +1,8 @@
 import pytest
 
 
-from plcc.spec import Spec
-from plcc.specfiles import default_specfile
-
+from plcc.spec import parse
+from plcc.specfile import specfile
 
 
 def test_parse_three_empty_sections(fs):
@@ -11,6 +10,4 @@ def test_parse_three_empty_sections(fs):
 %
 %
 ''')
-    s = Spec()
-    s.parse(default_specfile('/f'))
-    assert s.getSectionCount() == 3
+    spec = parse(specfile('/f'))

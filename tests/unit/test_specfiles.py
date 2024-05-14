@@ -1,35 +1,35 @@
 import pytest
 
 
-from plcc.specfiles import default_specfile, CircularIncludeException
+from plcc.specfile import specfile, CircularIncludeException
 
 
 def test_path_is_None():
     with pytest.raises(TypeError):
-        default_specfile(None)
+        specfile(None)
 
 
 def test_path_is_empty():
     with pytest.raises(ValueError):
-        default_specfile('    ')
+        specfile('    ')
 
 
 def test_missing_file(fs):
-    file = default_specfile('missing_file')
+    file = specfile('missing_file')
     with pytest.raises(FileNotFoundError):
         next(file)
 
 
 def test_empty_file(fs):
     fs.create_file('/f', contents='')
-    file = default_specfile('/f')
+    file = specfile('/f')
     with pytest.raises(StopIteration):
         next(file)
 
 
 def test_single_line_no_line_ending(fs):
     fs.create_file('/f', contents='a')
-    file = default_specfile('/f')
+    file = specfile('/f')
     line = next(file)
     assert line.string == 'a'
     with pytest.raises(StopIteration):
@@ -38,7 +38,7 @@ def test_single_line_no_line_ending(fs):
 
 def test_single_line(fs):
     fs.create_file('/f', contents='a\n')
-    file = default_specfile('/f')
+    file = specfile('/f')
     line = next(file)
     assert line.string == 'a'
     with pytest.raises(StopIteration):
@@ -47,7 +47,7 @@ def test_single_line(fs):
 
 def test_many_lines(fs):
     fs.create_file('/f', contents='a\nb\nc\n')
-    file = default_specfile('/f')
+    file = specfile('/f')
     line = next(file)
     assert line.string == 'a'
     line = next(file)
@@ -67,7 +67,7 @@ this too
 %%%
 not in block
 ''')
-    file = default_specfile('/f')
+    file = specfile('/f')
     line = next(file)
     assert line.string == 'not in block'
     assert not line.isInBlock
@@ -97,7 +97,7 @@ c
 2
 ''')
 
-    file = default_specfile('/f')
+    file = specfile('/f')
 
     line = next(file)
     assert line.string == 'a' and line.path == '/f' and line.number == 1
@@ -124,7 +124,7 @@ def test_circular_includes(fs):
 %include /f
 ''')
 
-    file = default_specfile('/f')
+    file = specfile('/f')
     with pytest.raises(CircularIncludeException):
         next(file)
 
@@ -141,7 +141,7 @@ def test_relative_paths(fs):
 a
 ''')
 
-    file = default_specfile('/d/f')
+    file = specfile('/d/f')
     line = next(file)
     assert line.string == 'a'
 

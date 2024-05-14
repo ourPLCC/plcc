@@ -3,9 +3,9 @@ import re
 from typing import Iterable, Iterator
 
 
-from .blocks import BlockMarker
-from .files import File
-from .lines import Line
+from .block import BlockMarker
+from .file import File
+from .line import Line
 
 
 class Includer(Iterable[Line]):

@@ -1,7 +1,12 @@
+from __future__ import annotations
 from typing import Iterable
 
 
-from ..specfiles.lines import Line
+from ..specfile.line import Line
+
+
+def parse(lines: Iterable[Line]) -> Spec:
+    ...
 
 
 def Spec():

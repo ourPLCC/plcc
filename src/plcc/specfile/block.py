@@ -2,8 +2,8 @@ from __future__ import annotations
 from typing import Iterator, Optional, Iterable
 
 
-from .files import File
-from .lines import Line
+from .file import File
+from .line import Line
 
 
 class BlockMarker(Iterable[Line]):
