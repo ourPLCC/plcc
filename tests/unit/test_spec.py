@@ -63,3 +63,15 @@ def test_allow_double_quote_in_lex(fs):
     assert rules[0] == LexRule(type='token', name='WS', pattern=r'\s+', quote='"', end="", line=Line(string=r'WS "\s+"', path='', number=1))
 
 
+def test_lex_combined_example(fs):
+    spec = parse(lines(r'''# A typical example
+skip WS "\s+"
+  # This line is ignored, as is the blank line below.
+token HI 'hi'   # for a greeting
+
+BYE " # " # we're "pounding (#)" it out
+'''))
+    rules = spec.getLexRules()
+    assert rules[0] == LexRule(type='skip', name='WS', pattern=r'\s+', quote='"', end="", line=Line(string=r'skip WS "\s+"', path='', number=2))
+    assert rules[1] == LexRule(type='token', name='HI', pattern=r'hi', quote="'", end="   # for a greeting", line=Line(string=r"token HI 'hi'   # for a greeting", path='', number=4))
+    assert rules[2].end.startswith(' # ')
