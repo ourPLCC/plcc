@@ -7,7 +7,11 @@ from typing import List
 
 class BnfParser:
     def parse(self, lines):
-        return lines
+        for line in lines:
+            yield self._parseBnfRule(line)
+
+    def _parseBnfRule(self, line):
+        return BnfRuleParser().parse(line.string)
 
 
 class BnfRuleParser:
@@ -68,7 +72,7 @@ class BnfRuleParser:
 
 @dataclass
 class BnfRule:
-    lhs: Nonterminal
+    lhs: Tnt
     op: str
     tnts: List[Terminal | Nonterminal | CaptureTerminal]
     sep: Terminal = None
