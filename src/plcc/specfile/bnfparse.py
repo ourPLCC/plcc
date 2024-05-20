@@ -8,6 +8,9 @@ from typing import List
 class BnfParser:
     def parse(self, lines):
         for line in lines:
+            s = line.string.strip()
+            if not s or s.startswith('#'):
+                continue
             yield self._parseBnfRule(line)
 
     def _parseBnfRule(self, line):
