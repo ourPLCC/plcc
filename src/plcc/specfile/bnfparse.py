@@ -6,6 +6,11 @@ from typing import List
 
 
 class BnfParser:
+    def parse(self, lines):
+        return lines
+
+
+class BnfRuleParser:
     RULE=re.compile(r'^(.*)(::=|\*\*=)(.*)$')
     def parse(self, string):
         m = self.RULE.match(string)
@@ -25,29 +30,25 @@ class BnfParser:
         pass
 
     def _parseNonterminal(self, lhs):
-        return NonterminalParser().parse(lhs)
+        nt, remaining = NonterminalParser().parse(lhs)
+        return nt
 
     def _parserRhs(self, rhs):
         return RhsParser().parse(rhs)
 
     def _makeBnfRule(self, nt, op, tnts, sep):
-        if op == '**=':
-            return self._makeRepeatingRule(nt, tnts, sep)
-        else:
-            return self._makeStandardRule(nt, tnts)
+        return self._makeBnfRule(nt, op, tnts, sep)
+
+    def _makeBnfRule(self, nt, op, tnts, sep):
         return BnfRule(nt, op, tnts, sep)
-
-    def _makeRepeatingRule(self, nt, tnts, sep):
-        return RepeatingRule(nt, tnts, sep)
-
-    def _makeStandardRule(self, nt, tnts):
-        return StandardRule(nt, tnts)
 
 
 @dataclass
-class StandardRule:
+class BnfRule:
     lhs: Nonterminal
+    op: str
     tnts: List[Terminal | Nonterminal | CaptureTerminal]
+    sep: Terminal = None
 
 
 @dataclass
@@ -61,7 +62,7 @@ class NonterminalParser:
     def parse(self, string):
         p = TntParser()
         tnt, string = p.parse(string)
-        if isinstance(tnt, Nonterminal):
+        if tnt.type == 'nonterminal':
             return tnt, string
         raise self.InvalidNonterminalName(tnt.name)
 
@@ -70,57 +71,52 @@ class NonterminalParser:
 
 
 class TntParser:
-    ANGLES=re.compile(r'\s*<\s*(\w*)\s*>')
-    ALT=re.compile(r'\s*:?\s*(\w*)')
-    def parse(self, string):
-        m = self.ANGLES.match(string)
-        if not m:
-            raise self.MissingAngles(string)
-        name = m[1]
-        n = len(m[0])
-        m = self.ALT.match(string[n:])
-        alt = m[1]
-        n += len(m[0])
-        return (self._makeTnt(name, alt), string[n:])
+    PATTERN=re.compile(r'\s*(?P<angle><)?(?P<name>\w+)(?(angle)>:?(?P<alt>\w*)|)')
+    TERMINAL=re.compile(r'^[A-Z_]+$')
 
-    class MissingAngles(Exception):
+    def __init__(self):
+        self._scanner = None
+
+    def parse(self, string):
+        self._scanner = MatchScanner(string)
+        m = self._scanner.match(self.PATTERN)
+        if not m:
+            raise self.InvalidTnt(string)
+        name = m['name']
+        type = 'terminal' if self.TERMINAL.match(name) else 'nonterminal'
+        capture = bool(m['angle'])
+        alt = '' if not capture else m['alt']
+        if not capture and type == 'nonterminal':
+            raise self.InvalidTerminal(string)
+        return Tnt(type,name,alt,capture), self._scanner.getRemainder()
+
+    class InvalidTnt(Exception):
         pass
 
-    def _makeTnt(self, name, alt):
-        if self._isValidTerminalName(name):
-            return self._makeCaptureTerminal(name, alt)
-        else:
-            return self._makeNonterminal(name, alt)
+    class InvalidTerminal(Exception):
+        pass
 
-    def _isValidTerminalName(self, name):
-        try:
-            TerminalParser().parse(name)
-            return True
-        except TerminalParser.InvalidTerminalName:
-            return False
+class MatchScanner:
+    def __init__(self, string):
+        self._string = string
+        self._position = 0
 
-    def _makeNonterminal(self, name, alt):
-        return Nonterminal(name, alt)
+    def match(self, pattern):
+        m = pattern.match(self._string, self._position)
+        if m:
+            self._position += len(m[0])
+        return m
 
-    def _makeCaptureTerminal(self, name, alt):
-        return CaptureTerminal(name, alt)
+    def getRemainder(self):
+        return self._string[self._position:]
 
 
 @dataclass(frozen=True)
-class Nonterminal:
+class Tnt:
+    type: str
     name: str
     alt: str
-
-
-@dataclass(frozen=True)
-class CaptureTerminal:
-    name: str
-    alt: str
-
-
-@dataclass(frozen=True)
-class Terminal:
-    name: str
+    capture: bool
 
 
 class RhsParser:
@@ -142,7 +138,7 @@ class RhsParser:
                 try:
                     tnt, string = self._parseTnt(string)
                     tnts.append(tnt)
-                except TntParser.MissingAngles:
+                except TntParser.InvalidTnt:
                     term, string = self._parseTerminal(string)
                     tnts.append(term)
         except TerminalParser.InvalidTerminalName:
@@ -165,7 +161,6 @@ class RhsParser:
 class TerminalParser:
     TERMINAL=re.compile(r'\s*([A-Z_]+)')
     def parse(self, string):
-        print(f'TerminalParser: {string}')
         m = self.TERMINAL.match(string)
         if m:
             return (m[1], string[len(m[0]):])
