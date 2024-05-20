@@ -30,17 +30,40 @@ class BnfRuleParser:
         pass
 
     def _parseNonterminal(self, lhs):
-        nt, remaining = NonterminalParser().parse(lhs)
-        return nt
+        return NonterminalParser().parse(MatchScanner(lhs))
 
     def _parserRhs(self, rhs):
-        return RhsParser().parse(rhs)
+        s = MatchScanner(rhs)
+        tnts = self._parseTnts(s)
+        sep = self._parseSeparator(s)
+        self._parseEolComment(s)
+        if s.hasMore():
+            raise self.Unrecognized(s.getRemainder())
+        return (tnts, sep)
+
+    def _parseTnts(self, scanner):
+        tnts = []
+        try:
+            while True:
+                tnts.append(TntParser().parse(scanner))
+        except TntParser.InvalidTnt:
+            pass
+        return tnts
+
+    def _parseSeparator(self, scanner):
+        return SeparatorParser().parse(scanner)
+
+    def _parseEolComment(self, scanner):
+        return EolCommentParser().parse(scanner)
 
     def _makeBnfRule(self, nt, op, tnts, sep):
         return self._makeBnfRule(nt, op, tnts, sep)
 
     def _makeBnfRule(self, nt, op, tnts, sep):
         return BnfRule(nt, op, tnts, sep)
+
+    class Unrecognized(Exception):
+        pass
 
 
 @dataclass
@@ -51,22 +74,15 @@ class BnfRule:
     sep: Terminal = None
 
 
-@dataclass
-class RepeatingRule:
-    lhs: Nonterminal
-    tnts: List[Terminal | Nonterminal | CaptureTerminal]
-    sep: Terminal
-
-
 class NonterminalParser:
-    def parse(self, string):
+    def parse(self, matchScanner):
         p = TntParser()
-        tnt, string = p.parse(string)
+        tnt = p.parse(matchScanner)
         if tnt.type == 'nonterminal':
-            return tnt, string
-        raise self.InvalidNonterminalName(tnt.name)
+            return tnt
+        raise self.InvalidNonterminal()
 
-    class InvalidNonterminalName(Exception):
+    class InvalidNonterminal(Exception):
         pass
 
 
@@ -77,18 +93,18 @@ class TntParser:
     def __init__(self):
         self._scanner = None
 
-    def parse(self, string):
-        self._scanner = MatchScanner(string)
+    def parse(self, matchScanner):
+        self._scanner = matchScanner
         m = self._scanner.match(self.PATTERN)
         if not m:
-            raise self.InvalidTnt(string)
+            raise self.InvalidTnt()
         name = m['name']
         type = 'terminal' if self.TERMINAL.match(name) else 'nonterminal'
         capture = bool(m['angle'])
         alt = '' if not capture else m['alt']
         if not capture and type == 'nonterminal':
-            raise self.InvalidTerminal(string)
-        return Tnt(type,name,alt,capture), self._scanner.getRemainder()
+            raise self.InvalidTerminal()
+        return Tnt(type,name,alt,capture)
 
     class InvalidTnt(Exception):
         pass
@@ -110,6 +126,9 @@ class MatchScanner:
     def getRemainder(self):
         return self._string[self._position:]
 
+    def hasMore(self):
+        return self._position < len(self._string)
+
 
 @dataclass(frozen=True)
 class Tnt:
@@ -119,71 +138,32 @@ class Tnt:
     capture: bool
 
 
-class RhsParser:
-    def parse(self, string):
-        tnts, string = self._parseTnts(string)
-        sep, string = self._parseSeparator(string)
-        _, string = self._parseEolComment(string)
-        if string:
-            raise self.Unrecognized(string)
-        return tnts, sep
-
-    class Unrecognized(Exception):
-        pass
-
-    def _parseTnts(self, string):
-        tnts = []
-        try:
-            while True:
-                try:
-                    tnt, string = self._parseTnt(string)
-                    tnts.append(tnt)
-                except TntParser.InvalidTnt:
-                    term, string = self._parseTerminal(string)
-                    tnts.append(term)
-        except TerminalParser.InvalidTerminalName:
-            pass
-        return (tnts, string)
-
-    def _parseTnt(self, string):
-        return TntParser().parse(string)
-
-    def _parseTerminal(self, string):
-        return TerminalParser().parse(string)
-
-    def _parseSeparator(self, string):
-        return SeparatorParser().parse(string)
-
-    def _parseEolComment(self, string):
-        return EolCommentParser().parse(string)
-
-
-class TerminalParser:
-    TERMINAL=re.compile(r'\s*([A-Z_]+)')
-    def parse(self, string):
-        m = self.TERMINAL.match(string)
-        if m:
-            return (m[1], string[len(m[0]):])
-        raise self.InvalidTerminalName(string)
-
-    class InvalidTerminalName(Exception):
-        pass
-
-
 class SeparatorParser:
-    SEPARATOR=re.compile(r'\s*\+(' + TerminalParser.TERMINAL.pattern + ')')
-    def parse(self, string):
-        m = self.SEPARATOR.match(string)
+    SEPARATOR=re.compile(r'\s*\+')
+    def parse(self, matchScanner):
+        m = matchScanner.match(self.SEPARATOR)
         if m:
-            return (m[1], string[len(m[0]):])
-        return ('', string)
+            tnt = TntParser().parse(matchScanner)
+            if tnt.type != 'terminal':
+                raise self.SeparatorMustBeTerminal()
+            if tnt.capture:
+                raise self.SeparatorMustNotBeInAngles()
+            return tnt
+        return None
+
+    class SeparatorMustBeTerminal(Exception):
+        pass
+
+    class SeparatorMustNotBeInAngles(Exception):
+        pass
+
+    class InvalidSeparator(Exception):
+        pass
 
 
 class EolCommentParser:
     EOL_COMMENT=re.compile(r'\s*#.*')
-    def parse(self, string):
-        m = self.EOL_COMMENT.match(string)
-        if m:
-            return (m[0], string[len(m[0]):])
-        return ('', string)
+    def parse(self, matchScanner):
+        m = matchScanner.match(self.EOL_COMMENT)
+        return m
 

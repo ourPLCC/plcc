@@ -1,7 +1,7 @@
 import pytest
 
 
-from plcc.specfile.bnfparse import BnfRuleParser, NonterminalParser, RhsParser, BnfRule
+from plcc.specfile.bnfparse import BnfRuleParser, NonterminalParser, BnfRule
 
 
 def test_standard():
@@ -24,9 +24,9 @@ def test_separator_with_standard():
         BnfRuleParser().parse('<one>:One ::= <two> +THREE # comment')
 
 def test_invalid_nonterminal():
-    with pytest.raises(NonterminalParser.InvalidNonterminalName):
+    with pytest.raises(NonterminalParser.InvalidNonterminal):
         BnfRuleParser().parse('<ONE>:One ::= <two> THREE')
 
 def test_unrecognized_rhs():
-    with pytest.raises(RhsParser.Unrecognized):
+    with pytest.raises(BnfRuleParser.Unrecognized):
         BnfRuleParser().parse('<one> ::= <two> THREE @32')
