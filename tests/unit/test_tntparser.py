@@ -1,6 +1,6 @@
 import pytest
 
-from plcc.specfile.line import toLines
+from plcc.specfile.line import strToLines
 from plcc.specfile.bnfparse import MatchScanner, TntParser, Tnt
 
 

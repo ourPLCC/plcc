@@ -1,11 +1,11 @@
 import pytest
 
-from plcc.specfile.line import toLines
+from plcc.specfile.line import strToLines
 from plcc.specfile.bnfparse import BnfParser, BnfRule, Tnt
 
 
 def test_standard():
-    lines = list(toLines(
+    lines = list(strToLines(
         '<one> ::= ONE <two>\n'
         '<two> ::= TWO'
     ))
@@ -32,7 +32,7 @@ def test_standard():
     ]
 
 def test_repeating():
-    lines = list(toLines(
+    lines = list(strToLines(
         '<one> **= ONE <two> +THREE\n'
     ))
     rules = list(BnfParser().parse(lines))
@@ -51,7 +51,7 @@ def test_repeating():
 
 def test_skip_blank_lines_and_comment_lines():
 
-    lines = list(toLines(
+    lines = list(strToLines(
         '    \n'
         '    # a comment to ignore\n'
         '<one> **= ONE <two> +THREE\n'
