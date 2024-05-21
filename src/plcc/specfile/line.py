@@ -9,16 +9,17 @@ def readLinesFromSpecFile(pathStr):
     lines = markBlocks(lines)
     lines = ignoreCommentLines(lines)
     lines = ignoreBlankLines(lines)
-    lines = processIncludes(lines, basePathStr=pathStr)
+    lines = processIncludes(lines, sourceFilePathStr=pathStr)
     return lines
 
 
 def readLinesFromFile(pathStr):
     pathStr = resolveRelativePath(pathStr, pathlib.Path.cwd())
-    path = pathlib.Path(pathStr)
+    path = pathlib.Path(pathStr).resolve()
+    pathStr = str(pathStr)
     with path.open(mode='r') as file:
         for number, line in enumerate(file, start=1):
-            yield Line(path,number,line.rstrip())
+            yield Line(pathStr,number,line.rstrip())
 
 
 def markBlocks(lines, brackets=None):
@@ -62,23 +63,32 @@ def ignoreBlankLines(lines):
 
 
 INCLUDE = re.compile(r'^%include\s+(?P<path>.*)$')
-def processIncludes(lines, basePathStr, stack=None, pattern=None):
+def processIncludes(lines, sourceFilePathStr, stack=None, pattern=None):
     if pattern is None:
         pattern = INCLUDE
+    sourceFilePath = pathlib.Path(sourceFilePathStr).resolve()
+    sourceDirPath = sourceFilePath.parent
     if stack is None:
-        stack = [ str(pathlib.Path(basePathStr).resolve()) ]
+        stack = [ str(sourceFilePath) ]
     for line in lines:
-        m = pattern.match(line.string)
-        if m:
-            pathStr = resolveRelativePath(m['path'], basePathStr)
-            if pathStr in stack:
-                raise CircularIncludeException(line)
-            stack.append(pathStr)
-            with path.open(mode='r') as f:
-                yield from processIncludes(readLinesFromFile(f, s), s, stack, pat)
-            stack.pop()
-        else:
+        if line.isInBlock:
             yield line
+            continue
+        m = pattern.match(line.string)
+        if not m:
+            yield line
+            continue
+        pathStr = resolveRelativePath(m['path'], str(sourceDirPath))
+        if pathStr in stack:
+            raise CircularIncludeException(line)
+        stack.append(pathStr)
+        yield from processIncludes(readLinesFromFile(pathStr), pathStr, stack, pattern)
+        stack.pop()
+
+
+class CircularIncludeException(Exception):
+    def __init__(self, line):
+        self.line = line
 
 
 @dataclass(frozen=True)
@@ -99,7 +109,7 @@ def strToLines(string):
 
 
 def resolveRelativePath(pathStr, basePathStr):
-    path = Path(pathStr)
+    path = pathlib.Path(pathStr)
     if path.is_absolute():
         return pathStr
-    return str((Path(basePathStr).resolve() / path).resolve())
+    return str((pathlib.Path(basePathStr).resolve() / path).resolve())
