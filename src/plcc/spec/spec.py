@@ -1,11 +1,19 @@
-from dataclasses import dataclass
 from .lexrule import LexRule
 from .bnfrule import BnfRule
 from .semrule import SemRule
 
 
-@dataclass(frozen=True)
 class Spec:
-    lexRules: [LexRule]
-    bnfRules: [BnfRule]
-    semRules: [[SemRule]]
+    def __init__(self):
+        self._bnfRules = None
+        self._lexRules = None
+        self._semRuleSections = []
+
+    def setLexRules(self, lexRules):
+        self._lexRules = lexRules
+
+    def setBnfRules(self, bnfRules):
+        self._bnfRules = bnfRules
+
+    def addSemRuleSection(self, semRules):
+        self._semRuleSections.append(semRule)
