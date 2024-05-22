@@ -1,10 +1,10 @@
 import pytest
 
 
-from plcc.specfile.lexparser import LexParser
-from plcc.specfile.lexrule import LexRule
-from plcc.specfile.line import Line
-from plcc.specfile.reader import SpecFileReader
+from plcc.spec.lexparser import LexParser
+from plcc.spec.lexrule import LexRule
+from plcc.spec.line import Line
+from plcc.spec.reader import SpecReader
 
 @pytest.fixture
 def parser():
@@ -18,7 +18,7 @@ def test_parse_wrong_type(parser, fs):
 
 
 def lines(string):
-    return SpecFileReader().readLinesFromString(string)
+    return SpecReader().readLinesFromString(string)
 
 
 def test_parse_skip_rule(parser):

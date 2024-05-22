@@ -7,7 +7,7 @@ import re
 from .line import Line
 
 
-class SpecFileReaderPatterns:
+class SpecReaderPatterns:
     def __init__(self):
         self.sectionSeparator = re.compile(r'^%$')
         self.brackets = {
@@ -18,11 +18,11 @@ class SpecFileReaderPatterns:
         self.include = re.compile(r'^%include\s+(?P<path>.*)$')
 
 
-class SpecFileReader:
-    def __init__(self, specFilePatterns = None):
-        if specFilePatterns is None:
-            specFilePatterns = SpecFileReaderPatterns()
-        self._patterns = specFilePatterns
+class SpecReader:
+    def __init__(self, specReaderPatterns = None):
+        if specReaderPatterns is None:
+            specReaderPatterns = SpecReaderPatterns()
+        self._patterns = specReaderPatterns
 
     def readSectionsFromSpecFile(self, pathStr):
         return self.groupLinesIntoSections(self.readLinesFromSpecFile(pathStr))

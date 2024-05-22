@@ -1,12 +1,12 @@
 import pytest
 
-from plcc.specfile.bnfrule import BnfRule, Tnt, TntType
-from plcc.specfile.bnfparser import BnfParser
-from plcc.specfile.reader import SpecFileReader
+from plcc.spec.bnfrule import BnfRule, Tnt, TntType
+from plcc.spec.bnfparser import BnfParser
+from plcc.spec.reader import SpecReader
 
 
 def readLinesFromString(string):
-    return SpecFileReader().readLinesFromString(string)
+    return SpecReader().readLinesFromString(string)
 
 
 def test_standard():

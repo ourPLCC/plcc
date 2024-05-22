@@ -1,8 +1,8 @@
 import pytest
 
 
-from plcc.specfile.bnfrule import BnfRule
-from plcc.specfile.bnfparser import BnfParser
+from plcc.spec.bnfrule import BnfRule
+from plcc.spec.bnfparser import BnfParser
 
 
 def test_standard():

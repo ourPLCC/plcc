@@ -1,13 +1,13 @@
 import pytest
 
-from plcc.specfile.semparser import SemParser
-from plcc.specfile.semrule import SemRule
-from plcc.specfile.reader import SpecFileReader
-from plcc.specfile.line import Line
+from plcc.spec.semparser import SemParser
+from plcc.spec.semrule import SemRule
+from plcc.spec.reader import SpecReader
+from plcc.spec.line import Line
 
 
 def toLines(string):
-    return SpecFileReader().readLinesFromString(string)
+    return SpecReader().readLinesFromString(string)
 
 
 @pytest.fixture

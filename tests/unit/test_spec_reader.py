@@ -2,12 +2,12 @@ import pytest
 import os
 
 
-from plcc.specfile.reader import SpecFileReader
+from plcc.spec.reader import SpecReader
 
 
 @pytest.fixture
 def reader():
-    return SpecFileReader()
+    return SpecReader()
 
 
 
@@ -207,7 +207,7 @@ def test_circular_includes_detected(reader, fs):
 
     line = next(lines)
     line = next(lines)
-    with pytest.raises(SpecFileReader.CircularIncludeException) as info:
+    with pytest.raises(SpecReader.CircularIncludeException) as info:
         next(lines)
     e = info.value
     assert e.line.path == '/a/c/g' and e.line.number == 2 and e.line.string == '%include ../b/f'

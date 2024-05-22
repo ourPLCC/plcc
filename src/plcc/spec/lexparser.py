@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import re
 
 
-from plcc.specfile.line import Line
+from plcc.spec.line import Line
 from .lexrule import LexRule
 
 

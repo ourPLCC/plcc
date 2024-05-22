@@ -1,7 +1,7 @@
 import pytest
 
-from plcc.specfile.bnfparser import BnfParser, MatchScanner
-from plcc.specfile.bnfrule import Tnt, TntType
+from plcc.spec.bnfparser import BnfParser, MatchScanner
+from plcc.spec.bnfrule import Tnt, TntType
 
 
 
