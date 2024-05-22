@@ -12,9 +12,3 @@ class Line:
     def markIsInBlock(self) -> Line:
         return replace(self, isInBlock=True)
 
-
-def strToLines(string):
-    path='// string //'
-    for i, s in enumerate(string.splitlines(), start=1):
-        yield Line(path, i, s, isInBlock=False)
-

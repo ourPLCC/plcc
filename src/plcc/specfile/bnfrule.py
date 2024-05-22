@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from enum import Enum
 from .line import Line
 
 
@@ -13,7 +14,12 @@ class BnfRule:
 
 @dataclass(frozen=True)
 class Tnt:
-    type: str
+    type: TntType
     name: str
     alt: str
     capture: bool
+
+
+class TntType(Enum):
+    TERMINAL=1
+    NONTERMINAL=2
