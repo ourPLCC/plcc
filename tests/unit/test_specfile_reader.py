@@ -2,52 +2,57 @@ import pytest
 import os
 
 
-from plcc.specfile.line import readLinesFromSpecFile, CircularIncludeException
+from plcc.specfile.reader import SpecFileReader
 
 
-@pytest.mark.focus
-def test_lines_contain_contents_without_eol(fs):
+@pytest.fixture
+def reader():
+    return SpecFileReader()
+
+
+
+def test_lines_contain_contents_without_eol(reader, fs):
     fs.create_file('/f', contents=
         'one\n'
         'two\n'
     )
-    lines = readLinesFromSpecFile('/f')
+    lines = reader.readLinesFromSpecFile('/f')
     line = next(lines)
     assert line.string == 'one'
     line = next(lines)
     assert line.string == 'two'
 
 
-@pytest.mark.focus
-def test_lines_are_numbered_from_1(fs):
+
+def test_lines_are_numbered_from_1(reader, fs):
     fs.create_file('/f', contents=
         'one\n'
         'two\n'
     )
-    lines = readLinesFromSpecFile('/f')
+    lines = reader.readLinesFromSpecFile('/f')
     line = next(lines)
     assert line.number == 1
     line = next(lines)
     assert line.number == 2
 
 
-@pytest.mark.focus
-def test_lines_contain_absolute_path(fs):
+
+def test_lines_contain_absolute_path(reader, fs):
     fs.create_dir('/a/b')
     fs.create_file('/a/b/f', contents=
         'one\n'
         'two\n'
     )
     os.chdir('/a')
-    lines = readLinesFromSpecFile('b/f')
+    lines = reader.readLinesFromSpecFile('b/f')
     line = next(lines)
     assert line.path == '/a/b/f'
     line = next(lines)
     assert line.path == '/a/b/f'
 
 
-@pytest.mark.focus
-def test_lines_skip_blank_lines(fs):
+
+def test_lines_skip_blank_lines(reader, fs):
     fs.create_dir('/a/b')
     fs.create_file('/a/b/f', contents=
         'one\n'
@@ -55,15 +60,15 @@ def test_lines_skip_blank_lines(fs):
         'three\n'
     )
     os.chdir('/a')
-    lines = readLinesFromSpecFile('b/f')
+    lines = reader.readLinesFromSpecFile('b/f')
     line = next(lines)
     assert line.string == 'one' and line.number == 1
     line = next(lines)
     assert line.string == 'three' and line.number == 3
 
 
-@pytest.mark.focus
-def test_lines_skip_comment_lines(fs):
+
+def test_lines_skip_comment_lines(reader, fs):
     fs.create_dir('/a/b')
     fs.create_file('/a/b/f', contents=
         'one\n'
@@ -71,15 +76,15 @@ def test_lines_skip_comment_lines(fs):
         'three\n'
     )
     os.chdir('/a')
-    lines = readLinesFromSpecFile('b/f')
+    lines = reader.readLinesFromSpecFile('b/f')
     line = next(lines)
     assert line.string == 'one' and line.number == 1
     line = next(lines)
     assert line.string == 'three' and line.number == 3
 
 
-@pytest.mark.focus
-def test_blocks_are_marked(fs):
+
+def test_blocks_are_marked(reader, fs):
     fs.create_file('/f', contents=
         'one\n'
         '%%%\n'
@@ -88,7 +93,7 @@ def test_blocks_are_marked(fs):
         '%%%\n'
         'two\n'
     )
-    lines = readLinesFromSpecFile('/f')
+    lines = reader.readLinesFromSpecFile('/f')
     line = next(lines)
     assert not line.isInBlock and line.string == 'one'
     line = next(lines)
@@ -103,8 +108,8 @@ def test_blocks_are_marked(fs):
     assert not line.isInBlock and line.string == 'two'
 
 
-@pytest.mark.focus
-def test_blanks_not_skipped_in_blocks(fs):
+
+def test_blanks_not_skipped_in_blocks(reader, fs):
     fs.create_file('/f', contents=
         'one\n'
         '%%%\n'
@@ -114,7 +119,7 @@ def test_blanks_not_skipped_in_blocks(fs):
         '%%%\n'
         'two\n'
     )
-    lines = readLinesFromSpecFile('/f')
+    lines = reader.readLinesFromSpecFile('/f')
     line = next(lines)
     assert not line.isInBlock
     line = next(lines)
@@ -131,8 +136,8 @@ def test_blanks_not_skipped_in_blocks(fs):
     assert not line.isInBlock
 
 
-@pytest.mark.focus
-def test_comments_not_skipped_in_blocks(fs):
+
+def test_comments_not_skipped_in_blocks(reader, fs):
     fs.create_file('/f', contents=
         'one\n'
         '%%%\n'
@@ -142,7 +147,7 @@ def test_comments_not_skipped_in_blocks(fs):
         '%%%\n'
         'two\n'
     )
-    lines = readLinesFromSpecFile('/f')
+    lines = reader.readLinesFromSpecFile('/f')
     line = next(lines)
     assert not line.isInBlock
     line = next(lines)
@@ -159,8 +164,8 @@ def test_comments_not_skipped_in_blocks(fs):
     assert not line.isInBlock
 
 
-@pytest.mark.focus
-def test_includes(fs):
+
+def test_includes(reader, fs):
     fs.create_dir('/a/b')
     fs.create_file('/a/b/f', contents=
         'one\n'
@@ -172,7 +177,7 @@ def test_includes(fs):
         'alpha\n'
         'bravo'
     )
-    lines = readLinesFromSpecFile('/a/b/f')
+    lines = reader.readLinesFromSpecFile('/a/b/f')
     line = next(lines)
     assert line.string == 'one' and line.path == '/a/b/f' and line.number == 1
     line = next(lines)
@@ -183,8 +188,7 @@ def test_includes(fs):
     assert line.string == 'three' and line.path == '/a/b/f' and line.number == 3
 
 
-@pytest.mark.focus
-def test_circular_includes_detected(fs):
+def test_circular_includes_detected(reader, fs):
     fs.create_dir('/a/b')
     fs.create_file('/a/b/f', contents=
         'one\n'
@@ -199,18 +203,17 @@ def test_circular_includes_detected(fs):
         'bravo\n'
     )
 
-    lines = readLinesFromSpecFile('/a/b/f')
+    lines = reader.readLinesFromSpecFile('/a/b/f')
 
     line = next(lines)
     line = next(lines)
-    with pytest.raises(CircularIncludeException) as info:
+    with pytest.raises(SpecFileReader.CircularIncludeException) as info:
         next(lines)
     e = info.value
     assert e.line.path == '/a/c/g' and e.line.number == 2 and e.line.string == '%include ../b/f'
 
 
-@pytest.mark.focus
-def test_includes_ignored_in_blocks(fs):
+def test_includes_ignored_in_blocks(reader, fs):
     fs.create_dir('/a/b')
     fs.create_file('/a/b/f', contents=
         'one\n'
@@ -227,7 +230,7 @@ def test_includes_ignored_in_blocks(fs):
         'bravo\n'
     )
 
-    lines = readLinesFromSpecFile('/a/b/f')
+    lines = reader.readLinesFromSpecFile('/a/b/f')
 
     line = next(lines)
     assert line.string == 'one'
@@ -239,3 +242,26 @@ def test_includes_ignored_in_blocks(fs):
     assert line.string == '%%%'
     line = next(lines)
     assert line.string == 'three'
+
+
+def test_can_read_lines_into_sections(reader, fs):
+    fs.create_file('/f', contents=
+        'one\n'
+        '%\n'       # Section separator
+        'two\n'
+        '%\n'       # Another
+        '%\n'       # Another
+    )
+    sections = reader.readSectionsFromSpecFile('/f')
+
+    # There are 4 sections.
+    assert len(sections) == 4
+
+    # Each section contains the lines that compose it.
+    lines = sections[0]
+    assert lines[0].string == 'one'
+
+    # The last two are empty.
+    assert len(sections[2]) == 0
+    assert len(sections[3]) == 0
+

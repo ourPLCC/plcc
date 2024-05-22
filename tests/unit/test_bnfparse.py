@@ -1,11 +1,16 @@
 import pytest
 
-from plcc.specfile.line import strToLines
-from plcc.specfile.bnfparse import BnfParser, BnfRule, Tnt
+from plcc.specfile.bnfrule import BnfRule, Tnt
+from plcc.specfile.bnfparser import BnfParser
+from plcc.specfile.reader import SpecFileReader
+
+
+def readLinesFromString(string):
+    return SpecFileReader().readLinesFromString(string)
 
 
 def test_standard():
-    lines = list(strToLines(
+    lines = list(readLinesFromString(
         '<one> ::= ONE <two>\n'
         '<two> ::= TWO'
     ))
@@ -31,8 +36,9 @@ def test_standard():
         )
     ]
 
+
 def test_repeating():
-    lines = list(strToLines(
+    lines = list(readLinesFromString(
         '<one> **= ONE <two> +THREE\n'
     ))
     rules = list(BnfParser().parse(lines))
@@ -50,9 +56,7 @@ def test_repeating():
     ]
 
 def test_skip_blank_lines_and_comment_lines():
-
-    lines = list(strToLines(
-        '    \n'
+    lines = list(readLinesFromString('    \n'
         '    # a comment to ignore\n'
         '<one> **= ONE <two> +THREE\n'
     ))

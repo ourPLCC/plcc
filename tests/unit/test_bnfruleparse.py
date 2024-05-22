@@ -1,7 +1,7 @@
 import pytest
 
 
-from plcc.specfile.bnfparse import BnfRuleParser, NonterminalParser, BnfRule
+from plcc.specfile.bnfparser import BnfRuleParser, NonterminalParser, BnfRule
 
 
 def test_standard():

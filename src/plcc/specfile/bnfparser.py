@@ -5,12 +5,12 @@ from dataclasses import dataclass
 from typing import List
 
 
+from .bnfrule import BnfRule, Tnt
+
+
 class BnfParser:
     def parse(self, lines):
         for line in lines:
-            s = line.string.strip()
-            if not s or s.startswith('#'):
-                continue
             yield self._parseBnfRule(line)
 
     def _parseBnfRule(self, line):
@@ -73,14 +73,6 @@ class BnfRuleParser:
         pass
 
 
-@dataclass
-class BnfRule:
-    lhs: Tnt
-    op: str
-    tnts: List[Terminal | Nonterminal | CaptureTerminal]
-    sep: Terminal = None
-
-
 class NonterminalParser:
     def parse(self, matchScanner):
         p = TntParser()
@@ -135,14 +127,6 @@ class MatchScanner:
 
     def hasMore(self):
         return self._position < len(self._string)
-
-
-@dataclass(frozen=True)
-class Tnt:
-    type: str
-    name: str
-    alt: str
-    capture: bool
 
 
 class SeparatorParser:
