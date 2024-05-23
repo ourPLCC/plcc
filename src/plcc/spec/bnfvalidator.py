@@ -18,7 +18,7 @@ class BnfValidator:
         self.duplicateRhsHaveAltExceptOne(bnfspec)
         self.nonRepeatingRulesCannotHaveSeparators(bnfspec)
         self.separatorsAreNonCapturingTerminals(bnfspec)
-        # self.everyNonterminalAppearsOnLhs(bnfspec)
+        self.everyNonterminalAppearsOnLhs(bnfspec)
 
     def terminalNamesMustContainOnlyUppercaseAndUnderscore(self, bnfspec):
         validTerminalName = re.compile(r'^[A-Z_]+$')
@@ -101,3 +101,19 @@ class BnfValidator:
     class SeparatorMustBeNonCapturingTerminal(Exception):
         def __init__(self, line):
             self.line = line
+
+    def everyNonterminalAppearsOnLhs(self, bnfspec):
+        lhsNames = set()
+        for r in bnfspec.getRules():
+            lhsNames.add(r.lhs.name)
+
+        for r in bnfspec.getRules():
+            for t in r.tnts:
+                if t.type == TntType.NONTERMINAL:
+                    if t.name not in lhsNames:
+                        raise self.NonterminalMustAppearOnLHS(r.line, t.name)
+
+    class NonterminalMustAppearOnLHS(Exception):
+        def __init__(self, line, name):
+            self.line = line
+            self.name = name

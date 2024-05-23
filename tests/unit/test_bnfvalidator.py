@@ -39,8 +39,8 @@ def test_detects_duplicate_alts_in_LHS(validator):
 
 def test_duplicate_LHS_nonterminals_must_have_an_alt(validator):
     spec = toSpec(
-        '<hi> ::= DAD\n'
-        '<hi>One ::= MOM\n'
+        '<hi>One ::= DAD\n'
+        '<hi> ::= MOM\n'
     )
     with pytest.raises(BnfValidator.DuplicateLhsMustProvideConcreteClassName):
         validator.validate(spec)
@@ -54,7 +54,7 @@ def test_alts_unique_within_RHS(validator):
         validator.validate(spec)
 
 
-def test_duplicate_capturing_RHS_must_have_alt_except_one(validator):
+def test_duplicate_capturing_RHS_must_have_alt(validator):
     spec = toSpec(
         '<hi> ::= <DAD>one <DAD> <DAD>\n'
     )
@@ -84,3 +84,22 @@ def test_separators_must_be_non_capturing_terminals(validator):
     )
     with pytest.raises(BnfValidator.SeparatorMustBeNonCapturingTerminal):
         validator.validate(spec)
+
+
+def test_each_nonterminal_appears_in_LHS(validator):
+    spec = toSpec(
+        '<hi> **= MOM <bye>\n'
+    )
+    with pytest.raises(BnfValidator.NonterminalMustAppearOnLHS):
+        validator.validate(spec)
+
+
+def test_no_errors(validator):
+    spec = toSpec(
+        '<hi>:Greet ::= <mom>parent AND <dad>:other'
+        '<mom>NoSpouse ::='
+        '<mom>Spouse ::= SPOUSE <hi>'
+        '<dad> ::= DAD'
+    )
+    validator.validate(spec)
+    assert True
