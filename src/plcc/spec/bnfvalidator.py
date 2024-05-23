@@ -1,5 +1,6 @@
 import re
 from collections import Counter
+from collections import defaultdict
 from itertools import chain
 
 
@@ -13,7 +14,7 @@ class BnfValidator:
         self.altsMustBeUniqueAcrossLHS(bnfspec)
         self.duplicateLhsHaveAlternativeNames(bnfspec)
         self.altsMustBeUniqueWithinRule(bnfspec)
-        # self.duplicateRhsHaveAlternativeNames(bnfspec)
+        self.duplicateRhsHaveAltExceptOne(bnfspec)
         # self.onlyRepeatingRulesHaveSeparators(bnfspec)
         # self.separatorsAreNoncapturingNonterminals(bnfspec)
         # self.everyNonterminalAppearsOnLhs(bnfspec)
@@ -62,6 +63,25 @@ class BnfValidator:
     class FieldNamesMustBeUniqueWithinRule(Exception):
         def __init__(self, line):
             self.line = line
+
+    def duplicateRhsHaveAltExceptOne(self, bnfspec):
+        for rule in bnfspec.getRules():
+            tntsByName = defaultdict(list)
+            for t in rule.tnts:
+                tntsByName[t.name].append(t)
+            for name in tntsByName:
+                if len(tntsByName[name]) > 1:
+                    altCount = 0
+                    for t in tntsByName[name]:
+                        if t.alt:
+                            altCount += 1
+                    if altCount < len(tntsByName[name]) - 1:
+                        raise self.SymbolNeedsFieldName(rule.line, name)
+
+    class SymbolNeedsFieldName(Exception):
+        def __init__(self, line, tntName):
+            self.line = line
+            self.tntName = tntName
 
     # def duplicateRhsHaveAlternativeNames(bnfspec):
     #     ...

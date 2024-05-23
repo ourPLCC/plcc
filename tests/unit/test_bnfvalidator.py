@@ -52,3 +52,19 @@ def test_alts_unique_within_RHS(validator):
     )
     with pytest.raises(BnfValidator.FieldNamesMustBeUniqueWithinRule):
         validator.validate(spec)
+
+
+def test_duplicate_capturing_RHS_must_have_alt_except_one(validator):
+    spec = toSpec(
+        '<hi> ::= <DAD>one <DAD> <DAD>\n'
+    )
+    with pytest.raises(BnfValidator.SymbolNeedsFieldName):
+        validator.validate(spec)
+
+
+def test_duplicate_capturing_RHS_must_have_alt_except_one(validator):
+    spec = toSpec(
+        '<hi> ::= <DAD>one <DAD>two <DAD>\n'
+    )
+    validator.validate(spec)
+    assert True
