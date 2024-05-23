@@ -10,18 +10,20 @@ def validator():
     return LexValidator()
 
 
+def makeLexRule(name):
+    return LexRule(line=None, name=name, pattern='', quote='', end='', isToken=None)
+
 def test_detects_duplicates(validator):
     rules = [
-        LexRule(type='', name='BOB', pattern='', quote='', end='', line=None),
-        LexRule(type='', name='BOB', pattern='', quote='', end='', line=None),
+        makeLexRule('BOB'),
+        makeLexRule('BOB'),
     ]
     with pytest.raises(LexValidator.DuplicateName):
         validator.validate(rules)
 
-
 def test_detects_invalid_names(validator):
     rules = [
-        LexRule(type='', name='bOB', pattern='', quote='', end='', line=None),
+        makeLexRule('bOB'),
     ]
     with pytest.raises(LexValidator.InvalidName):
         validator.validate(rules)

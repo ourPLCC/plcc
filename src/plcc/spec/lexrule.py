@@ -1,11 +1,14 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from .line import Line
 
 @dataclass(frozen=True)
 class LexRule:
-    type: str
+    line: Line
     name: str
     pattern: str
     quote: str
     end: str
-    line: Line
+    isToken: bool = True
+
+    def toSkip(self):
+        return replace(self, isToken=False)

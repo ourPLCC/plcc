@@ -26,6 +26,9 @@ class LexParser:
             d = m.groupdict()
             if not d['type']:
                 d['type'] = 'token'
+            type = d['type']
+            del d['type']
+            d['isToken'] = type == 'token'
             d['line'] = line
             yield LexRule(**d)
 
