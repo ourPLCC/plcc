@@ -1,3 +1,11 @@
+'''
+A SpecReader produces Lines from files or strings.
+A Line know the file they came, there number in that file, if the line
+is inside a code block, and the contents of its line without EOL characters.
+A SpecReader resolves %include directives, marks Lines that are in code blocks,
+and skips blank and comment lines.
+'''
+
 import pytest
 import os
 
@@ -52,7 +60,7 @@ def test_lines_skip_blank_lines(reader, fs):
     fs.create_dir('/a/b')
     fs.create_file('/a/b/f', contents=
         'one\n'
-        '\n'
+        '\n'        # blank, skipped (but counted)
         'three\n'
     )
     os.chdir('/a')
@@ -67,7 +75,7 @@ def test_lines_skip_comment_lines(reader, fs):
     fs.create_dir('/a/b')
     fs.create_file('/a/b/f', contents=
         'one\n'
-        '   #this is a comment line\n'
+        '   #this is a comment line\n'  # comment lines are lines only containing a comment.
         'three\n'
     )
     os.chdir('/a')
@@ -80,12 +88,12 @@ def test_lines_skip_comment_lines(reader, fs):
 
 def test_blocks_are_marked(reader, fs):
     fs.create_file('/f', contents=
-        'one\n'
-        '%%%\n'
-        'a\n'
-        'b\n'
-        '%%%\n'
-        'two\n'
+        'one\n'     # not in the bloc
+        '%%%\n'     # not (but starts)
+        'a\n'       # in
+        'b\n'       # in
+        '%%%\n'     # not (but ends)
+        'two\n'     # not
     )
     lines = reader.readLinesFromSpecFile('/f')
     line = next(lines)
@@ -107,7 +115,7 @@ def test_blanks_not_skipped_in_blocks(reader, fs):
         'one\n'
         '%%%\n'
         'a\n'
-        '\n'
+        '\n'        # blank, but in a block; not skipped
         'b\n'
         '%%%\n'
         'two\n'
@@ -134,7 +142,7 @@ def test_comments_not_skipped_in_blocks(reader, fs):
         'one\n'
         '%%%\n'
         'a\n'
-        '    # comment\n'
+        '    # comment\n'       # in block; not skipped
         'b\n'
         '%%%\n'
         'two\n'
@@ -160,7 +168,7 @@ def test_includes(reader, fs):
     fs.create_dir('/a/b')
     fs.create_file('/a/b/f', contents=
         'one\n'
-        '%include ../c/g\n'
+        '%include ../c/g\n' # relative paths resolved against parent of containing file
         'three\n'
     )
     fs.create_dir('/a/c')
