@@ -2,7 +2,7 @@ import pytest
 
 
 from plcc.spec.line import Line
-from plcc.spec.bnfrule import BnfRule, Tnt, TntType
+from plcc.spec.bnfrule import BnfRule, Tnt
 from plcc.spec.bnfparser import BnfParser
 from plcc.spec.reader import SpecReader
 
@@ -33,11 +33,11 @@ def test_standard():
                 string='<one> ::= ONE <two>',
                 isInBlock=False
             ),
-            lhs=Tnt(type=TntType.NONTERMINAL, name='one', alt='', capture=True),
-            op='::=',
+            lhs=Tnt(isTerminal=False, name='one', alt='', isCapture=True),
+            isRepeating=False,
             tnts=[
-                Tnt(type=TntType.TERMINAL, name='ONE', alt='', capture=False),
-                Tnt(type=TntType.NONTERMINAL, name='two', alt='', capture=True)
+                Tnt(isTerminal=True, name='ONE', alt='', isCapture=False),
+                Tnt(isTerminal=False, name='two', alt='', isCapture=True)
             ],
             sep=None
         ),
@@ -48,10 +48,10 @@ def test_standard():
                 string='<two> ::= TWO',
                 isInBlock=False
             ),
-            lhs=Tnt(type=TntType.NONTERMINAL, name='two', alt='', capture=True),
-            op='::=',
+            lhs=Tnt(isTerminal=False, name='two', alt='', isCapture=True),
+            isRepeating=False,
             tnts=[
-                Tnt(type=TntType.TERMINAL, name='TWO', alt='', capture=False)
+                Tnt(isTerminal=True, name='TWO', alt='', isCapture=False)
             ],
             sep=None
         )
@@ -71,13 +71,13 @@ def test_repeating():
                 string='<one> **= ONE <two> +THREE',
                 isInBlock=False
             ),
-            lhs=Tnt(type=TntType.NONTERMINAL, name='one', alt='', capture=True),
-            op='**=',
+            lhs=Tnt(isTerminal=False, name='one', alt='', isCapture=True),
+            isRepeating=True,
             tnts=[
-                Tnt(type=TntType.TERMINAL, name='ONE', alt='', capture=False),
-                Tnt(type=TntType.NONTERMINAL, name='two', alt='', capture=True)
+                Tnt(isTerminal=True, name='ONE', alt='', isCapture=False),
+                Tnt(isTerminal=False, name='two', alt='', isCapture=True)
             ],
-            sep=Tnt(type=TntType.TERMINAL, name='THREE', alt='', capture=False)
+            sep=Tnt(isTerminal=True, name='THREE', alt='', isCapture=False)
         )
     ]
 
@@ -96,12 +96,12 @@ def test_skip_blank_lines_and_comment_lines():
                 string='<one> **= ONE <two> +THREE',
                 isInBlock=False
             ),
-            lhs=Tnt(type=TntType.NONTERMINAL, name='one', alt='', capture=True),
-            op='**=',
+            lhs=Tnt(isTerminal=False, name='one', alt='', isCapture=True),
+            isRepeating=True,
             tnts=[
-                Tnt(type=TntType.TERMINAL, name='ONE', alt='', capture=False),
-                Tnt(type=TntType.NONTERMINAL, name='two', alt='', capture=True)
+                Tnt(isTerminal=True, name='ONE', alt='', isCapture=False),
+                Tnt(isTerminal=False, name='two', alt='', isCapture=True)
             ],
-            sep=Tnt(type=TntType.TERMINAL, name='THREE', alt='', capture=False)
+            sep=Tnt(isTerminal=True, name='THREE', alt='', isCapture=False)
         )
     ]

@@ -2,7 +2,6 @@ import re
 
 from .bnfrule import BnfRule
 from .bnfrule import Tnt
-from .bnfrule import TntType
 from .bnfspec import BnfSpec
 
 
@@ -47,7 +46,7 @@ class BnfParser:
 
     def parseNonterminal(self, lhs):
         tnt = self.parseTnt(MatchScanner(lhs))
-        if tnt.type != TntType.NONTERMINAL:
+        if tnt.isTerminal:
             raise self.InvalidNonterminal()
         return tnt
 
@@ -70,7 +69,7 @@ class BnfParser:
         return tnts
 
     def makeBnfRule(self, line, nt, op, tnts, sep):
-        return BnfRule(line, nt, op, tnts, sep)
+        return BnfRule(line=line, lhs=nt, isRepeating=op=='**=', tnts=tnts, sep=sep)
 
     class ExtraContent(Exception):
         pass
@@ -79,24 +78,15 @@ class BnfParser:
         pass
 
     def parseTnt(self, matchScanner):
-        def determineTntType(capture, name):
-            if not capture:
-                type = TntType.TERMINAL
-            elif self._patterns.terminal.match(name):
-                type = TntType.TERMINAL
-            else:
-                type = TntType.NONTERMINAL
-            return type
-
         self._scanner = matchScanner
         m = self._scanner.match(self._patterns.tnt)
         if not m:
             raise self.InvalidTnt()
         name = m['name']
-        capture = bool(m['angle'])
-        type = determineTntType(capture, name)
-        alt = '' if not capture else m['alt']
-        return Tnt(type, name, alt, capture)
+        isCapture = bool(m['angle'])
+        isTerminal = not isCapture or bool(self._patterns.terminal.match(name))
+        alt = '' if not isCapture else m['alt']
+        return Tnt(isTerminal=isTerminal, name=name, alt=alt, isCapture=isCapture)
 
     class InvalidTnt(Exception):
         pass
@@ -110,7 +100,7 @@ class BnfParser:
             tnt = BnfParser().parseTnt(matchScanner)
             # if tnt.type != TntType.TERMINAL:
             #     raise self.SeparatorMustBeTerminal()
-            # if tnt.capture:
+            # if tnt.isCapture:
             #     raise self.SeparatorMustNotBeInAngles()
             return tnt
         return None

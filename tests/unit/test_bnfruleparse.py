@@ -24,14 +24,14 @@ def test_standard(bnfParser):
     bnfRule = bnfParser.parseBnfRule(toLine('<one> ::= TWO <three> <FOUR> <five>hi <six>:by <SEVEN>:go # comment'))
     assert bnfRule.lhs.name == 'one'
     assert not bnfRule.lhs.alt
-    assert bnfRule.op == '::='
+    assert not bnfRule.isRepeating
     assert len(bnfRule.tnts) == 6
     assert bnfRule.tnts[0].name == 'TWO'
 
 
 def test_repeating(bnfParser):
     bnfRule = bnfParser.parseBnfRule(toLine('<one>:One **= <two> +THREE # comment'))
-    assert bnfRule.op == '**='
+    assert bnfRule.isRepeating
     assert bnfRule.sep.name == 'THREE'
 
 
