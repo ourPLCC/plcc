@@ -27,7 +27,7 @@ import shutil
 import tempfile
 
 import plcc.version
-from plcc.parse.reader import SpecificationReader
+from plcc.parse.specreader import SpecificationReader
 
 from plcc.stubs.java import JavaStubs
 from plcc.stubs.python import PythonStubs

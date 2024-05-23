@@ -4,7 +4,7 @@ import pytest
 from plcc.spec.lexparser import LexParser
 from plcc.spec.lexrule import LexRule
 from plcc.spec.line import Line
-from plcc.spec.reader import SpecReader
+from plcc.spec.specreader import SpecReader
 
 @pytest.fixture
 def parser():

@@ -2,7 +2,7 @@ import pytest
 import os
 
 
-from plcc.spec.reader import SpecReader
+from plcc.spec.specreader import SpecReader
 
 
 @pytest.fixture

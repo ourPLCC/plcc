@@ -1,7 +1,7 @@
 import pytest
 
 
-from plcc.spec.reader import SpecReader
+from plcc.spec.specreader import SpecReader
 from plcc.spec.bnfspec import BnfSpec
 from plcc.spec.bnfparser import BnfParser
 from plcc.spec.bnfvalidator import BnfValidator

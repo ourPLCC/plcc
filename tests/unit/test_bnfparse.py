@@ -4,7 +4,7 @@ import pytest
 from plcc.spec.line import Line
 from plcc.spec.bnfrule import BnfRule, Tnt
 from plcc.spec.bnfparser import BnfParser
-from plcc.spec.reader import SpecReader
+from plcc.spec.specreader import SpecReader
 
 
 def toRules(string):

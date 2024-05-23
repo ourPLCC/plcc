@@ -2,7 +2,7 @@ import pytest
 
 from plcc.spec.semparser import SemParser
 from plcc.spec.semrule import SemRule
-from plcc.spec.reader import SpecReader
+from plcc.spec.specreader import SpecReader
 from plcc.spec.line import Line
 
 
