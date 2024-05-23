@@ -13,6 +13,7 @@ def validator():
 def makeLexRule(name):
     return LexRule(line=None, name=name, pattern='', quote='', end='', isToken=None)
 
+
 def test_detects_duplicates(validator):
     rules = [
         makeLexRule('BOB'),
@@ -20,6 +21,7 @@ def test_detects_duplicates(validator):
     ]
     with pytest.raises(LexValidator.DuplicateName):
         validator.validate(rules)
+
 
 def test_detects_invalid_names(validator):
     rules = [
@@ -31,4 +33,3 @@ def test_detects_invalid_names(validator):
 
 def test_empty_rules_are_vacuously_valid(validator):
     validator.validate([])
-
