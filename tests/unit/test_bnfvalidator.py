@@ -44,3 +44,11 @@ def test_duplicate_LHS_nonterminals_must_have_an_alt(validator):
     )
     with pytest.raises(BnfValidator.DuplicateLhsMustProvideConcreteClassName):
         validator.validate(spec)
+
+
+def test_alts_unique_within_RHS(validator):
+    spec = toSpec(
+        '<hi> ::= <DAD>one <MOM>one\n'
+    )
+    with pytest.raises(BnfValidator.FieldNamesMustBeUniqueWithinRule):
+        validator.validate(spec)

@@ -12,7 +12,7 @@ class BnfValidator:
         # Invalid nonterminal names are detected by the parser
         self.altsMustBeUniqueAcrossLHS(bnfspec)
         self.duplicateLhsHaveAlternativeNames(bnfspec)
-        # self.rhsHaveDistinctAlternativeNamesWithinRule(bnfspec)
+        self.altsMustBeUniqueWithinRule(bnfspec)
         # self.duplicateRhsHaveAlternativeNames(bnfspec)
         # self.onlyRepeatingRulesHaveSeparators(bnfspec)
         # self.separatorsAreNoncapturingNonterminals(bnfspec)
@@ -50,8 +50,18 @@ class BnfValidator:
         def __init__(self, line):
             self.line = line
 
-    # def rhsHaveDistinctAlternativeNamesWithinRule(bnfspec):
-    #     ...
+    def altsMustBeUniqueWithinRule(self, bnfspec):
+        for rule in bnfspec.getRules():
+            seen = set()
+            for t in rule.tnts:
+                if t.alt:
+                    if t.alt in seen:
+                        raise self.FieldNamesMustBeUniqueWithinRule(rule.line)
+                    seen.add(t.alt)
+
+    class FieldNamesMustBeUniqueWithinRule(Exception):
+        def __init__(self, line):
+            self.line = line
 
     # def duplicateRhsHaveAlternativeNames(bnfspec):
     #     ...
