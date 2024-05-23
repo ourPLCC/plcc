@@ -68,3 +68,12 @@ def test_duplicate_capturing_RHS_must_have_alt_except_one(validator):
     )
     validator.validate(spec)
     assert True
+
+
+def test_only_repeating_rules_have_separators(validator):
+    spec = toSpec(
+        '<hi> ::= MOM +SEP\n'
+    )
+    with pytest.raises(BnfValidator.NonRepeatingRulesCannotHaveSeparators):
+        validator.validate(spec)
+

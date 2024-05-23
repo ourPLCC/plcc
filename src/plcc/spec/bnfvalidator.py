@@ -15,7 +15,7 @@ class BnfValidator:
         self.duplicateLhsHaveAlternativeNames(bnfspec)
         self.altsMustBeUniqueWithinRule(bnfspec)
         self.duplicateRhsHaveAltExceptOne(bnfspec)
-        # self.onlyRepeatingRulesHaveSeparators(bnfspec)
+        self.nonRepeatingRulesCannotHaveSeparators(bnfspec)
         # self.separatorsAreNoncapturingNonterminals(bnfspec)
         # self.everyNonterminalAppearsOnLhs(bnfspec)
 
@@ -82,6 +82,15 @@ class BnfValidator:
         def __init__(self, line, tntName):
             self.line = line
             self.tntName = tntName
+
+    def nonRepeatingRulesCannotHaveSeparators(self, bnfspec):
+        for rule in bnfspec.getRules():
+            if rule.op != '**=' and rule.sep:
+                raise self.NonRepeatingRulesCannotHaveSeparators(rule.line)
+
+    class NonRepeatingRulesCannotHaveSeparators(Exception):
+        def __init__(self, line):
+            self.line = line
 
     # def duplicateRhsHaveAlternativeNames(bnfspec):
     #     ...

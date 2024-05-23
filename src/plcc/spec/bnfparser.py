@@ -35,8 +35,8 @@ class BnfParser:
         lhs, op, rhs = m['lhs'], m['op'], m['rhs']
         nt = self.parseNonterminal(lhs)
         tnts, sep = self.parserRhs(rhs)
-        if op != '**=' and sep:
-            raise self.StandardRuleCannotHaveSeparator()
+        # if op != '**=' and sep:
+        #     raise self.StandardRuleCannotHaveSeparator()
         return self.makeBnfRule(line, nt, op, tnts, sep)
 
     class MissingDefinitionOperator(Exception):

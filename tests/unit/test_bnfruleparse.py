@@ -40,11 +40,6 @@ def test_missing_op(bnfParser):
         bnfParser.parseBnfRule(toLine('<one>:One *= <two> +THREE # comment'))
 
 
-def test_separator_with_standard(bnfParser):
-    with pytest.raises(BnfParser.StandardRuleCannotHaveSeparator):
-        bnfParser.parseBnfRule(toLine('<one>:One ::= <two> +THREE # comment'))
-
-
 def test_invalid_nonterminal(bnfParser):
     with pytest.raises(BnfParser.InvalidNonterminal):
         bnfParser.parseBnfRule(toLine('<ONE>:One ::= <two> THREE'))
