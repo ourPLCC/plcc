@@ -22,7 +22,25 @@ def validator():
 
 def test_detects_invalid_terminal_names(validator):
     spec = toSpec(
-        '<hi> ::= MOm'
+        '<hi> ::= MOm\n'
     )
     with pytest.raises(BnfValidator.InvalidTerminalName):
+        validator.validate(spec)
+
+
+def test_detects_duplicate_alts_in_LHS(validator):
+    spec = toSpec(
+        '<hi>One ::= <bye>\n'
+        '<bye>One ::= MOM\n'
+    )
+    with pytest.raises(BnfValidator.DuplicateConcreteClassNameInLhs):
+        validator.validate(spec)
+
+
+def test_duplicate_LHS_nonterminals_must_have_an_alt(validator):
+    spec = toSpec(
+        '<hi> ::= DAD\n'
+        '<hi>One ::= MOM\n'
+    )
+    with pytest.raises(BnfValidator.DuplicateLhsMustProvideConcreteClassName):
         validator.validate(spec)

@@ -9,9 +9,9 @@ from .bnfspec import BnfSpec
 class BnfValidator:
     def validate(self, bnfspec):
         self.terminalNamesMustContainOnlyUppercaseAndUnderscore(bnfspec)
-        # self.nonterminalsHaveValidNames(bnfspec)
-        # self.lhsHaveDistinctAlternativeNames(bnfspec)
-        # self.duplicateLhsHaveAlternativeNames(bnfspec)
+        # Invalid nonterminal names are detected by the parser
+        self.altsMustBeUniqueAcrossLHS(bnfspec)
+        self.duplicateLhsHaveAlternativeNames(bnfspec)
         # self.rhsHaveDistinctAlternativeNamesWithinRule(bnfspec)
         # self.duplicateRhsHaveAlternativeNames(bnfspec)
         # self.onlyRepeatingRulesHaveSeparators(bnfspec)
@@ -29,37 +29,26 @@ class BnfValidator:
             self.line = line
             self.name = name
 
-    # def nonterminalsHaveValidNames(self, bnfspec):
-    #     validNonterminalName = re.compile(r'^\w+$')
-    #     for rule, nt in bnfspec.getNonterminals():
-    #         if not validNonterminalName.match(nt.name):
-    #             raise self.InvalidNonterminalName(rule.name, nt.name)
+    def altsMustBeUniqueAcrossLHS(self, bnfspec):
+        names = set()
+        for r in bnfspec.getRules():
+            if r.lhs.alt and r.lhs.alt in names:
+                raise self.DuplicateConcreteClassNameInLhs(r.line, r.lhs.alt)
+            names.add(r.lhs.alt)
 
-    # class InvalidNonterminalName(Exception):
-    #     def __init__(self, line, name):
-    #         self.line = line
-    #         self.name = name
+    class DuplicateConcreteClassNameInLhs(Exception):
+        def __init__(self, line, name):
+            self.line = line
+            self.name = name
 
-    # def lhsHaveDistinctAlternativeNames(bnfspec):
-    #     names = set()
-    #     for r in bnfspec.getRules():
-    #         if r.lhs.alt and r.lhs.alt in names:
-    #             raise self.DuplicateLhsAlternateName(r.line, r.lhs.alt)
-    #         names.add(r.lhs.alt)
+    def duplicateLhsHaveAlternativeNames(self, bnfspec):
+        for rule in bnfspec.getRulesWithDuplicateLhsNames():
+            if not rule.lhs.alt:
+                raise self.DuplicateLhsMustProvideConcreteClassName(rule.line)
 
-    # class DuplicateLhsAlternateName(Exception):
-    #     def __init__(self, line, name):
-    #         self.line = line
-    #         self.name = name
-
-    # def duplicateLhsHaveAlternativeNames(bnfspec):
-    #     for rule in bnfspec.getRulesWithDuplicateLhsNames():
-    #         if not rule.lhs.alt:
-    #             raise self.LhsMissingAlternativeName(rule.line)
-
-    # class LhsMissingAlternativeName(Exception):
-    #     def __init__(self, line):
-    #         self.line = line
+    class DuplicateLhsMustProvideConcreteClassName(Exception):
+        def __init__(self, line):
+            self.line = line
 
     # def rhsHaveDistinctAlternativeNamesWithinRule(bnfspec):
     #     ...
