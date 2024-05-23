@@ -6,6 +6,7 @@ from plcc.spec.lexrule import LexRule
 from plcc.spec.line import Line
 from plcc.spec.specreader import SpecReader
 
+
 @pytest.fixture
 def parser():
     return LexParser()
