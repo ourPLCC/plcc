@@ -16,11 +16,9 @@ def test_terminal():
     assert tnt == Tnt(isTerminal=True, name='HI', alt='', isCapture=False)
 
 
-
 def test_captured_terminal():
     tnt = BnfParser().parseTnt(MatchScanner('<HI>'))
     assert tnt == Tnt(isTerminal=True, name='HI', alt='', isCapture=True)
-
 
 
 def test_captured_terminal_with_alt():
@@ -28,11 +26,9 @@ def test_captured_terminal_with_alt():
     assert tnt == Tnt(isTerminal=True, name='HI', alt='greet', isCapture=True)
 
 
-
 def test_captured_terminal_with_alt_colon():
     tnt = BnfParser().parseTnt(MatchScanner('<HI>:greet'))
     assert tnt == Tnt(isTerminal=True, name='HI', alt='greet', isCapture=True)
-
 
 
 def test_captured_nonterminal():
@@ -40,11 +36,9 @@ def test_captured_nonterminal():
     assert tnt == Tnt(isTerminal=False, name='hi', alt='', isCapture=True)
 
 
-
 def test_captured_nonterminal_with_alt():
     tnt = BnfParser().parseTnt(MatchScanner('<hi>greet'))
     assert tnt == Tnt(isTerminal=False, name='hi', alt='greet', isCapture=True)
-
 
 
 def test_captured_nonterminal_with_alt_colon():
@@ -52,8 +46,6 @@ def test_captured_nonterminal_with_alt_colon():
     assert tnt == Tnt(isTerminal=False, name='hi', alt='greet', isCapture=True)
 
 
-
 def test_captured_nonterminal_with_remainder():
     tnt = BnfParser().parseTnt(MatchScanner('<hi>:greet more stuff'))
     assert tnt == Tnt(isTerminal=False, name='hi', alt='greet', isCapture=True)
-
