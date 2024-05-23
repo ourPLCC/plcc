@@ -1,11 +1,9 @@
-from __future__ import annotations
-import functools
 import re
-from dataclasses import dataclass
-from typing import List
 
-
-from .bnfrule import BnfRule, Tnt, TntType
+from .bnfrule import BnfRule
+from .bnfrule import Tnt
+from .bnfrule import TntType
+from .bnfspec import BnfSpec
 
 
 class BnfParserPatterns:
@@ -23,12 +21,15 @@ class BnfParser:
             patterns = BnfParserPatterns()
         self._patterns = patterns
 
-    def parse(self, lines):
-        for line in lines:
-            yield self.parseBnfRule(line.string)
+    def parseBnfSpec(self, lines):
+        return BnfSpec(list(self.parseBnfRules(lines)))
 
-    def parseBnfRule(self, string):
-        m = self._patterns.rule.match(string)
+    def parseBnfRules(self, lines):
+        for line in lines:
+            yield self.parseBnfRule(line)
+
+    def parseBnfRule(self, line):
+        m = self._patterns.rule.match(line.string)
         if not m:
             raise self.MissingDefinitionOperator()
         lhs, op, rhs = m['lhs'], m['op'], m['rhs']
@@ -36,7 +37,7 @@ class BnfParser:
         tnts, sep = self.parserRhs(rhs)
         if op != '**=' and sep:
             raise self.StandardRuleCannotHaveSeparator()
-        return self.makeBnfRule(nt, op, tnts, sep)
+        return self.makeBnfRule(line, nt, op, tnts, sep)
 
     class MissingDefinitionOperator(Exception):
         pass
@@ -68,29 +69,34 @@ class BnfParser:
             pass
         return tnts
 
-    def makeBnfRule(self, nt, op, tnts, sep):
-        return BnfRule(nt, op, tnts, sep)
+    def makeBnfRule(self, line, nt, op, tnts, sep):
+        return BnfRule(line, nt, op, tnts, sep)
 
     class ExtraContent(Exception):
         pass
 
-
     class InvalidNonterminal(Exception):
         pass
 
-
     def parseTnt(self, matchScanner):
+        def determineTntType(capture, name):
+            if not capture:
+                type = TntType.TERMINAL
+            elif self._patterns.terminal.match(name):
+                type = TntType.TERMINAL
+            else:
+                type = TntType.NONTERMINAL
+            return type
+
         self._scanner = matchScanner
         m = self._scanner.match(self._patterns.tnt)
         if not m:
             raise self.InvalidTnt()
         name = m['name']
-        type = TntType.TERMINAL if self._patterns.terminal.match(name) else TntType.NONTERMINAL
         capture = bool(m['angle'])
+        type = determineTntType(capture, name)
         alt = '' if not capture else m['alt']
-        if not capture and type == TntType.NONTERMINAL:
-            raise self.InvalidTerminal()
-        return Tnt(type,name,alt,capture)
+        return Tnt(type, name, alt, capture)
 
     class InvalidTnt(Exception):
         pass
@@ -139,4 +145,3 @@ class MatchScanner:
 
     def hasMore(self):
         return self._position < len(self._string)
-

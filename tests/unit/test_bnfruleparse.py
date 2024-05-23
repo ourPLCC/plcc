@@ -3,31 +3,53 @@ import pytest
 
 from plcc.spec.bnfrule import BnfRule
 from plcc.spec.bnfparser import BnfParser
+from plcc.spec.line import Line
 
 
-def test_standard():
-    bnfRule = BnfParser().parseBnfRule('<one> ::= TWO <three> <FOUR> <five>hi <six>:by <SEVEN>:go # comment')
+@pytest.fixture
+def bnfParser():
+    return BnfParser()
+
+
+def toLine(string):
+    return Line(
+        path='',
+        number=1,
+        string=string,
+        isInBlock=False
+    )
+
+
+def test_standard(bnfParser):
+    bnfRule = bnfParser.parseBnfRule(toLine('<one> ::= TWO <three> <FOUR> <five>hi <six>:by <SEVEN>:go # comment'))
     assert bnfRule.lhs.name == 'one'
     assert not bnfRule.lhs.alt
     assert bnfRule.op == '::='
     assert len(bnfRule.tnts) == 6
     assert bnfRule.tnts[0].name == 'TWO'
 
-def test_repeating():
-    BnfParser().parseBnfRule('<one>:One **= <two> +THREE # comment')
 
-def test_missing_op():
+def test_repeating(bnfParser):
+    bnfRule = bnfParser.parseBnfRule(toLine('<one>:One **= <two> +THREE # comment'))
+    assert bnfRule.op == '**='
+    assert bnfRule.sep.name == 'THREE'
+
+
+def test_missing_op(bnfParser):
     with pytest.raises(BnfParser.MissingDefinitionOperator):
-        BnfParser().parseBnfRule('<one>:One *= <two> +THREE # comment')
+        bnfParser.parseBnfRule(toLine('<one>:One *= <two> +THREE # comment'))
 
-def test_separator_with_standard():
+
+def test_separator_with_standard(bnfParser):
     with pytest.raises(BnfParser.StandardRuleCannotHaveSeparator):
-        BnfParser().parseBnfRule('<one>:One ::= <two> +THREE # comment')
+        bnfParser.parseBnfRule(toLine('<one>:One ::= <two> +THREE # comment'))
 
-def test_invalid_nonterminal():
+
+def test_invalid_nonterminal(bnfParser):
     with pytest.raises(BnfParser.InvalidNonterminal):
-        BnfParser().parseBnfRule('<ONE>:One ::= <two> THREE')
+        bnfParser.parseBnfRule(toLine('<ONE>:One ::= <two> THREE'))
 
-def test_unrecognized_rhs():
+
+def test_unrecognized_rhs(bnfParser):
     with pytest.raises(BnfParser.ExtraContent):
-        BnfParser().parseBnfRule('<one> ::= <two> THREE @32')
+        bnfParser.parseBnfRule(toLine('<one> ::= <two> THREE @32'))

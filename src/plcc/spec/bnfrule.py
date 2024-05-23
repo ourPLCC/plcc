@@ -6,6 +6,7 @@ from .line import Line
 
 @dataclass
 class BnfRule:
+    line: Line
     lhs: Tnt
     op: str
     tnts: List[Tnt]

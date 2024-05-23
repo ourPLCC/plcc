@@ -10,7 +10,6 @@ def reader():
     return SpecReader()
 
 
-
 def test_lines_contain_contents_without_eol(reader, fs):
     fs.create_file('/f', contents=
         'one\n'
@@ -21,7 +20,6 @@ def test_lines_contain_contents_without_eol(reader, fs):
     assert line.string == 'one'
     line = next(lines)
     assert line.string == 'two'
-
 
 
 def test_lines_are_numbered_from_1(reader, fs):
@@ -36,7 +34,6 @@ def test_lines_are_numbered_from_1(reader, fs):
     assert line.number == 2
 
 
-
 def test_lines_contain_absolute_path(reader, fs):
     fs.create_dir('/a/b')
     fs.create_file('/a/b/f', contents=
@@ -49,7 +46,6 @@ def test_lines_contain_absolute_path(reader, fs):
     assert line.path == '/a/b/f'
     line = next(lines)
     assert line.path == '/a/b/f'
-
 
 
 def test_lines_skip_blank_lines(reader, fs):
@@ -67,7 +63,6 @@ def test_lines_skip_blank_lines(reader, fs):
     assert line.string == 'three' and line.number == 3
 
 
-
 def test_lines_skip_comment_lines(reader, fs):
     fs.create_dir('/a/b')
     fs.create_file('/a/b/f', contents=
@@ -81,7 +76,6 @@ def test_lines_skip_comment_lines(reader, fs):
     assert line.string == 'one' and line.number == 1
     line = next(lines)
     assert line.string == 'three' and line.number == 3
-
 
 
 def test_blocks_are_marked(reader, fs):
@@ -106,7 +100,6 @@ def test_blocks_are_marked(reader, fs):
     assert not line.isInBlock and line.string == '%%%'
     line = next(lines)
     assert not line.isInBlock and line.string == 'two'
-
 
 
 def test_blanks_not_skipped_in_blocks(reader, fs):
@@ -136,7 +129,6 @@ def test_blanks_not_skipped_in_blocks(reader, fs):
     assert not line.isInBlock
 
 
-
 def test_comments_not_skipped_in_blocks(reader, fs):
     fs.create_file('/f', contents=
         'one\n'
@@ -162,7 +154,6 @@ def test_comments_not_skipped_in_blocks(reader, fs):
     assert not line.isInBlock
     line = next(lines)
     assert not line.isInBlock
-
 
 
 def test_includes(reader, fs):
@@ -264,4 +255,3 @@ def test_can_read_lines_into_sections(reader, fs):
     # The last two are empty.
     assert len(sections[2]) == 0
     assert len(sections[3]) == 0
-

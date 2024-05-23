@@ -1,20 +1,15 @@
 import pytest
 
-from plcc.spec.bnfparser import BnfParser, MatchScanner
-from plcc.spec.bnfrule import Tnt, TntType
 
+from plcc.spec.bnfparser import BnfParser
+from plcc.spec.bnfparser import MatchScanner
+from plcc.spec.bnfrule import Tnt
+from plcc.spec.bnfrule import TntType
 
 
 def test_invalid_tnt():
     with pytest.raises(BnfParser.InvalidTnt):
         BnfParser().parseTnt(MatchScanner('-'))
-
-
-
-def test_invalid_terminal():
-    with pytest.raises(BnfParser.InvalidTerminal):
-        BnfParser().parseTnt(MatchScanner('abc'))
-
 
 
 def test_terminal():

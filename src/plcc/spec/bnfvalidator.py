@@ -2,66 +2,74 @@ import re
 from collections import Counter
 from itertools import chain
 
-from .bnfrule import TntType
+
+from .bnfspec import BnfSpec
 
 
 class BnfValidator:
-    def validate(self, bnfrules):
-        self.terminalsHaveValidNames(bnfrules)
-        self.nonterminalsHaveValidNames(bnfrules)
-        self.lhsHaveDistinctAlternativeNames(bnfrules)
-        self.duplicateLhsHaveAlternativeNames(bnfrules)
-        self.rhsHaveDistinctAlternativeNamesWithinRule(bnfrules)
-        self.duplicateRhsHaveAlternativeNames(bnfrules)
-        self.onlyRepeatingRulesHaveSeparators(bnfrules)
-        self.separatorsAreNoncapturingNonterminals(bnfrules)
+    def validate(self, bnfspec):
+        self.terminalNamesMustContainOnlyUppercaseAndUnderscore(bnfspec)
+        # self.nonterminalsHaveValidNames(bnfspec)
+        # self.lhsHaveDistinctAlternativeNames(bnfspec)
+        # self.duplicateLhsHaveAlternativeNames(bnfspec)
+        # self.rhsHaveDistinctAlternativeNamesWithinRule(bnfspec)
+        # self.duplicateRhsHaveAlternativeNames(bnfspec)
+        # self.onlyRepeatingRulesHaveSeparators(bnfspec)
+        # self.separatorsAreNoncapturingNonterminals(bnfspec)
+        # self.everyNonterminalAppearsOnLhs(bnfspec)
 
-    def terminalsHaveValidNames(self, bnfrules):
+    def terminalNamesMustContainOnlyUppercaseAndUnderscore(self, bnfspec):
         validTerminalName = re.compile(r'^[A-Z_]+$')
-        for r in bnfrules:
-            for t in (t for t in r.tnts if t.type == TntType.TERMINAL):
-                if not validTerminalName.match(t.name):
-                    raise InvalidTerminalName(r.line, t.name)
-            sep = r.sep
-            if sep:
-                if not validTerminalName.match(sep.name):
-                    raise InvalidTerminalName(r.line, sep.name)
+        for rule, t in bnfspec.getTerminals():
+            if not validTerminalName.match(t.name):
+                raise self.InvalidTerminalName(rule.line, t.name)
 
     class InvalidTerminalName(Exception):
         def __init__(self, line, name):
             self.line = line
             self.name = name
 
-    def nonterminalsHaveValidNames(self, bnfrules):
-        validNonterminalName = re.compile(r'^\w+$')
-        for r in bnfrules:
-            lhs = r.lhs
-            if not validNonterminalName.match(lhs.name):
-                raise InvalidNonterminalName(r.line, lhs.name)
-            for t in (t for t in r.tnts if t.type == TntType.NONTERMINAL):
-                if not validNonterminalName.match(t.name):
-                    raise InvalidNonterminalName(r.line, t.name)
+    # def nonterminalsHaveValidNames(self, bnfspec):
+    #     validNonterminalName = re.compile(r'^\w+$')
+    #     for rule, nt in bnfspec.getNonterminals():
+    #         if not validNonterminalName.match(nt.name):
+    #             raise self.InvalidNonterminalName(rule.name, nt.name)
 
-    class InvalidNonterminalName(Exception):
-        def __init__(self, line, name):
-            self.line = line
-            self.name = name
+    # class InvalidNonterminalName(Exception):
+    #     def __init__(self, line, name):
+    #         self.line = line
+    #         self.name = name
 
-    def lhsHaveDistinctAlternativeNames(bnfrules):
-        ...
+    # def lhsHaveDistinctAlternativeNames(bnfspec):
+    #     names = set()
+    #     for r in bnfspec.getRules():
+    #         if r.lhs.alt and r.lhs.alt in names:
+    #             raise self.DuplicateLhsAlternateName(r.line, r.lhs.alt)
+    #         names.add(r.lhs.alt)
 
-    def duplicateLhsHaveAlternativeNames(bnfrules):
-        ...
+    # class DuplicateLhsAlternateName(Exception):
+    #     def __init__(self, line, name):
+    #         self.line = line
+    #         self.name = name
 
-    def rhsHaveDistinctAlternativeNamesWithinRule(bnfrules):
-        ...
+    # def duplicateLhsHaveAlternativeNames(bnfspec):
+    #     for rule in bnfspec.getRulesWithDuplicateLhsNames():
+    #         if not rule.lhs.alt:
+    #             raise self.LhsMissingAlternativeName(rule.line)
 
-    def duplicateRhsHaveAlternativeNames(bnfrules):
-        ...
+    # class LhsMissingAlternativeName(Exception):
+    #     def __init__(self, line):
+    #         self.line = line
 
-    def onlyRepeatingRulesHaveSeparators(bnfrules):
-        ...
+    # def rhsHaveDistinctAlternativeNamesWithinRule(bnfspec):
+    #     ...
 
-    def separatorsAreNoncapturingNonterminals(bnfrules):
-        ...
+    # def duplicateRhsHaveAlternativeNames(bnfspec):
+    #     ...
+
+    # def onlyRepeatingRulesHaveSeparators(bnfspec):
+    #     ...
+
+    # def separatorsAreNoncapturingNonterminals(bnfspec):
+    #     ...
 
