@@ -108,10 +108,10 @@ class BnfParser:
         m = matchScanner.match(self._patterns.separator)
         if m:
             tnt = BnfParser().parseTnt(matchScanner)
-            if tnt.type != TntType.TERMINAL:
-                raise self.SeparatorMustBeTerminal()
-            if tnt.capture:
-                raise self.SeparatorMustNotBeInAngles()
+            # if tnt.type != TntType.TERMINAL:
+            #     raise self.SeparatorMustBeTerminal()
+            # if tnt.capture:
+            #     raise self.SeparatorMustNotBeInAngles()
             return tnt
         return None
 

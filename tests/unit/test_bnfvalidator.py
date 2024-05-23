@@ -77,3 +77,10 @@ def test_only_repeating_rules_have_separators(validator):
     with pytest.raises(BnfValidator.NonRepeatingRulesCannotHaveSeparators):
         validator.validate(spec)
 
+
+def test_separators_must_be_non_capturing_terminals(validator):
+    spec = toSpec(
+        '<hi> **= MOM +<SEP>\n'
+    )
+    with pytest.raises(BnfValidator.SeparatorMustBeNonCapturingTerminal):
+        validator.validate(spec)

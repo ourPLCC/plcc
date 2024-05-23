@@ -5,6 +5,7 @@ from itertools import chain
 
 
 from .bnfspec import BnfSpec
+from .bnfspec import TntType
 
 
 class BnfValidator:
@@ -16,7 +17,7 @@ class BnfValidator:
         self.altsMustBeUniqueWithinRule(bnfspec)
         self.duplicateRhsHaveAltExceptOne(bnfspec)
         self.nonRepeatingRulesCannotHaveSeparators(bnfspec)
-        # self.separatorsAreNoncapturingNonterminals(bnfspec)
+        self.separatorsAreNonCapturingTerminals(bnfspec)
         # self.everyNonterminalAppearsOnLhs(bnfspec)
 
     def terminalNamesMustContainOnlyUppercaseAndUnderscore(self, bnfspec):
@@ -92,12 +93,11 @@ class BnfValidator:
         def __init__(self, line):
             self.line = line
 
-    # def duplicateRhsHaveAlternativeNames(bnfspec):
-    #     ...
+    def separatorsAreNonCapturingTerminals(self, bnfspec):
+        for rule in bnfspec.getRules():
+            if rule.sep and (rule.sep.type != TntType.TERMINAL or rule.sep.capture):
+                raise self.SeparatorMustBeNonCapturingTerminal(rule.line)
 
-    # def onlyRepeatingRulesHaveSeparators(bnfspec):
-    #     ...
-
-    # def separatorsAreNoncapturingNonterminals(bnfspec):
-    #     ...
-
+    class SeparatorMustBeNonCapturingTerminal(Exception):
+        def __init__(self, line):
+            self.line = line
