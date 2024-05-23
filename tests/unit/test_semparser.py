@@ -14,7 +14,8 @@ def toLines(string):
 def parser():
     return SemParser()
 
-def test_(parser):
+
+def test_typical_case(parser):
     lines = toLines(
         'This\n'
         '%%%\n'
