@@ -97,17 +97,17 @@ def test_blocks_are_marked(reader, fs):
     )
     lines = reader.readLinesFromSpecFile('/f')
     line = next(lines)
-    assert not line.isInBlock and line.string == 'one'
+    assert not line.isInCodeBlock and line.string == 'one'
     line = next(lines)
-    assert not line.isInBlock and line.string == '%%%'
+    assert not line.isInCodeBlock and line.string == '%%%'
     line = next(lines)
-    assert line.isInBlock and line.string == 'a'
+    assert line.isInCodeBlock and line.string == 'a'
     line = next(lines)
-    assert line.isInBlock and line.string == 'b'
+    assert line.isInCodeBlock and line.string == 'b'
     line = next(lines)
-    assert not line.isInBlock and line.string == '%%%'
+    assert not line.isInCodeBlock and line.string == '%%%'
     line = next(lines)
-    assert not line.isInBlock and line.string == 'two'
+    assert not line.isInCodeBlock and line.string == 'two'
 
 
 def test_blanks_not_skipped_in_blocks(reader, fs):
@@ -122,19 +122,19 @@ def test_blanks_not_skipped_in_blocks(reader, fs):
     )
     lines = reader.readLinesFromSpecFile('/f')
     line = next(lines)
-    assert not line.isInBlock
+    assert not line.isInCodeBlock
     line = next(lines)
-    assert not line.isInBlock
+    assert not line.isInCodeBlock
     line = next(lines)
-    assert line.isInBlock
+    assert line.isInCodeBlock
     line = next(lines)
-    assert line.isInBlock and line.string == ''
+    assert line.isInCodeBlock and line.string == ''
     line = next(lines)
-    assert line.isInBlock
+    assert line.isInCodeBlock
     line = next(lines)
-    assert not line.isInBlock
+    assert not line.isInCodeBlock
     line = next(lines)
-    assert not line.isInBlock
+    assert not line.isInCodeBlock
 
 
 def test_comments_not_skipped_in_blocks(reader, fs):
@@ -149,19 +149,19 @@ def test_comments_not_skipped_in_blocks(reader, fs):
     )
     lines = reader.readLinesFromSpecFile('/f')
     line = next(lines)
-    assert not line.isInBlock
+    assert not line.isInCodeBlock
     line = next(lines)
-    assert not line.isInBlock
+    assert not line.isInCodeBlock
     line = next(lines)
-    assert line.isInBlock
+    assert line.isInCodeBlock
     line = next(lines)
-    assert line.isInBlock and line.string == '    # comment'
+    assert line.isInCodeBlock and line.string == '    # comment'
     line = next(lines)
-    assert line.isInBlock
+    assert line.isInCodeBlock
     line = next(lines)
-    assert not line.isInBlock
+    assert not line.isInCodeBlock
     line = next(lines)
-    assert not line.isInBlock
+    assert not line.isInCodeBlock
 
 
 def test_includes(reader, fs):

@@ -16,7 +16,7 @@ def toLine(string):
         path='',
         number=1,
         string=string,
-        isInBlock=False
+        isInCodeBlock=False
     )
 
 

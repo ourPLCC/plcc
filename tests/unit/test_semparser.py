@@ -32,8 +32,8 @@ def test_typical_case(parser):
         class_='This',
         modifier=None,
         code=[
-            Line(path='', number=3, string='blah', isInBlock=True),
-            Line(path='', number=4, string='blah', isInBlock=True)
+            Line(path='', number=3, string='blah', isInCodeBlock=True),
+            Line(path='', number=4, string='blah', isInCodeBlock=True)
         ]
     )
 

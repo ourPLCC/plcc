@@ -45,7 +45,7 @@ class SpecReader:
 
     def splitStringIntoLines(self, string):
         for number, lineStr in enumerate(string.splitlines(), start=1):
-            yield Line(path='', number=number, string=lineStr, isInBlock=False)
+            yield Line(path='', number=number, string=lineStr, isInCodeBlock=False)
 
     def readLinesFromSpecFile(self, pathStr):
         lines = self.readLinesFromFile(pathStr)
@@ -67,11 +67,11 @@ class SpecReader:
         return lines
 
     def markBlocks(self, lines):
-        isInBlock = False
+        isInCodeBlock = False
         close = None
 
         def mark(line):
-            nonlocal isInBlock
+            nonlocal isInCodeBlock
             nonlocal close
 
             s = line.string.strip()
@@ -81,7 +81,7 @@ class SpecReader:
             elif s == close:
                 close = None
             else:
-                line = line.markIsInBlock()
+                line = line.markInCodeBlock()
             return line
 
         return map(mark, lines)
@@ -89,13 +89,13 @@ class SpecReader:
     def ignoreCommentLines(self, lines):
         def isComment(line):
             s = line.string.strip()
-            return not line.isInBlock and s and self._patterns.comment.match(s)
+            return not line.isInCodeBlock and s and self._patterns.comment.match(s)
         return filter(lambda line: not isComment(line), lines)
 
     def ignoreBlankLines(self, lines):
         def isBlankLine(line):
             s = line.string.strip()
-            return not line.isInBlock and not s
+            return not line.isInCodeBlock and not s
         return filter(lambda line: not isBlankLine(line), lines)
 
     def processIncludes(self, lines, sourceFilePathStr, stack=None):
@@ -104,7 +104,7 @@ class SpecReader:
         if stack is None:
             stack = [ str(sourceFilePath) ]
         for line in lines:
-            if line.isInBlock:
+            if line.isInCodeBlock:
                 yield line
                 continue
             m = self._patterns.include.match(line.string)

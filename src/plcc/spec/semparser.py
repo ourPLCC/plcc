@@ -25,7 +25,7 @@ class SemParser:
             next(lines)
             line = next(lines)
             codeBlock = []
-            while line.isInBlock:
+            while line.isInCodeBlock:
                 codeBlock.append(line)
                 line = next(lines)
             yield SemRule(class_=m['class_'], modifier=m['modifier'], code=codeBlock)

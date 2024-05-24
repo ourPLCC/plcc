@@ -31,7 +31,7 @@ def test_standard():
                 path='',
                 number=1,
                 string='<one> ::= ONE <two>',
-                isInBlock=False
+                isInCodeBlock=False
             ),
             lhs=Tnt(isTerminal=False, name='one', alt='', isCapture=True),
             isRepeating=False,
@@ -46,7 +46,7 @@ def test_standard():
                 path='',
                 number=2,
                 string='<two> ::= TWO',
-                isInBlock=False
+                isInCodeBlock=False
             ),
             lhs=Tnt(isTerminal=False, name='two', alt='', isCapture=True),
             isRepeating=False,
@@ -69,7 +69,7 @@ def test_repeating():
                 path='',
                 number=1,
                 string='<one> **= ONE <two> +THREE',
-                isInBlock=False
+                isInCodeBlock=False
             ),
             lhs=Tnt(isTerminal=False, name='one', alt='', isCapture=True),
             isRepeating=True,
@@ -94,7 +94,7 @@ def test_skip_blank_lines_and_comment_lines():
                 path='',
                 number=3,
                 string='<one> **= ONE <two> +THREE',
-                isInBlock=False
+                isInCodeBlock=False
             ),
             lhs=Tnt(isTerminal=False, name='one', alt='', isCapture=True),
             isRepeating=True,
