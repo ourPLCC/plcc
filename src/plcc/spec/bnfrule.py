@@ -11,40 +11,40 @@ from .line import Line
 @dataclass(frozen=True)
 class BnfRule:
     line: Line
-    lhs: Tnt
-    tnts: List[Tnt]
+    leftHandSymbol: Symbol
+    rightHandSymbols: List[Symbol]
     isRepeating: bool = False
-    sep: Tnt = None
+    separator: Symbol = None
 
-    def getTntsByName(self):
-        tntsByName = defaultdict(list)
-        for t in self.tnts:
-            tntsByName[t.name].append(t)
-        return tntsByName
+    def getRightHandSymbolsByName(self):
+        symbolsByName = defaultdict(list)
+        for symbol in self.rightHandSymbols:
+            symbolsByName[symbol.name].append(symbol)
+        return symbolsByName
 
-    def getDuplicateTntsGroupedByName(self):
-        tntsByName = self.getTntsByName()
-        toD = set(name for name in tntsByName if len(tntsByName[name]) <= 1)
-        for name in toD:
-            del tntsByName[name]
-        return tntsByName
+    def getDuplicateRightHandSymbolsGroupedByName(self):
+        symbolsByName = self.getRightHandSymbolsByName()
+        toDelete = set(name for name in symbolsByName if len(symbolsByName[name]) <= 1)
+        for name in toDelete:
+            del symbolsByName[name]
+        return symbolsByName
 
     def getDuplicateRhsAlts(self):
-        c = Counter(self.getAlts())
-        dups = set()
-        for alt in c:
-            if c[alt] > 1:
-                dups.add(alt)
-        return dups
+        counts = Counter(self.getAlts())
+        duplicates = set()
+        for alt in counts:
+            if counts[alt] > 1:
+                duplicates.add(alt)
+        return duplicates
 
     def getAlts(self):
-        for t in self.tnts:
-            if t.alt:
-                yield t.alt
+        for symbol in self.rightHandSymbols:
+            if symbol.alt:
+                yield symbol.alt
 
 
 @dataclass(frozen=True)
-class Tnt:
+class Symbol:
     name: str
     alt: str
     isCapture: bool

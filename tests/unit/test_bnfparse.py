@@ -2,7 +2,7 @@ import pytest
 
 
 from plcc.spec.line import Line
-from plcc.spec.bnfrule import BnfRule, Tnt
+from plcc.spec.bnfrule import BnfRule, Symbol
 from plcc.spec.bnfparser import BnfParser
 from plcc.spec.specreader import SpecReader
 
@@ -33,13 +33,13 @@ def test_standard():
                 string='<one> ::= ONE <two>',
                 isInCodeBlock=False
             ),
-            lhs=Tnt(isTerminal=False, name='one', alt='', isCapture=True),
+            leftHandSymbol=Symbol(isTerminal=False, name='one', alt='', isCapture=True),
             isRepeating=False,
-            tnts=[
-                Tnt(isTerminal=True, name='ONE', alt='', isCapture=False),
-                Tnt(isTerminal=False, name='two', alt='', isCapture=True)
+            rightHandSymbols=[
+                Symbol(isTerminal=True, name='ONE', alt='', isCapture=False),
+                Symbol(isTerminal=False, name='two', alt='', isCapture=True)
             ],
-            sep=None
+            separator=None
         ),
         BnfRule(
             line=Line(
@@ -48,12 +48,12 @@ def test_standard():
                 string='<two> ::= TWO',
                 isInCodeBlock=False
             ),
-            lhs=Tnt(isTerminal=False, name='two', alt='', isCapture=True),
+            leftHandSymbol=Symbol(isTerminal=False, name='two', alt='', isCapture=True),
             isRepeating=False,
-            tnts=[
-                Tnt(isTerminal=True, name='TWO', alt='', isCapture=False)
+            rightHandSymbols=[
+                Symbol(isTerminal=True, name='TWO', alt='', isCapture=False)
             ],
-            sep=None
+            separator=None
         )
     ]
 
@@ -71,13 +71,13 @@ def test_repeating():
                 string='<one> **= ONE <two> +THREE',
                 isInCodeBlock=False
             ),
-            lhs=Tnt(isTerminal=False, name='one', alt='', isCapture=True),
+            leftHandSymbol=Symbol(isTerminal=False, name='one', alt='', isCapture=True),
             isRepeating=True,
-            tnts=[
-                Tnt(isTerminal=True, name='ONE', alt='', isCapture=False),
-                Tnt(isTerminal=False, name='two', alt='', isCapture=True)
+            rightHandSymbols=[
+                Symbol(isTerminal=True, name='ONE', alt='', isCapture=False),
+                Symbol(isTerminal=False, name='two', alt='', isCapture=True)
             ],
-            sep=Tnt(isTerminal=True, name='THREE', alt='', isCapture=False)
+            separator=Symbol(isTerminal=True, name='THREE', alt='', isCapture=False)
         )
     ]
 
@@ -96,12 +96,12 @@ def test_skip_blank_lines_and_comment_lines():
                 string='<one> **= ONE <two> +THREE',
                 isInCodeBlock=False
             ),
-            lhs=Tnt(isTerminal=False, name='one', alt='', isCapture=True),
+            leftHandSymbol=Symbol(isTerminal=False, name='one', alt='', isCapture=True),
             isRepeating=True,
-            tnts=[
-                Tnt(isTerminal=True, name='ONE', alt='', isCapture=False),
-                Tnt(isTerminal=False, name='two', alt='', isCapture=True)
+            rightHandSymbols=[
+                Symbol(isTerminal=True, name='ONE', alt='', isCapture=False),
+                Symbol(isTerminal=False, name='two', alt='', isCapture=True)
             ],
-            sep=Tnt(isTerminal=True, name='THREE', alt='', isCapture=False)
+            separator=Symbol(isTerminal=True, name='THREE', alt='', isCapture=False)
         )
     ]

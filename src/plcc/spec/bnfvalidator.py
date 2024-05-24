@@ -33,9 +33,9 @@ class BnfValidator:
     def altsMustBeUniqueAcrossLHS(self, bnfspec):
         seen = set()
         for r in bnfspec.getRules():
-            if r.lhs.alt and r.lhs.alt in seen:
-                raise self.DuplicateConcreteClassNameInLhs(r.line, r.lhs.alt)
-            seen.add(r.lhs.alt)
+            if r.leftHandSymbol.alt and r.leftHandSymbol.alt in seen:
+                raise self.DuplicateConcreteClassNameInLhs(r.line, r.leftHandSymbol.alt)
+            seen.add(r.leftHandSymbol.alt)
 
     class DuplicateConcreteClassNameInLhs(Exception):
         def __init__(self, line, name):
@@ -44,7 +44,7 @@ class BnfValidator:
 
     def duplicateLhsHaveAlternativeNames(self, bnfspec):
         for rule in bnfspec.getRulesWithDuplicateLhsNames():
-            if not rule.lhs.alt:
+            if not rule.leftHandSymbol.alt:
                 raise self.DuplicateLhsMustProvideConcreteClassName(rule.line)
 
     class DuplicateLhsMustProvideConcreteClassName(Exception):
@@ -62,21 +62,21 @@ class BnfValidator:
 
     def duplicateRhsHaveAltExceptOne(self, bnfspec):
         for rule in bnfspec.getRules():
-            dupTntsByName = rule.getDuplicateTntsGroupedByName()
-            for name in dupTntsByName:
-                dups = dupTntsByName[name]
-                altCount = sum(1 for t in dups if t.alt)
-                if altCount < len(dups) - 1:
+            symbolsByName = rule.getDuplicateRightHandSymbolsGroupedByName()
+            for name in symbolsByName:
+                duplicates = symbolsByName[name]
+                altCount = sum(1 for t in duplicates if t.alt)
+                if altCount < len(duplicates) - 1:
                     raise self.SymbolNeedsFieldName(rule.line, name)
 
     class SymbolNeedsFieldName(Exception):
-        def __init__(self, line, tntName):
+        def __init__(self, line, name):
             self.line = line
-            self.tntName = tntName
+            self.name = name
 
     def nonRepeatingRulesCannotHaveSeparators(self, bnfspec):
         for rule in bnfspec.getNonrepeatingRules():
-            if rule.sep:
+            if rule.separator:
                 raise self.NonRepeatingRulesCannotHaveSeparators(rule.line)
 
     class NonRepeatingRulesCannotHaveSeparators(Exception):
@@ -85,7 +85,7 @@ class BnfValidator:
 
     def separatorsAreNonCapturing(self, bnfspec):
         for rule in bnfspec.getRulesThatHaveSep():
-            if rule.sep.isCapture:
+            if rule.separator.isCapture:
                 raise self.SeparatorMustBeNonCapturing(rule.line)
 
     class SeparatorMustBeNonCapturing(Exception):
@@ -94,9 +94,9 @@ class BnfValidator:
 
     def everyNonterminalAppearsOnLhs(self, bnfspec):
         lhsNames = bnfspec.getLhsNames()
-        for r, t in bnfspec.getRhsNonterminals():
-            if t.name not in lhsNames:
-                raise self.NonterminalMustAppearOnLHS(r.line, t.name)
+        for rule, symbol in bnfspec.getRhsNonterminals():
+            if symbol.name not in lhsNames:
+                raise self.NonterminalMustAppearOnLHS(rule.line, symbol.name)
 
     class NonterminalMustAppearOnLHS(Exception):
         def __init__(self, line, name):

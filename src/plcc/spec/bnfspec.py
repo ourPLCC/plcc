@@ -7,11 +7,11 @@ class BnfSpec:
 
     def getTerminals(self):
         for rule in self._bnfRules:
-            for tnt in rule.tnts:
+            for tnt in rule.rightHandSymbols:
                 if tnt.isTerminal:
                     yield rule, tnt
-            if rule.sep:
-                yield rule, rule.sep
+            if rule.separator:
+                yield rule, rule.separator
 
     def getRules(self):
         for rule in self._bnfRules:
@@ -20,7 +20,7 @@ class BnfSpec:
     def getRulesWithDuplicateLhsNames(self):
         rulesByLhsName = defaultdict(list)
         for r in self.getRules():
-            rulesByLhsName[r.lhs.name].append(r)
+            rulesByLhsName[r.leftHandSymbol.name].append(r)
         for name in rulesByLhsName:
             if len(rulesByLhsName[name]) > 1:
                 for rule in rulesByLhsName[name]:
@@ -29,21 +29,23 @@ class BnfSpec:
     def getLhsNames(self):
         lhsNames = set()
         for r in self.getRules():
-            lhsNames.add(r.lhs.name)
+            lhsNames.add(r.leftHandSymbol.name)
         return lhsNames
 
     def getRhsNonterminals(self):
         for r in self.getRules():
-            for t in r.tnts:
+            for t in r.rightHandSymbols:
                 if not t.isTerminal:
                     yield r, t
 
     def getRulesThatHaveSep(self):
         for r in self.getRules():
-            if r.sep:
+            if r.separator:
                 yield r
 
     def getNonrepeatingRules(self):
         for r in self.getRules():
             if not r.isRepeating:
                 yield r
+
+

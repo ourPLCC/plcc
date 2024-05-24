@@ -1,7 +1,7 @@
 import re
 
 from .bnfrule import BnfRule
-from .bnfrule import Tnt
+from .bnfrule import Symbol
 from .bnfspec import BnfSpec
 
 
@@ -32,11 +32,9 @@ class BnfParser:
         if not m:
             raise self.MissingDefinitionOperator()
         lhs, op, rhs = m['lhs'], m['op'], m['rhs']
-        nt = self.parseNonterminal(lhs)
-        tnts, sep = self.parserRhs(rhs)
-        # if op != '**=' and sep:
-        #     raise self.StandardRuleCannotHaveSeparator()
-        return self.makeBnfRule(line, nt, op, tnts, sep)
+        leftHandSymbol = self.parseNonterminal(lhs)
+        rightHandSymbols, separator = self.parserRhs(rhs)
+        return self.makeBnfRule(line, leftHandSymbol, op, rightHandSymbols, separator)
 
     class MissingDefinitionOperator(Exception):
         pass
@@ -45,31 +43,37 @@ class BnfParser:
         pass
 
     def parseNonterminal(self, lhs):
-        tnt = self.parseTnt(MatchScanner(lhs))
-        if tnt.isTerminal:
+        symbol = self.parseSymbol(MatchScanner(lhs))
+        if symbol.isTerminal:
             raise self.InvalidNonterminal()
-        return tnt
+        return symbol
 
     def parserRhs(self, rhs):
-        s = MatchScanner(rhs)
-        tnts = self.parseTnts(s)
-        sep = self.parseSeparator(s)
-        self.parseEolComment(s)
-        if s.hasMore():
-            raise self.ExtraContent(s.getRemainder())
+        scanner = MatchScanner(rhs)
+        tnts = self.parseRightHandSymbols(scanner)
+        sep = self.parseSeparator(scanner)
+        self.parseEolComment(scanner)
+        if scanner.hasMore():
+            raise self.ExtraContent(scanner.getRemainder())
         return (tnts, sep)
 
-    def parseTnts(self, scanner):
-        tnts = []
+    def parseRightHandSymbols(self, scanner):
+        symbols = []
         try:
             while True:
-                tnts.append(self.parseTnt(scanner))
+                symbols.append(self.parseSymbol(scanner))
         except self.InvalidTnt:
             pass
-        return tnts
+        return symbols
 
-    def makeBnfRule(self, line, nt, op, tnts, sep):
-        return BnfRule(line=line, lhs=nt, isRepeating=op=='**=', tnts=tnts, sep=sep)
+    def makeBnfRule(self, line, leftHandSymbol, operator, rightHandSymbols, separator):
+        return BnfRule(
+            line=line,
+            leftHandSymbol=leftHandSymbol,
+            isRepeating=operator=='**=',
+            rightHandSymbols=rightHandSymbols,
+            separator=separator
+        )
 
     class ExtraContent(Exception):
         pass
@@ -77,7 +81,7 @@ class BnfParser:
     class InvalidNonterminal(Exception):
         pass
 
-    def parseTnt(self, matchScanner):
+    def parseSymbol(self, matchScanner):
         self._scanner = matchScanner
         m = self._scanner.match(self._patterns.tnt)
         if not m:
@@ -86,7 +90,7 @@ class BnfParser:
         isCapture = bool(m['angle'])
         isTerminal = not isCapture or bool(self._patterns.terminal.match(name))
         alt = '' if not isCapture else m['alt']
-        return Tnt(isTerminal=isTerminal, name=name, alt=alt, isCapture=isCapture)
+        return Symbol(isTerminal=isTerminal, name=name, alt=alt, isCapture=isCapture)
 
     class InvalidTnt(Exception):
         pass
@@ -97,8 +101,8 @@ class BnfParser:
     def parseSeparator(self, matchScanner):
         m = matchScanner.match(self._patterns.separator)
         if m:
-            tnt = BnfParser().parseTnt(matchScanner)
-            return tnt
+            symbol = BnfParser().parseSymbol(matchScanner)
+            return symbol
         return None
 
     class SeparatorMustBeTerminal(Exception):

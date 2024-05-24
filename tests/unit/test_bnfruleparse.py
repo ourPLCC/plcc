@@ -22,17 +22,17 @@ def toLine(string):
 
 def test_standard(bnfParser):
     bnfRule = bnfParser.parseBnfRule(toLine('<one> ::= TWO <three> <FOUR> <five>hi <six>:by <SEVEN>:go # comment'))
-    assert bnfRule.lhs.name == 'one'
-    assert not bnfRule.lhs.alt
+    assert bnfRule.leftHandSymbol.name == 'one'
+    assert not bnfRule.leftHandSymbol.alt
     assert not bnfRule.isRepeating
-    assert len(bnfRule.tnts) == 6
-    assert bnfRule.tnts[0].name == 'TWO'
+    assert len(bnfRule.rightHandSymbols) == 6
+    assert bnfRule.rightHandSymbols[0].name == 'TWO'
 
 
 def test_repeating(bnfParser):
     bnfRule = bnfParser.parseBnfRule(toLine('<one>:One **= <two> +THREE # comment'))
     assert bnfRule.isRepeating
-    assert bnfRule.sep.name == 'THREE'
+    assert bnfRule.separator.name == 'THREE'
 
 
 def test_missing_op(bnfParser):
