@@ -30,9 +30,7 @@ RUN addgroup -S my && adduser -S my -G my
 COPY --chown=plcc:plcc . /plcc
 ENV PATH="/plcc/src/plcc/bin:${PATH}"
 RUN git config --global --add safe.directory /plcc
-WORKDIR /plcc
-RUN ls -la
-RUN git status
+RUN git --git-dir=/plcc/.git describe --tags
 
 # Change user to dev.
 WORKDIR /workdir
