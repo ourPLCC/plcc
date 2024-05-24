@@ -28,13 +28,17 @@ class BnfParser:
             yield self.parseBnfRule(line)
 
     def parseBnfRule(self, line):
+        lhs, rhs, op = self.splitRule(line)
+        leftHandSymbol = self.parseNonterminal(lhs)
+        rightHandSymbols, separator = self.parserRhs(rhs)
+        return self.makeBnfRule(line, leftHandSymbol, op, rightHandSymbols, separator)
+
+    def splitRule(self, line):
         m = self._patterns.rule.match(line.string)
         if not m:
             raise self.MissingDefinitionOperator()
         lhs, op, rhs = m['lhs'], m['op'], m['rhs']
-        leftHandSymbol = self.parseNonterminal(lhs)
-        rightHandSymbols, separator = self.parserRhs(rhs)
-        return self.makeBnfRule(line, leftHandSymbol, op, rightHandSymbols, separator)
+        return lhs, rhs, op
 
     class MissingDefinitionOperator(Exception):
         pass
@@ -50,12 +54,12 @@ class BnfParser:
 
     def parserRhs(self, rhs):
         scanner = MatchScanner(rhs)
-        tnts = self.parseRightHandSymbols(scanner)
+        symbols = self.parseRightHandSymbols(scanner)
         sep = self.parseSeparator(scanner)
         self.parseEolComment(scanner)
         if scanner.hasMore():
             raise self.ExtraContent(scanner.getRemainder())
-        return (tnts, sep)
+        return (symbols, sep)
 
     def parseRightHandSymbols(self, scanner):
         symbols = []
