@@ -29,6 +29,9 @@ RUN addgroup -S my && adduser -S my -G my
 # Copy over plcc from downloader stage.
 COPY --chown=plcc:plcc . /plcc
 ENV PATH="/plcc/src/plcc/bin:${PATH}"
+WORKDIR /plcc
+RUN ls -la
+RUN git status
 
 # Change user to dev.
 WORKDIR /workdir
