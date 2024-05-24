@@ -10,8 +10,8 @@ def validator():
     return LexValidator()
 
 
-def makeLexRule(name):
-    return LexRule(line=None, name=name, pattern='', remainder='', isToken=None)
+def makeLexRule(name, remainder=''):
+    return LexRule(line=None, name=name, pattern='', remainder=remainder, isToken=None)
 
 
 def test_detects_duplicates(validator):
@@ -33,3 +33,20 @@ def test_detects_invalid_names(validator):
 
 def test_empty_rules_are_vacuously_valid(validator):
     validator.validate([])
+    assert True
+
+
+def test_detect_unmatched_content(validator):
+    rules = [
+        makeLexRule('BOB', remainder=' junk')
+    ]
+    with pytest.raises(LexValidator.UnmatchedContent):
+        validator.validate(rules)
+
+
+def test_but_comments_are_ok(validator):
+    rules = [
+        makeLexRule('BOB', remainder='   # junk')
+    ]
+    validator.validate(rules)
+    assert True
