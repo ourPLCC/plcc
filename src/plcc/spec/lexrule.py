@@ -1,6 +1,7 @@
 from dataclasses import dataclass, replace
 from .line import Line
 
+
 @dataclass(frozen=True)
 class LexRule:
     line: Line
@@ -8,6 +9,3 @@ class LexRule:
     pattern: str
     remainder: str
     isToken: bool = True
-
-    def toSkip(self):
-        return replace(self, isToken=False)

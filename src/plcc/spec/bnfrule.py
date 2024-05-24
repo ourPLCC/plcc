@@ -16,9 +16,6 @@ class BnfRule:
     isRepeating: bool = False
     sep: Tnt = None
 
-    def toRepeating(self):
-        return replace(self, isRepeating=True)
-
     def getTntsByName(self):
         tntsByName = defaultdict(list)
         for t in self.tnts:
@@ -52,6 +49,3 @@ class Tnt:
     alt: str
     isCapture: bool
     isTerminal: bool = False
-
-    def toTerminal(self):
-        return replace(self, isTerminal=True)

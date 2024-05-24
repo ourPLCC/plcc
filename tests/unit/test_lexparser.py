@@ -22,6 +22,11 @@ def lines(string):
     return SpecReader().readLinesFromString(string)
 
 
+def test_invalid_syntax(parser):
+    rules = parser.parse(lines(r"kip WS '\s+'"))
+    with pytest.raises(LexParser.InvalidLexRule):
+        list(rules)
+
 def test_parse_skip_rule(parser):
     rules = parser.parse(lines(r"skip WS '\s+'"))
     rules = list(rules)

@@ -16,7 +16,7 @@ class BnfValidator:
         self.altsMustBeUniqueWithinRule(bnfspec)
         self.duplicateRhsHaveAltExceptOne(bnfspec)
         self.nonRepeatingRulesCannotHaveSeparators(bnfspec)
-        self.separatorsAreNonCapturingTerminals(bnfspec)
+        self.separatorsAreNonCapturing(bnfspec)
         self.everyNonterminalAppearsOnLhs(bnfspec)
 
     def terminalNamesMustContainOnlyUppercaseAndUnderscore(self, bnfspec):
@@ -83,14 +83,12 @@ class BnfValidator:
         def __init__(self, line):
             self.line = line
 
-    def separatorsAreNonCapturingTerminals(self, bnfspec):
+    def separatorsAreNonCapturing(self, bnfspec):
         for rule in bnfspec.getRulesThatHaveSep():
-            if not rule.sep.isTerminal:
-                raise self.SeparatorMustBeNonCapturingTerminal(rule.line)
             if rule.sep.isCapture:
-                raise self.SeparatorMustBeNonCapturingTerminal(rule.line)
+                raise self.SeparatorMustBeNonCapturing(rule.line)
 
-    class SeparatorMustBeNonCapturingTerminal(Exception):
+    class SeparatorMustBeNonCapturing(Exception):
         def __init__(self, line):
             self.line = line
 

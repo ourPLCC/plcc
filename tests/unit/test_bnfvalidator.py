@@ -78,12 +78,20 @@ def test_only_repeating_rules_have_separators(validator):
         validator.validate(spec)
 
 
-def test_separators_must_be_non_capturing_terminals(validator):
+def test_separators_must_be_non_capturing(validator):
     spec = toSpec(
         '<hi> **= MOM +<SEP>\n'
     )
-    with pytest.raises(BnfValidator.SeparatorMustBeNonCapturingTerminal):
+    with pytest.raises(BnfValidator.SeparatorMustBeNonCapturing):
         validator.validate(spec)
+
+
+def test_can_pass_separators_must_be_non_capturing(validator):
+    spec = toSpec(
+        '<hi> **= MOM +SEP\n'
+    )
+    validator.validate(spec)
+    assert True
 
 
 def test_each_nonterminal_appears_in_LHS(validator):
@@ -92,6 +100,15 @@ def test_each_nonterminal_appears_in_LHS(validator):
     )
     with pytest.raises(BnfValidator.NonterminalMustAppearOnLHS):
         validator.validate(spec)
+
+
+def test_can_pass_each_nonterminal_appears_in_LHS(validator):
+    spec = toSpec(
+        '<hi> **= MOM <bye>\n'
+        '<bye> ::= DAD\n'
+    )
+    validator.validate(spec)
+    assert True
 
 
 def test_no_errors(validator):
