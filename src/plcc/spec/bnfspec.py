@@ -13,14 +13,6 @@ class BnfSpec:
             if rule.sep:
                 yield rule, rule.sep
 
-    def getNonterminals(self):
-        for rule in self._bnfRules:
-            print(rule)
-            yield rule, rule.lhs
-            for tnt in rule.tnts:
-                if tnt.type == TntType.NONTERMINAL:
-                    yield rule, tnt
-
     def getRules(self):
         for rule in self._bnfRules:
             yield rule
