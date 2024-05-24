@@ -8,7 +8,7 @@ from .lexrule import LexRule
 
 class LexParserPatterns:
     def __init__(self):
-        self.rule = re.compile(r'^\s*(?:(?P<type>skip|token)\s+)?(?P<name>[A-Z_]+)\s+(?P<quote>[\'"])(?P<pattern>[^(?P=quote)]*)(?P=quote)(?P<end>.*)$')
+        self.rule = re.compile(r'^\s*(?:(?P<isToken>skip|token)\s+)?(?P<name>[A-Z_]+)\s+(?P<quote>[\'"])(?P<pattern>[^(?P=quote)]*)(?P=quote)(?P<remainder>.*)$')
 
 
 class LexParser:
@@ -24,12 +24,9 @@ class LexParser:
             if not m:
                 raise self.InvalidLexRule(line)
             d = m.groupdict()
-            if not d['type']:
-                d['type'] = 'token'
-            type = d['type']
-            del d['type']
-            d['isToken'] = type == 'token'
+            d['isToken'] = not d['isToken'] or d['isToken'] == 'token'
             d['line'] = line
+            del d['quote']
             yield LexRule(**d)
 
     class InvalidLexRule(Exception):

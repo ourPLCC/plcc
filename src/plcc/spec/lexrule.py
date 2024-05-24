@@ -6,8 +6,7 @@ class LexRule:
     line: Line
     name: str
     pattern: str
-    quote: str
-    end: str
+    remainder: str
     isToken: bool = True
 
     def toSkip(self):

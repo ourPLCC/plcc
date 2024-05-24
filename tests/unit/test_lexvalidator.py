@@ -11,7 +11,7 @@ def validator():
 
 
 def makeLexRule(name):
-    return LexRule(line=None, name=name, pattern='', quote='', end='', isToken=None)
+    return LexRule(line=None, name=name, pattern='', remainder='', isToken=None)
 
 
 def test_detects_duplicates(validator):
