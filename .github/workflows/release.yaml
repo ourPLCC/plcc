@@ -23,8 +23,8 @@ jobs:
             [
               'main'
             ]
-          additional-packages: |
-            ['conventional-changelog-conventionalcommits']
+          # additional-packages: |
+          #   ['conventional-changelog-conventionalcommits']
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
