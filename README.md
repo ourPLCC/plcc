@@ -49,7 +49,7 @@ tasks:
     command: |
         # To pin to a specific version of PLCC,
         # in the next line, change main to something like v8.0.1
-        PLCC_GIT_BRANCH=main
+        PLCC_GIT_BRANCH=main \
           /bin/bash -c \
           "$(\curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" \
           >> ~/.bashrc
@@ -448,7 +448,7 @@ one per line. Lines starting with `#` are comments.
 For example,
 
 ```
-# Skip rules discard the text the match.
+# Skip rules discard the text they match.
 skip WHITESPACE '\s+'
 
 # Token rules emits a Token containing their name and the match.
@@ -488,7 +488,7 @@ While there is more unscanned input ...
 
 * Rules do not match across newline characters.
 
-### Syntactic specification
+### Syntactic Specification
 
 A syntax specification is a flavor of
 [BNF (Backus-Naur From)](https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form).
