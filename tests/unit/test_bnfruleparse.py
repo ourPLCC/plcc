@@ -1,17 +1,14 @@
 import pytest
 
 
+import plcc.spec.bnfparser as bp
 from plcc.spec.bnfrule import BnfRule
-from plcc.spec.bnfparser import BnfParser
-from plcc.spec.bnfparser import InvalidNonterminal
-from plcc.spec.bnfparser import ExtraContent
-from plcc.spec.bnfparser import MissingDefinitionOperator
 from plcc.spec.line import Line
 
 
 @pytest.fixture
 def bnfParser():
-    return BnfParser()
+    return bp.BnfParser()
 
 
 def toLine(string):
@@ -39,15 +36,17 @@ def test_repeating(bnfParser):
 
 
 def test_missing_op(bnfParser):
-    with pytest.raises(MissingDefinitionOperator):
-        bnfParser.parseBnfRule(toLine('<one>:One *= <two> +THREE # comment'))
+    assert_fails(bnfParser, '<one>:One *= <two> +THREE # comment', bp.MissingDefinitionOperator)
 
 
 def test_invalid_nonterminal(bnfParser):
-    with pytest.raises(InvalidNonterminal):
-        bnfParser.parseBnfRule(toLine('<ONE>:One ::= <two> THREE'))
+    assert_fails(bnfParser, '<ONE>:One ::= <two> THREE', bp.InvalidNonterminal)
 
 
 def test_unrecognized_rhs(bnfParser):
-    with pytest.raises(ExtraContent):
-        bnfParser.parseBnfRule(toLine('<one> ::= <two> THREE @32'))
+    assert_fails(bnfParser, '<one> ::= <two> THREE @32', bp.ExtraContent)
+
+
+def assert_fails(parser, string, exception):
+    with pytest.raises(exception):
+        parser.parseBnfRule(toLine(string))
