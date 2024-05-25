@@ -36,17 +36,17 @@ def test_repeating(bnfParser):
 
 
 def test_missing_op(bnfParser):
-    assert_fails(bnfParser, '<one>:One *= <two> +THREE # comment', bp.MissingDefinitionOperator)
+    failsWithException(bnfParser, '<one>:One *= <two> +THREE # comment', bp.MissingDefinitionOperator)
 
 
 def test_invalid_nonterminal(bnfParser):
-    assert_fails(bnfParser, '<ONE>:One ::= <two> THREE', bp.InvalidNonterminal)
+    failsWithException(bnfParser, '<ONE>:One ::= <two> THREE', bp.InvalidNonterminal)
 
 
 def test_unrecognized_rhs(bnfParser):
-    assert_fails(bnfParser, '<one> ::= <two> THREE @32', bp.ExtraContent)
+    failsWithException(bnfParser, '<one> ::= <two> THREE @32', bp.ExtraContent)
 
 
-def assert_fails(parser, string, exception):
+def failsWithException(parser, string, exception):
     with pytest.raises(exception):
         parser.parseBnfRule(toLine(string))
