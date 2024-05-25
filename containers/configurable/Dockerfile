@@ -45,4 +45,6 @@ RUN bash -c 'curl -s https://get.sdkman.io | bash'
 RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install java $JAVA_VERSION"
 
 COPY --chown=$USERNAME:$USERNAME . $HOME/.plcc
+RUN git config --global --add safe.directory $HOME/.plcc
+
 ENV PATH="$HOME/.plcc/src/plcc/bin:${PATH}"

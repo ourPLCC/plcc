@@ -19,7 +19,7 @@ def get_version():
 def get_version_from_git_tag():
     completedProcess = subprocess.run([
             'git',
-            '--git-dir=' + str(Path(__file__).parent.parent/'.git'),
+            '--git-dir=' + str(Path(__file__).parent.parent.parent/'.git'),
             'describe',
             '--tags'
         ],
