@@ -47,9 +47,12 @@ image: gitpod/workspace-full:latest
 tasks:
   - name: Install PLCC
     command: |
-        /bin/bash -c "$(\
-          \curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash \
-        )" >> ~/.bashrc
+        # To pin to a specific version of PLCC,
+        # in the next line, change main to something like v8.0.1
+        PLCC_GIT_BRANCH=main
+          /bin/bash -c \
+          "$(\curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" \
+          >> ~/.bashrc
         exec bash
 ```
 
