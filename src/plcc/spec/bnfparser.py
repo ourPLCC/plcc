@@ -5,20 +5,13 @@ from .bnfrule import Symbol
 from .bnfspec import BnfSpec
 
 
-class BnfParserPatterns:
-    def __init__(self):
-        self.rule = re.compile(r'^(?P<lhs>.*)(?P<op>::=|\*\*=)(?P<rhs>.*)$')
-        self.tnt = re.compile(r'\s*(?P<angle><)?(?P<name>\w+)(?(angle)>:?(?P<alt>\w*)|)')
-        self.terminal = re.compile(r'^[A-Z_]+$')
-        self.separator = re.compile(r'\s*\+')
-        self.eolComment = re.compile(r'\s*#.*')
-
-
 class BnfParser:
-    def __init__(self, patterns=None):
-        if not patterns:
-            patterns = BnfParserPatterns()
-        self._patterns = patterns
+    def __init__(self):
+        self._rulePattern = re.compile(r'^(?P<lhs>.*)(?P<op>::=|\*\*=)(?P<rhs>.*)$')
+        self._symbolPattern = re.compile(r'\s*(?P<angle><)?(?P<name>\w+)(?(angle)>:?(?P<alt>\w*)|)')
+        self._terminalPattern = re.compile(r'^[A-Z_]+$')
+        self._separatorPattern = re.compile(r'\s*\+')
+        self._eolCommentPattern = re.compile(r'\s*#.*')
 
     def parseBnfSpec(self, lines):
         return BnfSpec(list(self.parseBnfRules(lines)))
@@ -34,41 +27,24 @@ class BnfParser:
         return self.makeBnfRule(line, leftHandSymbol, op, rightHandSymbols, separator)
 
     def splitRule(self, line):
-        m = self._patterns.rule.match(line.string)
+        m = self._rulePattern.match(line.string)
         if not m:
-            raise self.MissingDefinitionOperator()
+            raise self._MissingDefinitionOperator()
         lhs, op, rhs = m['lhs'], m['op'], m['rhs']
         return lhs, rhs, op
 
-    class MissingDefinitionOperator(Exception):
-        pass
-
-    class StandardRuleCannotHaveSeparator(Exception):
+    class _MissingDefinitionOperator(Exception):
         pass
 
     def parseNonterminal(self, lhs):
-        symbol = self.parseSymbol(MatchScanner(lhs))
-        if symbol.isTerminal:
-            raise self.InvalidNonterminal()
-        return symbol
+        return NonterminalParser(self._symbolPattern, self._terminalPattern).parse(lhs)
 
     def parserRhs(self, rhs):
-        scanner = MatchScanner(rhs)
-        symbols = self.parseRightHandSymbols(scanner)
-        sep = self.parseSeparator(scanner)
-        self.parseEolComment(scanner)
-        if scanner.hasMore():
-            raise self.ExtraContent(scanner.getRemainder())
-        return (symbols, sep)
-
-    def parseRightHandSymbols(self, scanner):
-        symbols = []
-        try:
-            while True:
-                symbols.append(self.parseSymbol(scanner))
-        except self.InvalidTnt:
-            pass
-        return symbols
+        return RightHandSideParser(
+            self._symbolPattern,
+            self._terminalPattern,
+            self._separatorPattern,
+            self._eolCommentPattern).parse(rhs)
 
     def makeBnfRule(self, line, leftHandSymbol, operator, rightHandSymbols, separator):
         return BnfRule(
@@ -79,47 +55,85 @@ class BnfParser:
             separator=separator
         )
 
-    class ExtraContent(Exception):
-        pass
-
-    class InvalidNonterminal(Exception):
-        pass
-
     def parseSymbol(self, matchScanner):
+        return SymbolParser(self._symbolPattern, self._terminalPattern).parse(matchScanner)
+
+
+class SymbolParser:
+    def __init__(self, symbolPattern, terminalPattern):
+        self._scanner = None
+        self._symbolPattern = symbolPattern
+        self._terminalPattern = terminalPattern
+
+    def parse(self, matchScanner):
         self._scanner = matchScanner
-        m = self._scanner.match(self._patterns.tnt)
+        m = self._scanner.match(self._symbolPattern)
         if not m:
-            raise self.InvalidTnt()
+            raise self._InvalidSymbol()
         name = m['name']
         isCapture = bool(m['angle'])
-        isTerminal = not isCapture or bool(self._patterns.terminal.match(name))
+        isTerminal = not isCapture or bool(self._terminalPattern.match(name))
         alt = '' if not isCapture else m['alt']
         return Symbol(isTerminal=isTerminal, name=name, alt=alt, isCapture=isCapture)
 
-    class InvalidTnt(Exception):
+    class _InvalidSymbol(Exception):
         pass
 
-    class InvalidTerminal(Exception):
+
+class NonterminalParser(SymbolParser):
+    def parse(self, string):
+        symbol = self.parseSymbol(MatchScanner(string))
+        if symbol.isTerminal:
+            raise self._InvalidNonterminal()
+        return symbol
+
+    def parseSymbol(self, matchScanner):
+        return SymbolParser(self._symbolPattern, self._terminalPattern).parse(matchScanner)
+
+    class _InvalidNonterminal(Exception):
         pass
+
+
+class RightHandSideParser:
+    def __init__(self, symbolPattern, terminalPattern, separatorPattern, eolCommentPattern):
+        self._symbolPattern = symbolPattern
+        self._terminalPattern = terminalPattern
+        self._separatorPattern = separatorPattern
+        self._eolCommentPattern = eolCommentPattern
+
+    def parse(self, string):
+        scanner = MatchScanner(string)
+        symbols = self.parseRightHandSymbols(scanner)
+        sep = self.parseSeparator(scanner)
+        self.parseEolComment(scanner)
+        if scanner.hasMore():
+            raise self._ExtraContent(scanner.getRemainder())
+        return (symbols, sep)
+
+    class _ExtraContent(Exception):
+        pass
+
+    def parseRightHandSymbols(self, scanner):
+        symbols = []
+        try:
+            while True:
+                symbols.append(self.parseSymbol(scanner))
+        except SymbolParser._InvalidSymbol:
+            pass
+        return symbols
 
     def parseSeparator(self, matchScanner):
-        m = matchScanner.match(self._patterns.separator)
+        m = matchScanner.match(self._separatorPattern)
         if m:
             symbol = BnfParser().parseSymbol(matchScanner)
             return symbol
         return None
 
-    class SeparatorMustBeTerminal(Exception):
-        pass
-
-    class SeparatorMustNotBeInAngles(Exception):
-        pass
-
-    class InvalidSeparator(Exception):
-        pass
+    def parseSymbol(self, matchScanner):
+        return SymbolParser(self._symbolPattern, self._terminalPattern).parse(matchScanner)
 
     def parseEolComment(self, matchScanner):
-        m = matchScanner.match(self._patterns.eolComment)
+        m = matchScanner.match(self._eolCommentPattern)
         return m
 
 
@@ -139,3 +153,9 @@ class MatchScanner:
 
     def hasMore(self):
         return self._position < len(self._string)
+
+
+MissingDefinitionOperator = BnfParser._MissingDefinitionOperator
+InvalidNonterminal = NonterminalParser._InvalidNonterminal
+InvalidSymbol = SymbolParser._InvalidSymbol
+ExtraContent = RightHandSideParser._ExtraContent

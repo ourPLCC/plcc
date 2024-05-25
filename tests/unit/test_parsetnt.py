@@ -2,12 +2,15 @@ import pytest
 
 
 from plcc.spec.bnfparser import BnfParser
+from plcc.spec.bnfparser import InvalidSymbol
+from plcc.spec.bnfparser import InvalidNonterminal
+
 from plcc.spec.bnfparser import MatchScanner
 from plcc.spec.bnfrule import Symbol
 
 
 def test_invalid_tnt():
-    with pytest.raises(BnfParser.InvalidTnt):
+    with pytest.raises(InvalidSymbol):
         BnfParser().parseSymbol(MatchScanner('-'))
 
 

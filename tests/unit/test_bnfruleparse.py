@@ -3,6 +3,9 @@ import pytest
 
 from plcc.spec.bnfrule import BnfRule
 from plcc.spec.bnfparser import BnfParser
+from plcc.spec.bnfparser import InvalidNonterminal
+from plcc.spec.bnfparser import ExtraContent
+from plcc.spec.bnfparser import MissingDefinitionOperator
 from plcc.spec.line import Line
 
 
@@ -36,15 +39,15 @@ def test_repeating(bnfParser):
 
 
 def test_missing_op(bnfParser):
-    with pytest.raises(BnfParser.MissingDefinitionOperator):
+    with pytest.raises(MissingDefinitionOperator):
         bnfParser.parseBnfRule(toLine('<one>:One *= <two> +THREE # comment'))
 
 
 def test_invalid_nonterminal(bnfParser):
-    with pytest.raises(BnfParser.InvalidNonterminal):
+    with pytest.raises(InvalidNonterminal):
         bnfParser.parseBnfRule(toLine('<ONE>:One ::= <two> THREE'))
 
 
 def test_unrecognized_rhs(bnfParser):
-    with pytest.raises(BnfParser.ExtraContent):
+    with pytest.raises(ExtraContent):
         bnfParser.parseBnfRule(toLine('<one> ::= <two> THREE @32'))
