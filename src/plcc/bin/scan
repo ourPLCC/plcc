@@ -2,4 +2,4 @@
 source "$(dirname -- "${BASH_SOURCE[0]}" )/common.bash" && init
 
 assert_file_exists Java/Scan.class
-java Scan
+java Scan "$@"
