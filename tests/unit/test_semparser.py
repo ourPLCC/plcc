@@ -43,3 +43,15 @@ def test_typical_case(parser):
         code=[
         ]
     )
+
+
+def test_invalid_class_line(parser):
+    lines = toLines(
+        'This:Not Good\n'
+        '%%%\n'
+        'blah\n'
+        'blah\n'
+        '%%%\n'
+    )
+    with pytest.raises(SemParser.InvalidSemRule):
+        list(parser.parse(lines))
