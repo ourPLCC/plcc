@@ -1,5 +1,3 @@
-from __future__ import annotations
-from dataclasses import dataclass
 import re
 
 
@@ -7,7 +5,7 @@ from .semrule import SemRule
 
 
 class SemParser:
-    def __init__(self, semParserPatterns=None):
+    def __init__(self):
         self._classPattern=re.compile(r'^\s*(?P<class_>\w+)(?::(?P<modifier>\w+))?(?:\s*#.*)?$')
 
     def parse(self, lines):
