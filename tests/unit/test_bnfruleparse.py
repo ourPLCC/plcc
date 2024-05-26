@@ -36,11 +36,11 @@ def test_repeating(bnfParser):
 
 
 def test_missing_op(bnfParser):
-    failsWithException(bnfParser, '<one>:One *= <two> +THREE # comment', bp.MissingDefinitionOperator)
+    failsWithException(bnfParser, '<one>:One *= <two> +THREE # comment', bp.InvalidBnfRule)
 
 
 def test_invalid_nonterminal(bnfParser):
-    failsWithException(bnfParser, '<ONE>:One ::= <two> THREE', bp.InvalidNonterminal)
+    failsWithException(bnfParser, '<ONE>:One ::= <two> THREE', bp.InvalidLeftHandSide)
 
 
 def test_unrecognized_rhs(bnfParser):
