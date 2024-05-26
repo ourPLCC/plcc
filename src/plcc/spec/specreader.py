@@ -7,22 +7,15 @@ import re
 from .line import Line
 
 
-class SpecReaderPatterns:
-    def __init__(self):
-        self.sectionSeparator = re.compile(r'^%$')
-        self.brackets = {
+class SpecReader:
+    def __init__(self, specReaderPatterns = None):
+        self._sectionSeparatorPattern = re.compile(r'^%$')
+        self._brackets = {
             '%%%': '%%%',
             '%%{': '%%}'
         }
-        self.comment = re.compile(r'#.*')
-        self.include = re.compile(r'^%include\s+(?P<path>.*)$')
-
-
-class SpecReader:
-    def __init__(self, specReaderPatterns = None):
-        if specReaderPatterns is None:
-            specReaderPatterns = SpecReaderPatterns()
-        self._patterns = specReaderPatterns
+        self._commentPattern = re.compile(r'#.*')
+        self._includePattern = re.compile(r'^%include\s+(?P<path>.*)$')
 
     def readSectionsFromSpecFile(self, pathStr):
         return self.groupLinesIntoSections(self.readLinesFromSpecFile(pathStr))
@@ -32,7 +25,7 @@ class SpecReader:
         section = []
         sections.append(section)
         for line in lines:
-            if self._patterns.sectionSeparator.match(line.string.strip()):
+            if self._sectionSeparatorPattern.match(line.string.strip()):
                 section = []
                 sections.append(section)
             else:
@@ -76,8 +69,8 @@ class SpecReader:
 
             s = line.string.strip()
             if not close:
-                if s in self._patterns.brackets:
-                    close = self._patterns.brackets[s]
+                if s in self._brackets:
+                    close = self._brackets[s]
             elif s == close:
                 close = None
             else:
@@ -89,7 +82,7 @@ class SpecReader:
     def ignoreCommentLines(self, lines):
         def isComment(line):
             s = line.string.strip()
-            return not line.isInCodeBlock and s and self._patterns.comment.match(s)
+            return not line.isInCodeBlock and s and self._commentPattern.match(s)
         return filter(lambda line: not isComment(line), lines)
 
     def ignoreBlankLines(self, lines):
@@ -107,7 +100,7 @@ class SpecReader:
             if line.isInCodeBlock:
                 yield line
                 continue
-            m = self._patterns.include.match(line.string)
+            m = self._includePattern.match(line.string)
             if not m:
                 yield line
                 continue
