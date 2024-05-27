@@ -4,9 +4,6 @@ from collections import defaultdict
 from itertools import chain
 
 
-from .bnfspec import BnfSpec
-
-
 class BnfValidator:
     def validate(self, bnfspec):
         # Invalid nonterminal names are detected by the parser

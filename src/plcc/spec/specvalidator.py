@@ -1,21 +1,25 @@
-from .bnfvalidator import BnfValidator
-from .lexvalidator import LexValidator
-from .semvalidator import SemValidator
-from .specvalidator import SpecValidator
-
 
 class SpecValidator:
-    def __init__(self):
-        self._lexValidator = LexValidator()
-        self._bnfValidator = BnfValidator()
-        self._semValidator = SemValidator()
-
     def validate(self, spec):
-        self._lexValidator.validate(spec.getLexSpec())
-        self._bnfValidator.validate(spec.getBnfSpec())
-        for s in spec.getSemSpecs():
-            self._semValidator.validate(s)
-        self._all_terminals_are_tokens(spec.getLexSpec(), spec.getBnfSpec())
+        lexSpec = spec.getLexSpec()
+        bnfSpec = spec.getBnfSpec()
+        semSpecs = spec.getSemSpecs()
 
-    def _all_terminals_are_tokens(self, lexSpec, bnfSpec):
-        ...
+        self._validateLexSpec(lexSpec)
+        self._validateBnfSpec(bnfSpec, lexSpec, semSpecs)
+        for semSpec in spec.getSemSpecs():
+            self._validateSemSpec.validate(semSpec, bnfSpec)
+
+    def _validateLexSpec(self, lexSpec):
+        lexSpec.validate()
+
+    def _validateBnfSpec(self, bnfSpec, lexSpec, semSpecs):
+        bnfSpec.validate()
+        bnfSpec.validateAgainstLexSpec(lexSpec)
+        for semSpec in semSpecs:
+            semSpec.validateAgainstSemSpec(semSpec)
+
+    def _validateSemSpec(self, semSpec, bnfSpec):
+        semSpec.validate()
+        semSpec.validateAgainstBnfSpec(bnfSpec)
+

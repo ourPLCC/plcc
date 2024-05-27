@@ -13,7 +13,7 @@ def parser():
 
 
 def test_parse_wrong_type(parser, fs):
-    rules = parser.parse(None)
+    rules = parser.parseIntoLexRules(None)
     with pytest.raises(TypeError):
         next(rules)
 
@@ -23,60 +23,60 @@ def lines(string):
 
 
 def test_invalid_syntax(parser):
-    rules = parser.parse(lines(r"kip WS '\s+'"))
+    rules = parser.parseIntoLexRules(lines(r"kip WS '\s+'"))
     with pytest.raises(LexParser.InvalidLexRule):
         list(rules)
 
 def test_parse_skip_rule(parser):
-    rules = parser.parse(lines(r"skip WS '\s+'"))
+    rules = parser.parseIntoLexRules(lines(r"skip WS '\s+'"))
     rules = list(rules)
     assert rules[0] == LexRule(isToken=False, name='WS', pattern=r'\s+', remainder="", line=Line(string=r"skip WS '\s+'", path='', number=1))
 
 
 def test_parse_token_rule(parser):
-    rules = parser.parse(lines(r"token WS '\s+'"))
+    rules = parser.parseIntoLexRules(lines(r"token WS '\s+'"))
     rules = list(rules)
     assert rules[0] == LexRule(isToken=True, name='WS', pattern=r'\s+', remainder="", line=Line(string=r"token WS '\s+'", path='', number=1))
 
 
 def test_parse_implicit_token_rule(parser):
-    rules = parser.parse(lines(r"WS '\s+'"))
+    rules = parser.parseIntoLexRules(lines(r"WS '\s+'"))
     rules = list(rules)
     assert rules[0] == LexRule(isToken=True, name='WS', pattern=r'\s+', remainder="", line=Line(string=r"WS '\s+'", path='', number=1))
 
 
 def test_allow_line_comment_in_lex_rule(parser):
-    rules = parser.parse(lines(r"WS '\s+' # hi"))
+    rules = parser.parseIntoLexRules(lines(r"WS '\s+' # hi"))
     rules = list(rules)
     assert rules[0] == LexRule(isToken=True, name='WS', pattern=r'\s+', remainder=" # hi", line=Line(string=r"WS '\s+' # hi", path='', number=1))
 
 
 def test_allow_pound_in_lex_rule_pattern(parser):
-    rules = parser.parse(lines(r"COMMENT ' #\s+' # matching a comment"))
+    rules = parser.parseIntoLexRules(lines(r"COMMENT ' #\s+' # matching a comment"))
     rules = list(rules)
     assert rules[0] == LexRule(isToken=True, name='COMMENT', pattern=r' #\s+', remainder=" # matching a comment", line=Line(string=r"COMMENT ' #\s+' # matching a comment", path='', number=1))
 
 
 def test_skip_blank_lines_in_lex(parser):
-    rules = parser.parse(lines("\n\nCOMMENT ' #\\s+' # matching a comment"))
+    rules = parser.parseIntoLexRules(lines("\n\nCOMMENT ' #\\s+' # matching a comment"))
     rules = list(rules)
     assert rules[0] == LexRule(isToken=True, name='COMMENT', pattern=r' #\s+', remainder=" # matching a comment", line=Line(string=r"COMMENT ' #\s+' # matching a comment", path='', number=3))
 
 
 def test_skip_comment_lines_in_lex(parser):
-    rules = parser.parse(lines("#one\n  # two \nCOMMENT ' #\\s+' # matching a comment"))
+    rules = parser.parseIntoLexRules(lines("#one\n  # two \nCOMMENT ' #\\s+' # matching a comment"))
     rules = list(rules)
     assert rules[0] == LexRule(isToken=True, name='COMMENT', pattern=r' #\s+', remainder=" # matching a comment", line=Line(string=r"COMMENT ' #\s+' # matching a comment", path='', number=3))
 
 
 def test_allow_double_quote_in_lex(parser):
-    rules = parser.parse(lines(r'WS "\s+"'))
+    rules = parser.parseIntoLexRules(lines(r'WS "\s+"'))
     rules = list(rules)
     assert rules[0] == LexRule(isToken=True, name='WS', pattern=r'\s+', remainder="", line=Line(string=r'WS "\s+"', path='', number=1))
 
 
 def test_lex_combined_example(parser):
-    rules = parser.parse(lines(r'''# A typical example
+    rules = parser.parseIntoLexRules(lines(r'''# A typical example
 skip WS "\s+"
   # This line is ignored, as is the blank line below.
 token HI 'hi'   # for a greeting

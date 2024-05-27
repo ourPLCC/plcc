@@ -1,9 +1,13 @@
 from collections import defaultdict
+from .bnfvalidator import BnfValidator
 
 
 class BnfSpec:
     def __init__(self, bnfRules):
         self._bnfRules = bnfRules
+
+    def validate(self):
+        BnfValidator().validate(self)
 
     def getTerminals(self):
         for rule in self._bnfRules:

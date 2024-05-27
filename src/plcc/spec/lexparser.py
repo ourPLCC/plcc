@@ -4,13 +4,17 @@ import re
 
 from plcc.spec.line import Line
 from .lexrule import LexRule
+from .lexspec import LexSpec
 
 
 class LexParser:
     def __init__(self, lexParserPatterns=None):
         self._rulePattern = re.compile(r'^\s*(?:(?P<isToken>skip|token)\s+)?(?P<name>[A-Z_]+)\s+(?P<quote>[\'"])(?P<pattern>[^(?P=quote)]*)(?P=quote)(?P<remainder>.*)$')
 
-    def parse(self, lines):
+    def parseIntoLexSpec(self, lines):
+        return LexSpec(list(self.parseIntoLexRules(lines)))
+
+    def parseIntoLexRules(self, lines):
         for line in lines:
             s = line.string.strip()
             m = self._rulePattern.match(line.string)

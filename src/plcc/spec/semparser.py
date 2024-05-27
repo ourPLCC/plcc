@@ -8,7 +8,10 @@ class SemParser:
     def __init__(self):
         self._classPattern=re.compile(r'^\s*(?P<class_>\w+)(?::(?P<modifier>\w+))?(?:\s*#.*)?$')
 
-    def parse(self, lines):
+    def parseIntoSemSpec(self, lines):
+        return SemSpec(list(self.parseIntoSemRules()))
+
+    def parseIntoSemRules(self, lines):
         for line in lines:
             m = self._classPattern.match(line.string)
             if not m:

@@ -27,7 +27,7 @@ def test_typical_case(parser):
         '%%%\n'
         '%%%\n'
     )
-    semRules = list(parser.parse(lines))
+    semRules = list(parser.parseIntoSemRules(lines))
     assert semRules[0] == SemRule(
         class_='This',
         modifier=None,
@@ -54,4 +54,4 @@ def test_invalid_class_line(parser):
         '%%%\n'
     )
     with pytest.raises(SemParser.InvalidSemRule):
-        list(parser.parse(lines))
+        list(parser.parseIntoSemRules(lines))
