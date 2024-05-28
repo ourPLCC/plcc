@@ -1,25 +1,16 @@
 
 class SpecValidator:
+    def __init__(self, lexValidator, bnfValidator, semValidator, translators=None):
+        self.lexValidator = lexValidator
+        self.bnfValidator = bnfValidator
+        self.semValidator = semValidator
+        self.translators = translators
+
     def validate(self, spec):
-        lexSpec = spec.getLexSpec()
-        bnfSpec = spec.getBnfSpec()
-        semSpecs = spec.getSemSpecs()
-
-        self._validateLexSpec(lexSpec)
-        self._validateBnfSpec(bnfSpec, lexSpec, semSpecs)
-        for semSpec in spec.getSemSpecs():
-            self._validateSemSpec.validate(semSpec, bnfSpec)
-
-    def _validateLexSpec(self, lexSpec):
-        lexSpec.validate()
-
-    def _validateBnfSpec(self, bnfSpec, lexSpec, semSpecs):
-        bnfSpec.validate()
-        bnfSpec.validateAgainstLexSpec(lexSpec)
-        for semSpec in semSpecs:
-            semSpec.validateAgainstSemSpec(semSpec)
-
-    def _validateSemSpec(self, semSpec, bnfSpec):
-        semSpec.validate()
-        semSpec.validateAgainstBnfSpec(bnfSpec)
-
+        self.lexValidator.validate(spec.lexspec)
+        self.bnfValidator.validate(spec.bnfspec, spec.lexspec.getTokenNames())
+        for semspec in spec.semspecs:
+            self.semValidator.validate(semspec)
+        for semspec in spec.semspecs:
+            translator = self.translators[langs.append(semspec.language)]
+            self.bnfValidator.validateForLanguage(spec.bnfspec, translator)

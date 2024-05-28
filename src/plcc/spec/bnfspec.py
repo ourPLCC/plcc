@@ -1,16 +1,12 @@
 from collections import defaultdict
-from .bnfvalidator import BnfValidator
 
 
 class BnfSpec:
     def __init__(self, bnfRules):
-        self._bnfRules = bnfRules
-
-    def validate(self):
-        BnfValidator().validate(self)
+        self.rules = bnfRules
 
     def getTerminals(self):
-        for rule in self._bnfRules:
+        for rule in self.rules:
             for tnt in rule.rightHandSymbols:
                 if tnt.isTerminal:
                     yield rule, tnt
@@ -18,7 +14,7 @@ class BnfSpec:
                 yield rule, rule.separator
 
     def getRules(self):
-        for rule in self._bnfRules:
+        for rule in self.rules:
             yield rule
 
     def getRulesWithDuplicateLhsNames(self):
