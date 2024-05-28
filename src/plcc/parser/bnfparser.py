@@ -1,8 +1,8 @@
 import re
 
-from .bnfrule import BnfRule
-from .bnfrule import Symbol
-from .bnfspec import BnfSpec
+from ..spec.bnfrule import BnfRule
+from ..spec.bnfrule import Symbol
+from ..spec.bnfspec import BnfSpec
 
 
 class BnfParser:

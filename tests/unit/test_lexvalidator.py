@@ -1,7 +1,7 @@
 import pytest
 
 
-from plcc.spec.lexvalidator import LexValidator
+from plcc.validator.lexvalidator import LexValidator
 from plcc.spec.lexrule import LexRule
 
 

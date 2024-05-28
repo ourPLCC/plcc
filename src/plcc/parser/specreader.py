@@ -4,7 +4,7 @@ import pathlib
 import re
 
 
-from .line import Line
+from ..spec.line import Line
 
 
 class SpecReader:

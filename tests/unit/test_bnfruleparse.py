@@ -1,7 +1,7 @@
 import pytest
 
 
-import plcc.spec.bnfparser as bp
+import plcc.parser.bnfparser as bp
 from plcc.spec.bnfrule import BnfRule
 from plcc.spec.line import Line
 
