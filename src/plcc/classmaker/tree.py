@@ -2,37 +2,52 @@ class TreeNodeMaker:
     def makeFile(self, bnfRule):
         bnfRule.line
 
+        baseName = Name(
+            name = bnfRule.name,
+            isList = False,
+            isFinal = False
+        )
+
         if bnfRule.leftHandSymbol.alt:
-            className = bnfRule.leftHandSymbol.alt
+            className = Name(
+                name = bnfRule.leftHandSymbol.alt,
+                isList = False,
+                isFinal = True
+            )
         else:
-            className = self.language.getClassName(bnfRule.name)
+            className = baseName
 
         if bnfRule.isAlternativeRule:
-            extends = self.language.getClassName(bnfRule.name)
+            extends = baseName
         elif bnfRule.isFirstRule:
-            extends = self.language.getStartClassName()
+            extends = START_TYPE
         else:
             extends = None
 
         fields = []
         for s in bnfRule.rightHandSymbols:
-            if s.alt:
-                fieldName = self.language.alt
-            else:
-                if bnfRule.isRepeating:
-                    fieldName = self.language.getListFieldName(s.name)
-                else:
-                    fieldName = self.language.getFieldName(s.name)
+            fieldName = Name(
+                name = s.alt if s.alt else s.name,
+                isList = rule.isRepeating,
+                isFinal = bool(s.alt)
+            )
 
-            if bnfRule.isRepeating:
-                fieldType = self.language.getListFieldType(s.name)
-            else:
-                fieldType = self.language.getFieldType(s.name)
+            fieldType = Type(
+                name = s.name,
+                isList = True,
+                isFinal = bnfRule.isRepeating
+            )
 
             field = Variable(fieldName, fieldType)
             fields.append(field)
 
-        fileName = self.language.getFileNameForClass(className)
+        Method(
+            name = className,
+            parameters = fields,
+            returnType = None,
+            body = None
+        )
+
 
         constructorBody = '\n'.join(self.language.indentLines(levels=2, lines=[
             self.language.getConstructorFieldInit(fieldName) for f in fields
