@@ -1,7 +1,28 @@
 from .struct import *
 
 
-class TreeClassMaker:
+class AstClassHierarchyMaker:
+
+    def make(self, spec):
+        classes = []
+        classes.append(self.makeTokenClass(spec.lexSpec))
+        classes.append(self.makeStartClass())
+        classes.extend(self.makeAbstractBaseClasses(spec.bnfSpec))
+        classes.extend(self.makeConcreteClasses(spec.bnfSpec))
+        return classes
+
+    def makeTokenClass(self, lexSpec):
+        ...
+
+    def makeStartClass(self):
+        ...
+
+    def makeAbstractBaseClasses(self, bnfSpec):
+        ...
+
+    def makeConcreteClasses(self, bnfSpec):
+        ...
+
     def makeClass(self, bnfRule):
         return Class(
             name=self.makeClassName(bnfRule),

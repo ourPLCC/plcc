@@ -2,6 +2,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from dataclasses import replace
 
+START_TYPE = Type('_Start', isList=False)
+
 @dataclass(frozen=True)
 class Class:
     name: Name = None
@@ -14,7 +16,6 @@ class Variable:
     name: Name
     type: Type
     isField: bool
-
     def toNonField(self):
         return replace(self, isField=False)
 
@@ -35,8 +36,6 @@ class Name:
 class Type:
     name: str
     isList: bool    # name is the element type if isList is true
-
-START_TYPE = Type('_Start', isList=False)
 
 @dataclass(frozen=True)
 class ConstructorAssignmentStatement:
