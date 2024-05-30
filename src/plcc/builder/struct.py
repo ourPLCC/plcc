@@ -11,6 +11,13 @@ class Class:
     fields: [Variable] = []
     methods: [Method] = []
 
+
+@dataclass(frozen=True)
+class Enum:
+    name: Name = None
+    values: [Name] = []
+
+
 @dataclass(frozen=True)
 class Variable:
     name: Name
@@ -41,3 +48,7 @@ class Type:
 class ConstructorAssignmentStatement:
     lhs: Variable
     rhs: Variable
+
+@dataclass(frozen=True)
+class PrintSelfAsStringStatement:
+    ...

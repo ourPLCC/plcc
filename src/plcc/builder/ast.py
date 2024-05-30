@@ -12,16 +12,77 @@ class AstClassHierarchyMaker:
         return classes
 
     def makeTokenClass(self, lexSpec):
-        ...
+        return Enum(
+            name=self.makeTokenClassName(),
+            values=self.makeTokenNames(lexSpec)
+        )
+
+    def makeTokenClassName(self):
+        return Name(
+            name = 'Token',
+            isList = False,
+            isFinal = True
+        )
+
+    def makeTokenNames(self, lexSpec):
+        names = []
+        for nameString in lexSpec.getTokenNames():
+            names.append(nameString)
+        return names
+
+    def makeTokenName(self, string):
+        return Name(
+            name=string,
+            isList=False,
+            isFinal=True
+        )
 
     def makeStartClass(self):
-        ...
+        return Class(
+            name='_Start',
+            extends=None,
+            fields=[],
+            methods=[
+                self.makeStartRunMethod()
+            ]
+        )
+
+    def makeStartRunMethod(self):
+        return Method(
+            name='_run',
+            returnType='void',
+            parameters=[],
+            body=PrintSelfAsStringStatement()
+        )
 
     def makeAbstractBaseClasses(self, bnfSpec):
-        ...
+        classes = []
+        for symbol in bnfSpec.getAbstractBaseSymbols():
+            classes.append(self.makeAbstractBaseClass(symbol))
+        return classes
+
+    def makeAbstractBaseClass(self, symbol):
+        return Class(
+            name=self.makeAbstractBaseClassName(symbol),
+            extends=None,
+            fields=[],
+            methods=[]
+        )
+
+    def makeAbstractBaseClassName(self, symbol):
+        return self.makeDefaultClassName(symbol)
 
     def makeConcreteClasses(self, bnfSpec):
-        ...
+        classes = []
+        for rule in bnfSpec.getRules():
+            classes.append(self.makeClass(rule))
+        return classes
+
+    def makeStartRuleClass(self, startRule):
+        return Class(
+            name=self.makeClassName(bnfRule),
+            extends
+        )
 
     def makeClass(self, bnfRule):
         return Class(
