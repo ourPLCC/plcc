@@ -78,12 +78,6 @@ class AstClassHierarchyMaker:
             classes.append(self.makeClass(rule))
         return classes
 
-    def makeStartRuleClass(self, startRule):
-        return Class(
-            name=self.makeClassName(bnfRule),
-            extends
-        )
-
     def makeClass(self, bnfRule):
         return Class(
             name=self.makeClassName(bnfRule),
