@@ -18,28 +18,22 @@ class AstClassHierarchyMaker:
         )
 
     def makeTokenClassName(self):
-        return Name(
-            name = 'Token',
-            isList = False,
-            isFinal = True
+        return ClassName(
+            name = 'Token'
         )
 
     def makeTokenNames(self, lexSpec):
         names = []
         for nameString in lexSpec.getTokenNames():
-            names.append(nameString)
+            names.append(self.makeTokenName(nameString))
         return names
 
     def makeTokenName(self, string):
-        return Name(
-            name=string,
-            isList=False,
-            isFinal=True
-        )
+        return ConstantName(string)
 
     def makeStartClass(self):
         return Class(
-            name='_Start',
+            name=ClassName('_Start'),
             extends=None,
             fields=[],
             methods=[
@@ -49,10 +43,12 @@ class AstClassHierarchyMaker:
 
     def makeStartRunMethod(self):
         return Method(
-            name='_run',
-            returnType='void',
+            name=MethodName('_run'),
+            returnType=Type('void'),
             parameters=[],
-            body=PrintSelfAsStringStatement()
+            body=[
+                PrintSelfAsStringStatement()
+            ]
         )
 
     def makeAbstractBaseClasses(self, bnfSpec):
@@ -93,17 +89,13 @@ class AstClassHierarchyMaker:
             return self.makeDefaultClassName(bnfRule)
 
     def makeAltClassName(self, bnfRule):
-        return Name(
-            name = bnfRule.leftHandSymbol.alt,
-            isList = False,
-            isFinal = True
+        return ClassName(
+            name = bnfRule.leftHandSymbol.alt
         )
 
     def makeDefaultClassName(self, bnfRule):
-        return Name(
-            name = bnfRule.name,
-            isList = False,
-            isFinal = False
+        return ClassName(
+            name = bnfRule.leftHandSymbol.name
         )
 
     def makeExtends(self, bnfRule):
@@ -127,10 +119,9 @@ class AstClassHierarchyMaker:
         )
 
     def makeFieldName(self, symbol, isRepeating):
-        return Name(
+        return VariableName(
             name = symbol.alt if symbol.alt else symbol.name,
-            isList = isRepeating,
-            isFinal = bool(symbol.alt)
+            isList = isRepeating
         )
 
     def makeFieldType(self, symbol, isRepeating):
