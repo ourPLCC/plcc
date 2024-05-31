@@ -33,11 +33,11 @@ def test_standard():
                 string='<one> ::= ONE <two>',
                 isInCodeBlock=False
             ),
-            leftHandSymbol=Symbol(isTerminal=False, name='one', alt='', isCapture=True),
+            leftHandSymbol=Symbol(isTerminal=False, name='one', givenName='', isCapture=True),
             isRepeating=False,
             rightHandSymbols=[
-                Symbol(isTerminal=True, name='ONE', alt='', isCapture=False),
-                Symbol(isTerminal=False, name='two', alt='', isCapture=True)
+                Symbol(isTerminal=True, name='ONE', givenName='', isCapture=False),
+                Symbol(isTerminal=False, name='two', givenName='', isCapture=True)
             ],
             separator=None
         ),
@@ -48,10 +48,10 @@ def test_standard():
                 string='<two> ::= TWO',
                 isInCodeBlock=False
             ),
-            leftHandSymbol=Symbol(isTerminal=False, name='two', alt='', isCapture=True),
+            leftHandSymbol=Symbol(isTerminal=False, name='two', givenName='', isCapture=True),
             isRepeating=False,
             rightHandSymbols=[
-                Symbol(isTerminal=True, name='TWO', alt='', isCapture=False)
+                Symbol(isTerminal=True, name='TWO', givenName='', isCapture=False)
             ],
             separator=None
         )
@@ -71,13 +71,13 @@ def test_repeating():
                 string='<one> **= ONE <two> +THREE',
                 isInCodeBlock=False
             ),
-            leftHandSymbol=Symbol(isTerminal=False, name='one', alt='', isCapture=True),
+            leftHandSymbol=Symbol(isTerminal=False, name='one', givenName='', isCapture=True),
             isRepeating=True,
             rightHandSymbols=[
-                Symbol(isTerminal=True, name='ONE', alt='', isCapture=False),
-                Symbol(isTerminal=False, name='two', alt='', isCapture=True)
+                Symbol(isTerminal=True, name='ONE', givenName='', isCapture=False),
+                Symbol(isTerminal=False, name='two', givenName='', isCapture=True)
             ],
-            separator=Symbol(isTerminal=True, name='THREE', alt='', isCapture=False)
+            separator=Symbol(isTerminal=True, name='THREE', givenName='', isCapture=False)
         )
     ]
 
@@ -96,12 +96,12 @@ def test_skip_blank_lines_and_comment_lines():
                 string='<one> **= ONE <two> +THREE',
                 isInCodeBlock=False
             ),
-            leftHandSymbol=Symbol(isTerminal=False, name='one', alt='', isCapture=True),
+            leftHandSymbol=Symbol(isTerminal=False, name='one', givenName='', isCapture=True),
             isRepeating=True,
             rightHandSymbols=[
-                Symbol(isTerminal=True, name='ONE', alt='', isCapture=False),
-                Symbol(isTerminal=False, name='two', alt='', isCapture=True)
+                Symbol(isTerminal=True, name='ONE', givenName='', isCapture=False),
+                Symbol(isTerminal=False, name='two', givenName='', isCapture=True)
             ],
-            separator=Symbol(isTerminal=True, name='THREE', alt='', isCapture=False)
+            separator=Symbol(isTerminal=True, name='THREE', givenName='', isCapture=False)
         )
     ]

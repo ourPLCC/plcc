@@ -6,6 +6,7 @@ from collections import Counter
 
 
 from .line import Line
+from .symbol import Symbol
 
 
 @dataclass(frozen=True)
@@ -29,23 +30,15 @@ class BnfRule:
             del symbolsByName[name]
         return symbolsByName
 
-    def getDuplicateRhsAlts(self):
-        counts = Counter(self.getAlts())
+    def getDuplicateRhsGivenNames(self):
+        counts = Counter(self.getGivenNames())
         duplicates = set()
-        for alt in counts:
-            if counts[alt] > 1:
-                duplicates.add(alt)
+        for givenName in counts:
+            if counts[givenName] > 1:
+                duplicates.add(givenName)
         return duplicates
 
-    def getAlts(self):
+    def getGivenNames(self):
         for symbol in self.rightHandSymbols:
-            if symbol.alt:
-                yield symbol.alt
-
-
-@dataclass(frozen=True)
-class Symbol:
-    name: str
-    alt: str
-    isCapture: bool
-    isTerminal: bool = False
+            if symbol.givenName:
+                yield symbol.givenName

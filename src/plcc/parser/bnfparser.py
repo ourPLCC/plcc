@@ -72,7 +72,7 @@ class SymbolParser:
         isCapture = bool(m['angle'])
         isTerminal = not isCapture or bool(self._terminalPattern.match(name))
         alt = '' if not isCapture else m['alt']
-        symbol = Symbol(isTerminal=isTerminal, name=name, alt=alt, isCapture=isCapture)
+        symbol = Symbol(isTerminal=isTerminal, name=name, givenName=alt, isCapture=isCapture)
         remainder = string[len(m[0]):]
         return (symbol, remainder)
 

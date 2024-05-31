@@ -8,10 +8,10 @@ class BnfValidator:
     def validate(self, bnfspec):
         # Invalid nonterminal names are detected by the parser
         self.terminalNamesMustContainOnlyUppercaseAndUnderscore(bnfspec)
-        self.altsMustBeUniqueAcrossLHS(bnfspec)
-        self.duplicateLhsHaveAlternativeNames(bnfspec)
-        self.altsMustBeUniqueWithinRule(bnfspec)
-        self.duplicateRhsHaveAltExceptOne(bnfspec)
+        self.givenNamesMustBeUniqueAcrossLHS(bnfspec)
+        self.duplicateLhsHaveGivenNames(bnfspec)
+        self.givenNamesMustBeUniqueWithinRule(bnfspec)
+        self.duplicateRhsHaveGivenNameExceptOne(bnfspec)
         self.nonRepeatingRulesCannotHaveSeparators(bnfspec)
         self.separatorsAreNonCapturing(bnfspec)
         self.everyNonterminalAppearsOnLhs(bnfspec)
@@ -27,43 +27,43 @@ class BnfValidator:
             self.line = line
             self.name = name
 
-    def altsMustBeUniqueAcrossLHS(self, bnfspec):
+    def givenNamesMustBeUniqueAcrossLHS(self, bnfspec):
         seen = set()
         for r in bnfspec.getRules():
-            if r.leftHandSymbol.alt and r.leftHandSymbol.alt in seen:
-                raise self.DuplicateConcreteClassNameInLhs(r.line, r.leftHandSymbol.alt)
-            seen.add(r.leftHandSymbol.alt)
+            if r.leftHandSymbol.givenName and r.leftHandSymbol.givenName in seen:
+                raise self.DuplicateConcreteClassNameInLhs(r.line, r.leftHandSymbol.givenName)
+            seen.add(r.leftHandSymbol.givenName)
 
     class DuplicateConcreteClassNameInLhs(Exception):
         def __init__(self, line, name):
             self.line = line
             self.name = name
 
-    def duplicateLhsHaveAlternativeNames(self, bnfspec):
+    def duplicateLhsHaveGivenNames(self, bnfspec):
         for rule in bnfspec.getRulesWithDuplicateLhsNames():
-            if not rule.leftHandSymbol.alt:
+            if not rule.leftHandSymbol.givenName:
                 raise self.DuplicateLhsMustProvideConcreteClassName(rule.line)
 
     class DuplicateLhsMustProvideConcreteClassName(Exception):
         def __init__(self, line):
             self.line = line
 
-    def altsMustBeUniqueWithinRule(self, bnfspec):
+    def givenNamesMustBeUniqueWithinRule(self, bnfspec):
         for rule in bnfspec.getRules():
-            if rule.getDuplicateRhsAlts():
+            if rule.getDuplicateRhsGivenNames():
                 raise self.FieldNamesMustBeUniqueWithinRule(rule.line)
 
     class FieldNamesMustBeUniqueWithinRule(Exception):
         def __init__(self, line):
             self.line = line
 
-    def duplicateRhsHaveAltExceptOne(self, bnfspec):
+    def duplicateRhsHaveGivenNameExceptOne(self, bnfspec):
         for rule in bnfspec.getRules():
             symbolsByName = rule.getDuplicateRightHandSymbolsGroupedByName()
             for name in symbolsByName:
                 duplicates = symbolsByName[name]
-                altCount = sum(1 for t in duplicates if t.alt)
-                if altCount < len(duplicates) - 1:
+                givenNameCount = sum(1 for t in duplicates if t.givenName)
+                if givenNameCount < len(duplicates) - 1:
                     raise self.SymbolNeedsFieldName(rule.line, name)
 
     class SymbolNeedsFieldName(Exception):

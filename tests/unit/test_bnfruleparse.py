@@ -23,7 +23,7 @@ def toLine(string):
 def test_standard(bnfParser):
     bnfRule = bnfParser.parseBnfRule(toLine('<one> ::= TWO <three> <FOUR> <five>hi <six>:by <SEVEN>:go # comment'))
     assert bnfRule.leftHandSymbol.name == 'one'
-    assert not bnfRule.leftHandSymbol.alt
+    assert not bnfRule.leftHandSymbol.givenName
     assert not bnfRule.isRepeating
     assert len(bnfRule.rightHandSymbols) == 6
     assert bnfRule.rightHandSymbols[0].name == 'TWO'

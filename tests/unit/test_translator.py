@@ -45,7 +45,7 @@ def assertResolvesTo(UnresolvedNameType, name=None, alt=None, isTerminal=None, r
 def makeSymbol(name=None, alt=None, isTerminal=None):
     return bnfrule.Symbol(
         name=name,
-        alt=alt,
+        givenName=alt,
         isCapture=None,
         isTerminal=isTerminal
     )

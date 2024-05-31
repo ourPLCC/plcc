@@ -20,8 +20,8 @@ class UnresolvedVariableName:
     symbol: Symbol
 
     def to(self, language):
-        if self.symbol.alt:
-            return language.toVariableName(self.symbol.alt)
+        if self.symbol.givenName:
+            return language.toVariableName(self.symbol.givenName)
         else:
             return language.toVariableName(self.symbol.name)
 
@@ -31,8 +31,8 @@ class UnresolvedClassName:
     symbol: Symbol
 
     def to(self, language):
-        if self.symbol.alt:
-            return language.toClassName(self.symbol.alt)
+        if self.symbol.givenName:
+            return language.toClassName(self.symbol.givenName)
         else:
             return language.toClassName(self.symbol.name)
 
