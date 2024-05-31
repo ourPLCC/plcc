@@ -8,6 +8,40 @@ from plcc.translator.java import JavaTranslator
 from plcc.translator.python import PythonTranslator
 
 
+def test_TypeName_resolves_to_capitalized_symbol_name():
+    assertResolvesTo(code.UnresolvedTypeName, name='cat', alt='pet', resolvesTo='Cat')
+
+
+def test_VariableName_resolves_to_symbol_given_name():
+    assertResolvesTo(code.UnresolvedVariableName, name='cat', alt='pet', resolvesTo='pet')
+
+
+def test_VariableName_resolves_to_symbol_name_if_no_given_name():
+    assertResolvesTo(code.UnresolvedVariableName, name='cat', alt=None, resolvesTo='cat')
+
+
+def test_TypeName_resolves_to_Token_for_terminal_symbols():
+    assertResolvesTo(code.UnresolvedTypeName, name='cat', alt='pet', isTerminal=True, resolvesTo='Token')
+
+
+def test_ClassName_resolves_to_symbol_given_name():
+    assertResolvesTo(code.UnresolvedClassName, name='cat', alt='Pet', resolvesTo='Pet')
+
+
+def test_ClassName_resolves_to_capitalized_symbol_name_if_no_given_name():
+    assertResolvesTo(code.UnresolvedClassName, name='cat', alt=None, resolvesTo='Cat')
+
+
+def test_BaseClassName_resolves_to_capitalized_symbol_name():
+    assertResolvesTo(code.UnresolvedBaseClassName, name='cat', alt='Pet', resolvesTo='Cat')
+
+
+def assertResolvesTo(UnresolvedNameType, name=None, alt=None, isTerminal=None, resolvesTo=''):
+    symbol = makeSymbol(name=name, alt=alt, isTerminal=isTerminal)
+    unresolvedName = UnresolvedNameType(symbol)
+    assertBothJavaAndPythonResolveNameTo(unresolvedName, resolvesTo)
+
+
 def makeSymbol(name=None, alt=None, isTerminal=None):
     return bnfrule.Symbol(
         name=name,
@@ -15,48 +49,6 @@ def makeSymbol(name=None, alt=None, isTerminal=None):
         isCapture=None,
         isTerminal=isTerminal
     )
-
-
-def test_capitalize_symbol_name_to_make_a_type_name():
-    symbol = makeSymbol(name='cat', alt='pet')
-    name = code.UnresolvedTypeName(symbol)
-    assertBothJavaAndPythonResolveNameTo(name, 'Cat')
-
-
-def test_use_provided_name_for_variable_name():
-    symbol = makeSymbol(name= 'cat', alt= 'pet')
-    name = code.UnresolvedVariableName(symbol)
-    assertBothJavaAndPythonResolveNameTo(name, 'pet')
-
-
-def test_use_symbol_name_vor_variable_name_if_no_name_provided():
-    symbol = makeSymbol(name='cat', alt=None)
-    name = code.UnresolvedVariableName(symbol)
-    assertBothJavaAndPythonResolveNameTo(name, 'cat')
-
-
-def test_type_for_a_terminal_is_Token():
-    symbol = makeSymbol(name='cat', alt='pet', isTerminal=True)
-    name = code.UnresolvedTypeName(symbol)
-    assertBothJavaAndPythonResolveNameTo(name, 'Token')
-
-
-def test_the_class_name_of_a_symbol_is_its_name_capitalized():
-    symbol = makeSymbol(name='cat', alt=None)
-    name = code.UnresolvedClassName(symbol)
-    assertBothJavaAndPythonResolveNameTo(name, 'Cat')
-
-
-def test_use_provided_name_for_class_name():
-    symbol = makeSymbol(name='cat', alt='Pet')
-    name = code.UnresolvedClassName(symbol)
-    assertBothJavaAndPythonResolveNameTo(name, 'Pet')
-
-
-def test_capitalize_symbol_name_to_make_base_class_name():
-    symbol = makeSymbol(name='cat', alt='Pet')
-    name = code.UnresolvedBaseClassName(symbol)
-    assertBothJavaAndPythonResolveNameTo(name, 'Cat')
 
 
 def assertBothJavaAndPythonResolveNameTo(name, string):
