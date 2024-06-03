@@ -5,6 +5,16 @@ from plcc.spec.bnfrule import Symbol
 
 
 @dataclass
+class File:
+    ...
+
+
+@dataclass
+class Class:
+    ...
+
+
+@dataclass
 class UnresolvedTypeName:
     symbol: Symbol
 
