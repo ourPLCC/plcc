@@ -1,12 +1,17 @@
 from ..class_ import Class
 from ..module import Module
+from ..names import UnresolvedClassName
+from ..names import ClassName
 
 
-class AstDesigner:
-    def design(self, bnfspec):
-        if not bnfspec:
+class AstGenerator:
+    def generate(self, bnfspec):
+        if not bnfspec or not list(bnfspec.getRules()):
             return []
-        if not list(bnfspec.getRules()):
-            return []
-        print(bnfspec.getRules())
-        return [Module()]
+
+        m = Module()
+        rule = list(bnfspec.getRules())[0]
+        c = Class(UnresolvedClassName(rule.leftHandSymbol), extends=ClassName('_Start'))
+        m.classes.append(c)
+
+        return [m]

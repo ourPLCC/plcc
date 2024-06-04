@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from plcc.spec.bnfrule import Symbol
 
 
-@dataclass
+@dataclass(frozen=True)
 class UnresolvedTypeName:
     symbol: Symbol
 
@@ -15,7 +15,7 @@ class UnresolvedTypeName:
             return language.toTypeName(self.symbol.name)
 
 
-@dataclass
+@dataclass(frozen=True)
 class UnresolvedVariableName:
     symbol: Symbol
 
@@ -26,7 +26,7 @@ class UnresolvedVariableName:
             return language.toVariableName(self.symbol.name)
 
 
-@dataclass
+@dataclass(frozen=True)
 class UnresolvedClassName:
     symbol: Symbol
 
@@ -37,9 +37,17 @@ class UnresolvedClassName:
             return language.toClassName(self.symbol.name)
 
 
-@dataclass
+@dataclass(frozen=True)
 class UnresolvedBaseClassName:
     symbol: Symbol
 
     def to(self, language):
         return language.toBaseClassName(self.symbol.name)
+
+
+@dataclass(frozen=True)
+class ClassName:
+    name: str
+
+    def to(self, language):
+        return language.toClassName(self.name)
