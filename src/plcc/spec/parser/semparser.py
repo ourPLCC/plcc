@@ -1,7 +1,7 @@
 import re
 
 
-from ..spec.semrule import SemRule
+from ..semrule import SemRule
 
 
 class SemParser:

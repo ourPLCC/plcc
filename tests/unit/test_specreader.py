@@ -10,7 +10,7 @@ import pytest
 import os
 
 
-from plcc.parser.specreader import SpecReader
+from plcc.spec.parser.specreader import SpecReader
 
 
 @pytest.fixture

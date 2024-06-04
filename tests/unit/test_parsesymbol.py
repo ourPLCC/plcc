@@ -1,9 +1,9 @@
 import pytest
 
 
-from plcc.parser.bnfparser import BnfParser
-from plcc.parser.bnfparser import InvalidSymbol
-from plcc.parser.bnfparser import InvalidLeftHandSide
+from plcc.spec.parser.bnfparser import BnfParser
+from plcc.spec.parser.bnfparser import InvalidSymbol
+from plcc.spec.parser.bnfparser import InvalidLeftHandSide
 from plcc.spec.bnfrule import Symbol
 
 

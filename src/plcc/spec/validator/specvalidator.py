@@ -4,7 +4,7 @@ class SpecValidator:
         self.lexValidator = lexValidator
         self.bnfValidator = bnfValidator
         self.semValidator = semValidator
-        self.translators = translators
+        self.codes = translators
 
     def validate(self, spec):
         self.lexValidator.validate(spec.lexspec)
@@ -12,5 +12,5 @@ class SpecValidator:
         for semspec in spec.semspecs:
             self.semValidator.validate(semspec)
         for semspec in spec.semspecs:
-            translator = self.translators[langs.append(semspec.language)]
+            translator = self.codes[langs.append(semspec.language)]
             self.bnfValidator.validateForLanguage(spec.bnfspec, translator)

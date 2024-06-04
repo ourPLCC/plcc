@@ -1,4 +1,4 @@
-from .specvalidator import SpecValidator
+from .validator import SpecValidator
 
 class Spec:
     def __init__(self, lexspec, bnfspec, semspecs):

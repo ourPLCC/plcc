@@ -3,8 +3,8 @@ import pytest
 
 from plcc.spec.line import Line
 from plcc.spec.bnfrule import BnfRule, Symbol
-from plcc.parser.bnfparser import BnfParser
-from plcc.parser.specreader import SpecReader
+from plcc.spec.parser.bnfparser import BnfParser
+from plcc.spec.parser.specreader import SpecReader
 
 
 def toRules(string):

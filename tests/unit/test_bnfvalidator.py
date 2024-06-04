@@ -1,10 +1,10 @@
 import pytest
 
 
-from plcc.parser.specreader import SpecReader
+from plcc.spec.parser.specreader import SpecReader
 from plcc.spec.bnfspec import BnfSpec
-from plcc.parser.bnfparser import BnfParser
-from plcc.validator.bnfvalidator import BnfValidator
+from plcc.spec.parser.bnfparser import BnfParser
+from plcc.spec.validator.bnfvalidator import BnfValidator
 
 
 def toSpec(string):

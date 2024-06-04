@@ -1,5 +1,5 @@
-from ..translator.code import Class
-from ..translator.code import File
+from ..class_ import Class
+from ..module import Module
 
 
 class AstDesigner:
@@ -9,4 +9,4 @@ class AstDesigner:
         if not list(bnfspec.getRules()):
             return []
         print(bnfspec.getRules())
-        return [File()]
+        return [Module()]

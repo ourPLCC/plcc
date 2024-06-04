@@ -2,9 +2,9 @@ from dataclasses import dataclass
 import re
 
 
-from ..spec.line import Line
-from ..spec.lexrule import LexRule
-from ..spec.lexspec import LexSpec
+from ..line import Line
+from ..lexrule import LexRule
+from ..lexspec import LexSpec
 
 
 class LexParser:

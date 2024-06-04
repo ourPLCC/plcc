@@ -1,10 +1,10 @@
 import pytest
 
 
-from plcc.parser.lexparser import LexParser
+from plcc.spec.parser.lexparser import LexParser
 from plcc.spec.lexrule import LexRule
 from plcc.spec.line import Line
-from plcc.parser.specreader import SpecReader
+from plcc.spec.parser.specreader import SpecReader
 
 
 @pytest.fixture
