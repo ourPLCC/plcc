@@ -121,7 +121,7 @@ def test_one_rule_with_uncaptured_nonterminal(astGenerator):
     )
 
 
-def test_repeating_rule(astGenerator):
+def test_one_repeating_rule(astGenerator):
     spec = givenBnfSpec('<one> **= <alpha> IGNORE <BRAVO> +IGNORE')
     modules = astGenerator.generate(spec)
     assert len(modules) == 1
@@ -168,6 +168,17 @@ def test_repeating_rule(astGenerator):
             )
         ]
     )
+
+
+def test_multiple_rules(astGenerator):
+    spec = givenBnfSpec('''\
+        <one> ::= <two>
+        <two> ::=
+    ''')
+    modules = astGenerator.generate(spec)
+    assert len(modules) == 2
+    assert modules[0].classes[0].extends == ClassName('_Start')
+    assert modules[1].classes[0].extends == None
 
 
 

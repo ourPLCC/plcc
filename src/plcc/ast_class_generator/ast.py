@@ -18,15 +18,19 @@ class AstClassGenerator:
     def generate(self, bnfspec):
         if not bnfspec or not list(bnfspec.getRules()):
             return []
-        m = Module()
-        rule = list(bnfspec.getRules())[0]
-        c = self.makeClass(rule)
-        m.classes.append(c)
-        return [m]
+        modules = []
+        isFirstRule = True
+        for rule in bnfspec.getRules():
+            m = Module()
+            c = self.makeClass(rule, isFirstRule)
+            m.classes.append(c)
+            modules.append(m)
+            isFirstRule = False
+        return modules
 
-    def makeClass(self, rule):
+    def makeClass(self, rule, isFirstRule):
         className = self.getClassNameForRule(rule)
-        extends = self.getStartClassName()
+        extends = self.getStartClassName() if isFirstRule else self.getBaseClassName(rule)
         fields = self.makeFields(rule)
         constructor = self.makeConstructor(className, fields)
         class_ = Class(
@@ -42,6 +46,9 @@ class AstClassGenerator:
 
     def getStartClassName(self):
         return ClassName('_Start')
+
+    def getBaseClassName(self, rule):
+        return None
 
     def makeFields(self, rule):
         fields = []
