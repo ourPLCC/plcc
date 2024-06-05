@@ -44,3 +44,29 @@ def test_single_empty_bnf_rule_returns_one_class(astGenerator):
         isTerminal=False
     ))
     assert c.extends == ClassName('_Start')
+
+
+def test_one_rhs_nonterminal(astGenerator):
+    spec = givenBnfSpec('<one> ::= <two>')
+    modules = astGenerator.generate(spec)
+    assert len(modules) == 1
+    c = modules[0].classes[0]
+    one = Symbol(
+        name='one',
+        givenName='',
+        isCapture=True,
+        isTerminal=False
+    )
+    two = Symbol(
+        name='two',
+        givenName='',
+        isCapture=True,
+        isTerminal=False
+    )
+    assert c.name == UnresolvedClassName(one)
+    assert c.extends == ClassName('_Start')
+    assert c.fields[0] == FieldDeclaration(
+        name=UnresolvedVariableName(two),
+        type=UnresolvedTypeName(two)
+    )
+
