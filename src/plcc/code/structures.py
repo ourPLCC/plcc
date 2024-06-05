@@ -1,7 +1,31 @@
-from dataclasses import dataclass
+from __future__ import annotations
+from dataclasses import dataclass, field
+
+from ..spec.bnfrule import BnfRule
 
 
-from plcc.spec.bnfrule import Symbol
+@dataclass(frozen=True)
+class Module:
+    classes: [Class] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class Class:
+    name: UnresolvedClassName | ClassName
+    extends: UnresolvedBaseClassName = None
+    fields: [FieldDeclaration] = field(default_factory=list)
+    source_bnfrule: BnfRule = None
+
+
+@dataclass(frozen=True)
+class ClassName:
+    name: str
+
+
+@dataclass(frozen=True)
+class FieldDeclaration:
+    name: UnresolvedVariableName
+    type: UnresolvedTypeName
 
 
 @dataclass(frozen=True)
@@ -44,10 +68,3 @@ class UnresolvedBaseClassName:
     def to(self, language):
         return language.toBaseClassName(self.symbol.name)
 
-
-@dataclass(frozen=True)
-class ClassName:
-    name: str
-
-    def to(self, language):
-        return language.toClassName(self.name)
