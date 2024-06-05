@@ -44,11 +44,16 @@ class AstClassGenerator:
     def makeFields(self, rule):
         fields = []
         for s in rule.rightHandSymbols:
-            n = UnresolvedVariableName(s)
-            t = UnresolvedTypeName(s)
-            f = FieldDeclaration(name=n, type=t)
-            fields.append(f)
+            if s.isCapture:
+                f = self.makeField(s)
+                fields.append(f)
         return fields
+
+    def makeField(self, symbol):
+        n = UnresolvedVariableName(symbol)
+        t = UnresolvedTypeName(symbol)
+        f = FieldDeclaration(name=n, type=t)
+        return f
 
     def makeConstructor(self, className, fields):
         parameters = self.makeConstructorParameters(fields)

@@ -41,7 +41,7 @@ def test_single_empty_bnf_rule_returns_one_class(astGenerator):
     assert c.extends == ClassName('_Start')
 
 
-def test_one_rhs_nonterminal(astGenerator):
+def test_one_rule_with_one_nonterminal(astGenerator):
     spec = givenBnfSpec('<one> ::= <two>')
     modules = astGenerator.generate(spec)
     assert len(modules) == 1
@@ -72,6 +72,53 @@ def test_one_rhs_nonterminal(astGenerator):
         ]
     )
 
+def test_one_rule_with_uncaptured_nonterminal(astGenerator):
+    spec = givenBnfSpec('<one> ::= <alpha> IGNORE <BRAVO>')
+    modules = astGenerator.generate(spec)
+    assert len(modules) == 1
+    c = modules[0].classes[0]
+
+    one = nonterminal('one')
+
+    alpha = nonterminal('alpha')
+    alphaName = UnresolvedVariableName(alpha)
+    alphaType = UnresolvedTypeName(alpha)
+
+    BRAVO = terminal('BRAVO')
+    BRAVOName = UnresolvedVariableName(BRAVO)
+    BRAVOType = UnresolvedTypeName(BRAVO)
+
+    assert c.fields[0] == FieldDeclaration(
+        name=alphaName,
+        type=alphaType
+    )
+    assert c.fields[1] == FieldDeclaration(
+        name=BRAVOName,
+        type=BRAVOType
+    )
+    assert c.constructor == Constructor(
+        className=UnresolvedClassName(one),
+        parameters=[
+            Parameter(
+                name=alphaName,
+                type=alphaType
+            ),
+            Parameter(
+                name=BRAVOName,
+                type=BRAVOType
+            )
+        ],
+        body=[
+            FieldInitialization(
+                field=FieldReference(name=alphaName),
+                parameter=alphaName
+            ),
+            FieldInitialization(
+                field=FieldReference(name=BRAVOName),
+                parameter=BRAVOName
+            )
+        ]
+    )
 
 def nonterminal(name):
     return Symbol(
@@ -79,4 +126,12 @@ def nonterminal(name):
         givenName='',
         isCapture=True,
         isTerminal=False
+    )
+
+def terminal(name):
+    return Symbol(
+        name=name,
+        givenName='',
+        isCapture=True,
+        isTerminal=True
     )
