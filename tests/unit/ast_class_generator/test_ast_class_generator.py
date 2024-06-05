@@ -37,12 +37,7 @@ def test_single_empty_bnf_rule_returns_one_class(astGenerator):
     modules = astGenerator.generate(spec)
     assert len(modules) == 1
     c = modules[0].classes[0]
-    assert c.name == UnresolvedClassName(Symbol(
-        name='one',
-        givenName='',
-        isCapture=True,
-        isTerminal=False
-    ))
+    assert c.name == UnresolvedClassName(nonterminal('one'))
     assert c.extends == ClassName('_Start')
 
 
@@ -51,22 +46,37 @@ def test_one_rhs_nonterminal(astGenerator):
     modules = astGenerator.generate(spec)
     assert len(modules) == 1
     c = modules[0].classes[0]
-    one = Symbol(
-        name='one',
-        givenName='',
-        isCapture=True,
-        isTerminal=False
-    )
-    two = Symbol(
-        name='two',
-        givenName='',
-        isCapture=True,
-        isTerminal=False
-    )
-    assert c.name == UnresolvedClassName(one)
-    assert c.extends == ClassName('_Start')
+
+    one = nonterminal('one')
+    two = nonterminal('two')
+    twoName = UnresolvedVariableName(two)
+    twoType = UnresolvedTypeName(two)
+
     assert c.fields[0] == FieldDeclaration(
-        name=UnresolvedVariableName(two),
-        type=UnresolvedTypeName(two)
+        name=twoName,
+        type=twoType
+    )
+    assert c.constructor == Constructor(
+        className=UnresolvedClassName(one),
+        parameters=[
+            Parameter(
+                name=twoName,
+                type=twoType
+            )
+        ],
+        body=[
+            FieldInitialization(
+                field=FieldReference(name=twoName),
+                parameter=twoName
+            )
+        ]
     )
 
+
+def nonterminal(name):
+    return Symbol(
+        name=name,
+        givenName='',
+        isCapture=True,
+        isTerminal=False
+    )

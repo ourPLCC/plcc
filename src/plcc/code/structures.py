@@ -14,6 +14,7 @@ class Class:
     name: UnresolvedClassName | ClassName
     extends: UnresolvedBaseClassName = None
     fields: [FieldDeclaration] = field(default_factory=list)
+    constructor: Constructor = None
 
 
 @dataclass(frozen=True)
@@ -25,6 +26,30 @@ class ClassName:
 class FieldDeclaration:
     name: UnresolvedVariableName
     type: UnresolvedTypeName
+
+
+@dataclass(frozen=True)
+class Constructor:
+    className: UnresolvedClassName
+    parameters: [Parameter]
+    body: [FieldInitialization]
+
+
+@dataclass(frozen=True)
+class Parameter:
+    name: UnresolvedVariableName
+    type: UnresolvedTypeName
+
+
+@dataclass(frozen=True)
+class FieldInitialization:
+    field: FieldReference
+    parameter: UnresolvedVariableName
+
+
+@dataclass(frozen=True)
+class FieldReference:
+    name: UnresolvedVariableName
 
 
 @dataclass(frozen=True)
