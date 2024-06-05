@@ -72,6 +72,7 @@ def test_one_rule_with_one_nonterminal(astGenerator):
         ]
     )
 
+
 def test_one_rule_with_uncaptured_nonterminal(astGenerator):
     spec = givenBnfSpec('<one> ::= <alpha> IGNORE <BRAVO>')
     modules = astGenerator.generate(spec)
@@ -176,16 +177,49 @@ def test_multiple_rules(astGenerator):
         <two> ::=
     ''')
     modules = astGenerator.generate(spec)
-    assert len(modules) == 2
-    assert modules[0].classes[0].extends == ClassName('_Start')
-    assert modules[1].classes[0].extends == None
+    assertStartClass(modules[0].classes[0], nonterminal('one'))
+    assertClass(modules[1].classes[0], nonterminal('two'))
 
 
+def test_alternative_rules(astGenerator):
+    spec = givenBnfSpec('''\
+        <firstRuleCannotHaveAlternative> ::= <one>
+        <one>:Some ::= <two>
+        <one>:None ::=
+    ''')
+    modules = astGenerator.generate(spec)
+    oneSome = nonterminal('one', 'Some')
+    oneNone = nonterminal('one', 'None')
+    assertBaseClass(modules[0].classes[0], oneSome)
+    assertStartClass(modules[1].classes[0], nonterminal('firstRuleCannotHaveAlternative'))
+    assertSubclass(modules[2].classes[0], oneSome)
+    assertSubclass(modules[3].classes[0], oneNone)
 
-def nonterminal(name):
+
+def assertClass(class_, symbol):
+    assert class_.name == UnresolvedClassName(symbol)
+    assert class_.extends is None
+
+
+def assertBaseClass(class_, symbol):
+    assert class_.name == UnresolvedBaseClassName(symbol)
+    assert class_.extends is None
+
+
+def assertStartClass(class_, symbol):
+    assert class_.name == UnresolvedClassName(symbol)
+    assert class_.extends == ClassName(name='_Start')
+
+
+def assertSubclass(class_, symbol):
+    assert class_.name == UnresolvedClassName(symbol)
+    assert class_.extends == UnresolvedBaseClassName(symbol)
+
+
+def nonterminal(name, given=''):
     return Symbol(
         name=name,
-        givenName='',
+        givenName=given,
         isCapture=True,
         isTerminal=False
     )
