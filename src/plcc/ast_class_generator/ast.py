@@ -14,8 +14,7 @@ class AstClassGenerator:
 
         c = Class(
             UnresolvedClassName(rule.leftHandSymbol),
-            extends=ClassName('_Start'),
-            source_bnfrule=rule
+            extends=ClassName('_Start')
         )
 
         m.classes.append(c)

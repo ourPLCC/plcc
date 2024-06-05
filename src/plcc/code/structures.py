@@ -14,7 +14,6 @@ class Class:
     name: UnresolvedClassName | ClassName
     extends: UnresolvedBaseClassName = None
     fields: [FieldDeclaration] = field(default_factory=list)
-    source_bnfrule: BnfRule = None
 
 
 @dataclass(frozen=True)

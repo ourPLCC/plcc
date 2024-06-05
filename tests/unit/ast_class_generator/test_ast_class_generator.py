@@ -44,4 +44,3 @@ def test_single_empty_bnf_rule_returns_one_class(astGenerator):
         isTerminal=False
     ))
     assert c.extends == ClassName('_Start')
-    assert c.source_bnfrule == spec.rules[0]
