@@ -64,6 +64,17 @@ class UnresolvedTypeName:
 
 
 @dataclass(frozen=True)
+class UnresolvedListTypeName:
+    symbol: Symbol
+
+    def to(self, language):
+        if self.symbol.isTerminal:
+            return language.toListTypeName('Token')
+        else:
+            return language.toListTypeName(self.symbol.name)
+
+
+@dataclass(frozen=True)
 class UnresolvedVariableName:
     symbol: Symbol
 
@@ -72,6 +83,17 @@ class UnresolvedVariableName:
             return language.toVariableName(self.symbol.givenName)
         else:
             return language.toVariableName(self.symbol.name)
+
+
+@dataclass(frozen=True)
+class UnresolvedListVariableName:
+    symbol: Symbol
+
+    def to(self, language):
+        if self.symbol.givenName:
+            return language.toListVariableName(self.symbol.givenName)
+        else:
+            return language.toListVariableName(self.symbol.name)
 
 
 @dataclass(frozen=True)

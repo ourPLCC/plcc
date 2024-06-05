@@ -4,6 +4,8 @@ from plcc.code.structures import ClassName
 from plcc.code.structures import UnresolvedClassName
 from plcc.code.structures import UnresolvedVariableName
 from plcc.code.structures import UnresolvedTypeName
+from plcc.code.structures import UnresolvedListVariableName
+from plcc.code.structures import UnresolvedListTypeName
 from plcc.code.structures import FieldDeclaration
 from plcc.code.structures import Parameter
 from plcc.code.structures import FieldInitialization
@@ -45,13 +47,22 @@ class AstClassGenerator:
         fields = []
         for s in rule.rightHandSymbols:
             if s.isCapture:
-                f = self.makeField(s)
+                if not rule.isRepeating:
+                    f = self.makeField(s)
+                else:
+                    f = self.makeListField(s)
                 fields.append(f)
         return fields
 
     def makeField(self, symbol):
         n = UnresolvedVariableName(symbol)
         t = UnresolvedTypeName(symbol)
+        f = FieldDeclaration(name=n, type=t)
+        return f
+
+    def makeListField(self, symbol):
+        n = UnresolvedListVariableName(symbol)
+        t = UnresolvedListTypeName(symbol)
         f = FieldDeclaration(name=n, type=t)
         return f
 

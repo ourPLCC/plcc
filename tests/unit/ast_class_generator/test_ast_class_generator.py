@@ -120,6 +120,57 @@ def test_one_rule_with_uncaptured_nonterminal(astGenerator):
         ]
     )
 
+
+def test_repeating_rule(astGenerator):
+    spec = givenBnfSpec('<one> **= <alpha> IGNORE <BRAVO> +IGNORE')
+    modules = astGenerator.generate(spec)
+    assert len(modules) == 1
+    c = modules[0].classes[0]
+
+    one = nonterminal('one')
+
+    alpha = nonterminal('alpha')
+    alphaName = UnresolvedListVariableName(alpha)
+    alphaType = UnresolvedListTypeName(alpha)
+
+    BRAVO = terminal('BRAVO')
+    BRAVOName = UnresolvedListVariableName(BRAVO)
+    BRAVOType = UnresolvedListTypeName(BRAVO)
+
+    assert c.fields[0] == FieldDeclaration(
+        name=alphaName,
+        type=alphaType
+    )
+    assert c.fields[1] == FieldDeclaration(
+        name=BRAVOName,
+        type=BRAVOType
+    )
+    assert c.constructor == Constructor(
+        className=UnresolvedClassName(one),
+        parameters=[
+            Parameter(
+                name=alphaName,
+                type=alphaType
+            ),
+            Parameter(
+                name=BRAVOName,
+                type=BRAVOType
+            )
+        ],
+        body=[
+            FieldInitialization(
+                field=FieldReference(name=alphaName),
+                parameter=alphaName
+            ),
+            FieldInitialization(
+                field=FieldReference(name=BRAVOName),
+                parameter=BRAVOName
+            )
+        ]
+    )
+
+
+
 def nonterminal(name):
     return Symbol(
         name=name,
@@ -127,6 +178,7 @@ def nonterminal(name):
         isCapture=True,
         isTerminal=False
     )
+
 
 def terminal(name):
     return Symbol(
