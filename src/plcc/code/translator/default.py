@@ -13,3 +13,7 @@ class DefaultTranslator:
 
     def toListVariableName(self, name):
         return f'{name}List'
+
+    def indentLines(self, lines, levels, indent='    '):
+        indent = indent * levels
+        return [ indent+line for line in lines ]
