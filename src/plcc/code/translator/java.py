@@ -10,3 +10,6 @@ class JavaTranslator(DefaultTranslator):
 
     def toAssignmentStatement(self, lhs, rhs):
         return f'{lhs} = {rhs};'
+
+    def toParameter(self, name, type):
+        return f'{type} {name}'

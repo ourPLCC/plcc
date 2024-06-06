@@ -14,6 +14,7 @@ from plcc.code.structures import UnresolvedListVariableName
 from plcc.code.structures import UnresolvedListTypeName
 from plcc.code.structures import FieldReference
 from plcc.code.structures import AssignVariableToField
+from plcc.code.structures import Parameter
 
 
 def test_UnresolvedTypeName_resolves_to_capitalized_symbol_name():
@@ -116,6 +117,46 @@ def givenFieldReference(name):
     return FieldReference(givenUnresolved(UnresolvedVariableName, name))
 
 
+def test_in_Java_Parameter():
+    param = givenParameter('cat')
+    resolved = whenResolvedByJava(param)
+    assert resolved == 'Cat cat'
+
+
+def test_in_Python_Parameter():
+    param = givenParameter('cat')
+    resolved = whenResolvedByPython(param)
+    assert resolved == 'cat: Cat'
+
+
+def test_in_Java_list_Parameter():
+    param = givenListParameter('cat')
+    resolved = whenResolvedByJava(param)
+    assert resolved == 'List<Cat> catList'
+
+
+def test_in_Python_list_Parameter():
+    param = givenListParameter('cat')
+    resolved = whenResolvedByPython(param)
+    assert resolved == 'catList: [Cat]'
+
+
+def givenParameter(name):
+    symbol = makeSymbol(name)
+    name = UnresolvedVariableName(symbol)
+    type = UnresolvedTypeName(symbol)
+    param = Parameter(name, type)
+    return param
+
+
+def givenListParameter(name):
+    symbol = makeSymbol(name)
+    name = UnresolvedListVariableName(symbol)
+    type = UnresolvedListTypeName(symbol)
+    param = Parameter(name, type)
+    return param
+
+
 def givenUnresolved(of, name, givenName='', isTerminal=False):
     symbol = makeSymbol(name=name, given=givenName, isTerminal=isTerminal)
     unresolvedName = of(symbol)
@@ -145,5 +186,3 @@ def whenResolvedByJava(unresolved):
 
 def whenResolve(unresolved, using):
     return unresolved.to(using)
-
-

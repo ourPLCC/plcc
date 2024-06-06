@@ -37,8 +37,13 @@ class Constructor:
 
 @dataclass(frozen=True)
 class Parameter:
-    name: UnresolvedVariableName
-    type: UnresolvedTypeName
+    name: UnresolvedVariableName | UnresolvedListVariableName
+    type: UnresolvedTypeName | UnresolvedListTypeName
+
+    def to(self, language):
+        name = self.name.to(language)
+        type = self.type.to(language)
+        return language.toParameter(name=name, type=type)
 
 
 @dataclass(frozen=True)
