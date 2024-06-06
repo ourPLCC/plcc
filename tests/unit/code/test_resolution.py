@@ -15,6 +15,7 @@ from plcc.code.structures import UnresolvedListTypeName
 from plcc.code.structures import FieldReference
 from plcc.code.structures import AssignVariableToField
 from plcc.code.structures import Parameter
+from plcc.code.structures import Constructor
 
 
 def test_UnresolvedTypeName_resolves_to_capitalized_symbol_name():
@@ -96,18 +97,18 @@ def test_in_Python_FieldReference_resolves_to_self_dot_variable_name():
 
 
 def test_in_Java_FieldInitialization():
-    unresolved = givenFieldInitialization('cat')
+    unresolved = givenAssignVariableToField('cat')
     resolved = whenResolvedByJava(unresolved)
     assert resolved == 'this.cat = cat;'
 
 
 def test_in_Python_FieldInitialization():
-    unresolved = givenFieldInitialization('cat')
+    unresolved = givenAssignVariableToField('cat')
     resolved = whenResolvedByPython(unresolved)
     assert resolved == 'self.cat = cat'
 
 
-def givenFieldInitialization(name):
+def givenAssignVariableToField(name):
     fieldRef = givenFieldReference(name)
     param = givenUnresolved(UnresolvedVariableName, name)
     return AssignVariableToField(fieldRef, param)
@@ -155,6 +156,42 @@ def givenListParameter(name):
     type = UnresolvedListTypeName(symbol)
     param = Parameter(name, type)
     return param
+
+
+def test_in_Java_constructor():
+    constructor = givenSimpleConstructor('cat', ['fur', 'tail', 'claws'])
+    resolved = whenResolvedByJava(constructor)
+    assert resolved == [
+        'public Cat(Fur fur, Tail tail, Claws claws) {',
+        '    this.fur = fur;',
+        '    this.tail = tail;',
+        '    this.claws = claws;',
+        '}'
+    ]
+
+
+def test_in_Python_constructor():
+    constructor = givenSimpleConstructor('cat', ['fur', 'tail', 'claws'])
+    resolved = whenResolvedByPython(constructor)
+    assert resolved == [
+        'def __init__(self, fur: Fur, tail: Tail, claws: Claws):',
+        '    self.fur = fur',
+        '    self.tail = tail',
+        '    self.claws = claws'
+    ]
+
+
+def givenSimpleConstructor(name, fields):
+    className = givenUnresolved(of=UnresolvedClassName, name=name)
+    params = []
+    for f in fields:
+        p = givenParameter(f)
+        params.append(p)
+    assignments = []
+    for f in fields:
+        a = givenAssignVariableToField(f)
+        assignments.append(a)
+    return Constructor(className, params, assignments)
 
 
 def givenUnresolved(of, name, givenName='', isTerminal=False):

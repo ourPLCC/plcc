@@ -32,7 +32,13 @@ class FieldDeclaration:
 class Constructor:
     className: UnresolvedClassName
     parameters: [Parameter]
-    body: [FieldInitialization]
+    assignments: [AssignVariableToField]
+
+    def to(self, language):
+        className = self.className.to(language)
+        params = [p.to(language) for p in self.parameters]
+        body = [a.to(language) for a in self.assignments]
+        return language.toConstructor(className, params, body)
 
 
 @dataclass(frozen=True)

@@ -64,7 +64,7 @@ def test_one_rule_with_one_nonterminal(astGenerator):
                 type=twoType
             )
         ],
-        body=[
+        assignments=[
             AssignVariableToField(
                 lhs=FieldReference(name=twoName),
                 rhs=twoName
@@ -109,7 +109,7 @@ def test_one_rule_with_uncaptured_nonterminal(astGenerator):
                 type=BRAVOType
             )
         ],
-        body=[
+        assignments=[
             AssignVariableToField(
                 lhs=FieldReference(name=alphaName),
                 rhs=alphaName
@@ -158,7 +158,7 @@ def test_one_repeating_rule(astGenerator):
                 type=BRAVOType
             )
         ],
-        body=[
+        assignments=[
             AssignVariableToField(
                 lhs=FieldReference(name=alphaName),
                 rhs=alphaName

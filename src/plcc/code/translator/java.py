@@ -13,3 +13,11 @@ class JavaTranslator(DefaultTranslator):
 
     def toParameter(self, name, type):
         return f'{type} {name}'
+
+    def toConstructor(self, className, params, assignments):
+        pstr = ', '.join(params)
+        open = [ f'public {className}({pstr}) {{' ]
+        body = self.indentLines(assignments, 1)
+        close = [ '}' ]
+        return open + body + close
+

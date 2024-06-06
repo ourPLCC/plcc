@@ -104,7 +104,7 @@ class AstClassGenerator:
     def makeConstructor(self, className, fields):
         parameters = self.makeConstructorParameters(fields)
         body = self.makeConstructorBody(fields)
-        constructor=Constructor(className=className, parameters=parameters, body=body)
+        constructor=Constructor(className=className, parameters=parameters, assignments=body)
         return constructor
 
     def makeConstructorParameters(self, fields):

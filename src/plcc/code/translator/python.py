@@ -13,3 +13,10 @@ class PythonTranslator(DefaultTranslator):
 
     def toParameter(self, name, type):
         return f'{name}: {type}'
+
+    def toConstructor(self, className, params, assignments):
+        pstr = ', '.join(['self'] + params)
+        open = [ f'def __init__({pstr}):' ]
+        body = self.indentLines(assignments, 1)
+        return open + body
+
