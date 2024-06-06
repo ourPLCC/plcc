@@ -1,5 +1,5 @@
 
-from plcc.java_frontend.genmatchvalue import genMatchValue
+from plcc.java.frontend.genmatchvalue import genMatchValue
 
 
 def assertRuleGeneratesValue(rule, value):
