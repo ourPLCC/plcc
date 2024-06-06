@@ -1,12 +1,6 @@
-class PythonTranslator:
-    def toTypeName(self, name):
-        return name.capitalize()
+from .default import DefaultTranslator
 
-    def toVariableName(self, name):
-        return name
 
-    def toClassName(self, name):
-        return name.capitalize()
-
-    def toBaseClassName(self, name):
-        return name.capitalize()
+class PythonTranslator(DefaultTranslator):
+    def toListTypeName(self, name):
+        return f'[{name}]'
