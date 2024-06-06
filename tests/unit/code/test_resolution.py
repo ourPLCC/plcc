@@ -13,6 +13,7 @@ from plcc.code.structures import UnresolvedVariableName
 from plcc.code.structures import UnresolvedListVariableName
 from plcc.code.structures import UnresolvedListTypeName
 from plcc.code.structures import FieldReference
+from plcc.code.structures import AssignVariableToField
 
 
 def test_UnresolvedTypeName_resolves_to_capitalized_symbol_name():
@@ -91,6 +92,24 @@ def test_in_Python_FieldReference_resolves_to_self_dot_variable_name():
     unresolved = givenFieldReference('cat')
     resolved = whenResolvedByPython(unresolved)
     assert resolved == 'self.cat'
+
+
+def test_in_Java_FieldInitialization():
+    unresolved = givenFieldInitialization('cat')
+    resolved = whenResolvedByJava(unresolved)
+    assert resolved == 'this.cat = cat;'
+
+
+def test_in_Python_FieldInitialization():
+    unresolved = givenFieldInitialization('cat')
+    resolved = whenResolvedByPython(unresolved)
+    assert resolved == 'self.cat = cat'
+
+
+def givenFieldInitialization(name):
+    fieldRef = givenFieldReference(name)
+    param = givenUnresolved(UnresolvedVariableName, name)
+    return AssignVariableToField(fieldRef, param)
 
 
 def givenFieldReference(name):

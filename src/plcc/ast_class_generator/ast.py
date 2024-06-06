@@ -9,7 +9,7 @@ from plcc.code.structures import UnresolvedListVariableName
 from plcc.code.structures import UnresolvedListTypeName
 from plcc.code.structures import FieldDeclaration
 from plcc.code.structures import Parameter
-from plcc.code.structures import FieldInitialization
+from plcc.code.structures import AssignVariableToField
 from plcc.code.structures import FieldReference
 from plcc.code.structures import Constructor
 
@@ -117,9 +117,9 @@ class AstClassGenerator:
     def makeConstructorBody(self, fields):
         inits = []
         for f in fields:
-            init = FieldInitialization(
-                field=FieldReference(name=f.name),
-                parameter=f.name
+            init = AssignVariableToField(
+                lhs=FieldReference(name=f.name),
+                rhs=f.name
             )
             inits.append(init)
 

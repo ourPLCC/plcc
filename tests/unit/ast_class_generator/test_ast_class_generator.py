@@ -65,9 +65,9 @@ def test_one_rule_with_one_nonterminal(astGenerator):
             )
         ],
         body=[
-            FieldInitialization(
-                field=FieldReference(name=twoName),
-                parameter=twoName
+            AssignVariableToField(
+                lhs=FieldReference(name=twoName),
+                rhs=twoName
             )
         ]
     )
@@ -110,13 +110,13 @@ def test_one_rule_with_uncaptured_nonterminal(astGenerator):
             )
         ],
         body=[
-            FieldInitialization(
-                field=FieldReference(name=alphaName),
-                parameter=alphaName
+            AssignVariableToField(
+                lhs=FieldReference(name=alphaName),
+                rhs=alphaName
             ),
-            FieldInitialization(
-                field=FieldReference(name=BRAVOName),
-                parameter=BRAVOName
+            AssignVariableToField(
+                lhs=FieldReference(name=BRAVOName),
+                rhs=BRAVOName
             )
         ]
     )
@@ -159,13 +159,13 @@ def test_one_repeating_rule(astGenerator):
             )
         ],
         body=[
-            FieldInitialization(
-                field=FieldReference(name=alphaName),
-                parameter=alphaName
+            AssignVariableToField(
+                lhs=FieldReference(name=alphaName),
+                rhs=alphaName
             ),
-            FieldInitialization(
-                field=FieldReference(name=BRAVOName),
-                parameter=BRAVOName
+            AssignVariableToField(
+                lhs=FieldReference(name=BRAVOName),
+                rhs=BRAVOName
             )
         ]
     )

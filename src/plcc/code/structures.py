@@ -42,9 +42,14 @@ class Parameter:
 
 
 @dataclass(frozen=True)
-class FieldInitialization:
-    field: FieldReference
-    parameter: UnresolvedVariableName
+class AssignVariableToField:
+    lhs: FieldReference
+    rhs: UnresolvedVariableName
+
+    def to(self, language):
+        field = self.lhs.to(language)
+        parameter = self.rhs.to(language)
+        return language.toAssignmentStatement(field, parameter)
 
 
 @dataclass(frozen=True)
@@ -118,4 +123,6 @@ class UnresolvedBaseClassName:
 
     def to(self, language):
         return language.toBaseClassName(self.symbol.name)
+
+
 

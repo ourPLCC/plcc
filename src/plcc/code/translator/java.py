@@ -7,3 +7,6 @@ class JavaTranslator(DefaultTranslator):
 
     def toFieldReference(self, name):
         return f'this.{name}'
+
+    def toAssignmentStatement(self, lhs, rhs):
+        return f'{lhs} = {rhs};'

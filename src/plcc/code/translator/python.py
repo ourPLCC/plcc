@@ -7,3 +7,6 @@ class PythonTranslator(DefaultTranslator):
 
     def toFieldReference(self, name):
         return f'self.{name}'
+
+    def toAssignmentStatement(self, lhs, rhs):
+        return f'{lhs} = {rhs}'
