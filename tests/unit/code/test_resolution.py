@@ -1,7 +1,7 @@
 import pytest
 
 
-from plcc.spec import bnfrule
+from plcc.spec.symbol import Symbol
 
 from plcc.code.translator.default import DefaultTranslator
 from plcc.code.translator.java import JavaTranslator
@@ -12,38 +12,7 @@ from plcc.code.structures import UnresolvedTypeName
 from plcc.code.structures import UnresolvedVariableName
 from plcc.code.structures import UnresolvedListVariableName
 from plcc.code.structures import UnresolvedListTypeName
-
-
-
-def givenUnresolved(of, name, givenName='', isTerminal=False):
-    symbol = makeSymbol(name=name, given=givenName, isTerminal=isTerminal)
-    unresolvedName = of(symbol)
-    return unresolvedName
-
-
-def makeSymbol(name=None, given=None, isTerminal=None):
-    return bnfrule.Symbol(
-        name=name,
-        givenName=given,
-        isCapture=None,
-        isTerminal=isTerminal
-    )
-
-
-def whenResolvedByDefault(unresolved):
-    return whenResolve(unresolved, DefaultTranslator())
-
-
-def whenResolvedByPython(unresolved):
-    return whenResolve(unresolved, PythonTranslator())
-
-
-def whenResolvedByJava(unresolved):
-    return whenResolve(unresolved, JavaTranslator())
-
-
-def whenResolve(unresolved, using):
-    return unresolved.to(using)
+from plcc.code.structures import FieldReference
 
 
 def test_UnresolvedTypeName_resolves_to_capitalized_symbol_name():
@@ -110,3 +79,52 @@ def test_in_Python_UnresolvedListTypeName_resolves_to_square_brackets_containing
     unresolved = givenUnresolved(of=UnresolvedListTypeName, name='cat', givenName='fluffy')
     resolved = whenResolve(unresolved, using=PythonTranslator())
     assert resolved == '[Cat]'
+
+
+def test_in_Java_FieldReference_resolves_to_this_dot_variable_name():
+    unresolved = givenFieldReference('cat')
+    resolved = whenResolvedByJava(unresolved)
+    assert resolved == 'this.cat'
+
+
+def test_in_Python_FieldReference_resolves_to_self_dot_variable_name():
+    unresolved = givenFieldReference('cat')
+    resolved = whenResolvedByPython(unresolved)
+    assert resolved == 'self.cat'
+
+
+def givenFieldReference(name):
+    return FieldReference(givenUnresolved(UnresolvedVariableName, name))
+
+
+def givenUnresolved(of, name, givenName='', isTerminal=False):
+    symbol = makeSymbol(name=name, given=givenName, isTerminal=isTerminal)
+    unresolvedName = of(symbol)
+    return unresolvedName
+
+
+def makeSymbol(name=None, given=None, isTerminal=None):
+    return Symbol(
+        name=name,
+        givenName=given,
+        isCapture=None,
+        isTerminal=isTerminal
+    )
+
+
+def whenResolvedByDefault(unresolved):
+    return whenResolve(unresolved, DefaultTranslator())
+
+
+def whenResolvedByPython(unresolved):
+    return whenResolve(unresolved, PythonTranslator())
+
+
+def whenResolvedByJava(unresolved):
+    return whenResolve(unresolved, JavaTranslator())
+
+
+def whenResolve(unresolved, using):
+    return unresolved.to(using)
+
+

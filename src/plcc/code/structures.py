@@ -51,6 +51,10 @@ class FieldInitialization:
 class FieldReference:
     name: UnresolvedVariableName
 
+    def to(self, language):
+        name = self.name.to(language)
+        return language.toFieldReference(name)
+
 
 @dataclass(frozen=True)
 class UnresolvedTypeName:
