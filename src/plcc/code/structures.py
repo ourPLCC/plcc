@@ -27,10 +27,10 @@ class FieldDeclaration:
     name: UnresolvedVariableName
     type: UnresolvedTypeName
 
-    def to(self, language):
-        name = self.name.to(language)
-        type = self.type.to(language)
-        return language.toFieldDeclaration(name=name, type=type)
+    def renderWith(self, language):
+        name = self.name.renderWith(language)
+        type = self.type.renderWith(language)
+        return language.renderFieldDeclaration(name=name, type=type)
 
 
 @dataclass(frozen=True)
@@ -39,11 +39,11 @@ class Constructor:
     parameters: [Parameter]
     assignments: [AssignVariableToField]
 
-    def to(self, language):
-        className = self.className.to(language)
-        params = [p.to(language) for p in self.parameters]
-        body = [a.to(language) for a in self.assignments]
-        return language.toConstructor(className, params, body)
+    def renderWith(self, language):
+        className = self.className.renderWith(language)
+        params = [p.renderWith(language) for p in self.parameters]
+        body = [a.renderWith(language) for a in self.assignments]
+        return language.renderConstructor(className, params, body)
 
 
 @dataclass(frozen=True)
@@ -51,10 +51,10 @@ class Parameter:
     name: UnresolvedVariableName | UnresolvedListVariableName
     type: UnresolvedTypeName | UnresolvedListTypeName
 
-    def to(self, language):
-        name = self.name.to(language)
-        type = self.type.to(language)
-        return language.toParameter(name=name, type=type)
+    def renderWith(self, language):
+        name = self.name.renderWith(language)
+        type = self.type.renderWith(language)
+        return language.renderParameter(name=name, type=type)
 
 
 @dataclass(frozen=True)
@@ -62,83 +62,83 @@ class AssignVariableToField:
     lhs: FieldReference
     rhs: UnresolvedVariableName
 
-    def to(self, language):
-        field = self.lhs.to(language)
-        parameter = self.rhs.to(language)
-        return language.toAssignmentStatement(field, parameter)
+    def renderWith(self, language):
+        field = self.lhs.renderWith(language)
+        parameter = self.rhs.renderWith(language)
+        return language.renderAssignmentStatement(field, parameter)
 
 
 @dataclass(frozen=True)
 class FieldReference:
     name: UnresolvedVariableName
 
-    def to(self, language):
-        name = self.name.to(language)
-        return language.toFieldReference(name)
+    def renderWith(self, language):
+        name = self.name.renderWith(language)
+        return language.renderFieldReference(name)
 
 
 @dataclass(frozen=True)
 class TypeName:
     symbol: Symbol
 
-    def to(self, language):
+    def renderWith(self, language):
         if self.symbol.isTerminal:
-            return language.toTypeName('Token')
+            return language.renderTypeName('Token')
         else:
-            return language.toTypeName(self.symbol.name)
+            return language.renderTypeName(self.symbol.name)
 
 
 @dataclass(frozen=True)
 class ListTypeName:
     symbol: Symbol
 
-    def to(self, language):
+    def renderWith(self, language):
         if self.symbol.isTerminal:
-            return language.toListTypeName('Token')
+            return language.renderListTypeName('Token')
         else:
-            elementTypeName = TypeName(self.symbol).to(language)
-            return language.toListTypeName(elementTypeName)
+            elementTypeName = TypeName(self.symbol).renderWith(language)
+            return language.renderListTypeName(elementTypeName)
 
 
 @dataclass(frozen=True)
 class VariableName:
     symbol: Symbol
 
-    def to(self, language):
+    def renderWith(self, language):
         if self.symbol.givenName:
             return self.symbol.givenName
         else:
-            return language.toVariableName(self.symbol.name)
+            return language.renderVariableName(self.symbol.name)
 
 
 @dataclass(frozen=True)
 class ListVariableName:
     symbol: Symbol
 
-    def to(self, language):
+    def renderWith(self, language):
         if self.symbol.givenName:
             return self.symbol.givenName
         else:
-            return language.toListVariableName(self.symbol.name)
+            return language.renderListVariableName(self.symbol.name)
 
 
 @dataclass(frozen=True)
 class ClassName:
     symbol: Symbol
 
-    def to(self, language):
+    def renderWith(self, language):
         if self.symbol.givenName:
             return self.symbol.givenName
         else:
-            return language.toClassName(self.symbol.name)
+            return language.renderClassName(self.symbol.name)
 
 
 @dataclass(frozen=True)
 class BaseClassName:
     symbol: Symbol
 
-    def to(self, language):
-        return language.toBaseClassName(self.symbol.name)
+    def renderWith(self, language):
+        return language.renderBaseClassName(self.symbol.name)
 
 
 

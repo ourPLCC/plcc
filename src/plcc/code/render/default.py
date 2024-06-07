@@ -1,17 +1,17 @@
-class DefaultTranslator:
-    def toTypeName(self, name):
+class Default:
+    def renderTypeName(self, name):
         return name.capitalize()
 
-    def toVariableName(self, name):
+    def renderVariableName(self, name):
         return name
 
-    def toClassName(self, name):
+    def renderClassName(self, name):
         return name.capitalize()
 
-    def toBaseClassName(self, name):
+    def renderBaseClassName(self, name):
         return name.capitalize()
 
-    def toListVariableName(self, name):
+    def renderListVariableName(self, name):
         return f'{name}List'
 
     def indentLines(self, lines, levels, indent='    '):
