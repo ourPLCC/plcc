@@ -21,6 +21,9 @@ class Class:
 class StrClassName:
     name: str
 
+    def renderWith(self, language):
+        return self.name
+
 
 @dataclass(frozen=True)
 class FieldDeclaration:

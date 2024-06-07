@@ -3,6 +3,7 @@ import pytest
 
 from plcc.spec.symbol import Symbol
 
+
 from plcc.code.render.default import Default
 from plcc.code.render.java import Java
 from plcc.code.render.python import Python
@@ -17,6 +18,7 @@ from plcc.code.structures import AssignVariableToField
 from plcc.code.structures import Parameter
 from plcc.code.structures import Constructor
 from plcc.code.structures import FieldDeclaration
+from plcc.code.structures import StrClassName
 
 
 def test_TypeName_resolves_to_capitalized_symbol_name():
@@ -174,6 +176,12 @@ def test_in_Python_FieldDeclaration_is_done_in_constructor_so_empty():
     decl = givenFieldDeclaration('cat')
     rendered = whenRenderedWithPython(decl)
     assert rendered == ''
+
+
+def test_StrClassName_renders_to_its_name():
+    unrendered = StrClassName('cat')
+    rendered = whenRenderedWithDefault(unrendered)
+    assert rendered == 'cat'
 
 
 def givenFieldDeclaration(name):
