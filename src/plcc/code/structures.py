@@ -18,7 +18,7 @@ class Class:
 
 
 @dataclass(frozen=True)
-class ClassName:
+class StrClassName:
     name: str
 
 
@@ -78,7 +78,7 @@ class FieldReference:
 
 
 @dataclass(frozen=True)
-class UnresolvedTypeName:
+class TypeName:
     symbol: Symbol
 
     def to(self, language):
@@ -89,19 +89,19 @@ class UnresolvedTypeName:
 
 
 @dataclass(frozen=True)
-class UnresolvedListTypeName:
+class ListTypeName:
     symbol: Symbol
 
     def to(self, language):
         if self.symbol.isTerminal:
             return language.toListTypeName('Token')
         else:
-            elementTypeName = UnresolvedTypeName(self.symbol).to(language)
+            elementTypeName = TypeName(self.symbol).to(language)
             return language.toListTypeName(elementTypeName)
 
 
 @dataclass(frozen=True)
-class UnresolvedVariableName:
+class VariableName:
     symbol: Symbol
 
     def to(self, language):
@@ -112,7 +112,7 @@ class UnresolvedVariableName:
 
 
 @dataclass(frozen=True)
-class UnresolvedListVariableName:
+class ListVariableName:
     symbol: Symbol
 
     def to(self, language):
@@ -123,7 +123,7 @@ class UnresolvedListVariableName:
 
 
 @dataclass(frozen=True)
-class UnresolvedClassName:
+class ClassName:
     symbol: Symbol
 
     def to(self, language):
@@ -134,7 +134,7 @@ class UnresolvedClassName:
 
 
 @dataclass(frozen=True)
-class UnresolvedBaseClassName:
+class BaseClassName:
     symbol: Symbol
 
     def to(self, language):

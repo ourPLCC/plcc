@@ -6,12 +6,12 @@ from plcc.spec.symbol import Symbol
 from plcc.code.translator.default import DefaultTranslator
 from plcc.code.translator.java import JavaTranslator
 from plcc.code.translator.python import PythonTranslator
-from plcc.code.structures import UnresolvedBaseClassName
-from plcc.code.structures import UnresolvedClassName
-from plcc.code.structures import UnresolvedTypeName
-from plcc.code.structures import UnresolvedVariableName
-from plcc.code.structures import UnresolvedListVariableName
-from plcc.code.structures import UnresolvedListTypeName
+from plcc.code.structures import BaseClassName
+from plcc.code.structures import ClassName
+from plcc.code.structures import TypeName
+from plcc.code.structures import VariableName
+from plcc.code.structures import ListVariableName
+from plcc.code.structures import ListTypeName
 from plcc.code.structures import FieldReference
 from plcc.code.structures import AssignVariableToField
 from plcc.code.structures import Parameter
@@ -23,6 +23,7 @@ def test_UnresolvedTypeName_resolves_to_capitalized_symbol_name():
     unresolved = givenUnresolvedTypeName(name='cat', givenName='pet')
     resolved = whenResolvedByDefault(unresolved)
     assert resolved == 'Cat'
+
 
 def test_UnresolvedVariableName_resolves_to_symbol_given_name():
     unresolved = givenUnresolvedVariableName(name='cat', givenName='pet')
@@ -175,21 +176,21 @@ def givenFieldDeclaration(name):
 
 
 def givenFieldReference(name):
-    return FieldReference(givenUnresolved(UnresolvedVariableName, name))
+    return FieldReference(givenUnresolved(VariableName, name))
 
 
 def givenParameter(name):
     symbol = makeSymbol(name)
-    name = UnresolvedVariableName(symbol)
-    type = UnresolvedTypeName(symbol)
+    name = VariableName(symbol)
+    type = TypeName(symbol)
     param = Parameter(name, type)
     return param
 
 
 def givenListParameter(name):
     symbol = makeSymbol(name)
-    name = UnresolvedListVariableName(symbol)
-    type = UnresolvedListTypeName(symbol)
+    name = ListVariableName(symbol)
+    type = ListTypeName(symbol)
     param = Parameter(name, type)
     return param
 
@@ -209,32 +210,32 @@ def givenSimpleConstructor(name, fields):
 
 def givenAssignVariableToField(name):
     fieldRef = givenFieldReference(name)
-    param = givenUnresolved(UnresolvedVariableName, name)
+    param = givenUnresolved(VariableName, name)
     return AssignVariableToField(fieldRef, param)
 
 
 def givenUnresolvedTypeName(name='', givenName='', isTerminal=False):
-    return givenUnresolved(of=UnresolvedTypeName, name=name, givenName=givenName, isTerminal=isTerminal)
+    return givenUnresolved(of=TypeName, name=name, givenName=givenName, isTerminal=isTerminal)
 
 
 def givenUnresolvedVariableName(name='', givenName='', isTerminal=False):
-    return givenUnresolved(of=UnresolvedVariableName, name=name, givenName=givenName, isTerminal=isTerminal)
+    return givenUnresolved(of=VariableName, name=name, givenName=givenName, isTerminal=isTerminal)
 
 
 def givenUnresolvedClassName(name='', givenName='', isTerminal=False):
-    return givenUnresolved(of=UnresolvedClassName, name=name, givenName=givenName, isTerminal=isTerminal)
+    return givenUnresolved(of=ClassName, name=name, givenName=givenName, isTerminal=isTerminal)
 
 
 def givenUnresolvedBaseClassName(name='', givenName='', isTerminal=False):
-    return givenUnresolved(of=UnresolvedBaseClassName, name=name, givenName=givenName, isTerminal=isTerminal)
+    return givenUnresolved(of=BaseClassName, name=name, givenName=givenName, isTerminal=isTerminal)
 
 
 def givenUnresolvedListVariableName(name='', givenName='', isTerminal=False):
-    return givenUnresolved(of=UnresolvedListVariableName, name=name, givenName=givenName, isTerminal=isTerminal)
+    return givenUnresolved(of=ListVariableName, name=name, givenName=givenName, isTerminal=isTerminal)
 
 
 def givenUnresolvedListTypeName(name='', givenName='', isTerminal=False):
-    return givenUnresolved(of=UnresolvedListTypeName, name=name, givenName=givenName, isTerminal=isTerminal)
+    return givenUnresolved(of=ListTypeName, name=name, givenName=givenName, isTerminal=isTerminal)
 
 
 def givenUnresolved(of, name, givenName='', isTerminal=False):

@@ -1,12 +1,12 @@
 from plcc.code.structures import Module
 from plcc.code.structures import Class
+from plcc.code.structures import StrClassName
 from plcc.code.structures import ClassName
-from plcc.code.structures import UnresolvedClassName
-from plcc.code.structures import UnresolvedBaseClassName
-from plcc.code.structures import UnresolvedVariableName
-from plcc.code.structures import UnresolvedTypeName
-from plcc.code.structures import UnresolvedListVariableName
-from plcc.code.structures import UnresolvedListTypeName
+from plcc.code.structures import BaseClassName
+from plcc.code.structures import VariableName
+from plcc.code.structures import TypeName
+from plcc.code.structures import ListVariableName
+from plcc.code.structures import ListTypeName
 from plcc.code.structures import FieldDeclaration
 from plcc.code.structures import Parameter
 from plcc.code.structures import AssignVariableToField
@@ -35,7 +35,7 @@ class AstClassGenerator:
         modules = []
         for symbol in symsWithAlts.values():
             c = Class(
-                name=UnresolvedBaseClassName(symbol),
+                name=BaseClassName(symbol),
                 constructor=None,
                 extends=None,
                 fields=[]
@@ -67,16 +67,16 @@ class AstClassGenerator:
         return class_
 
     def getClassNameForRule(self, rule):
-        return UnresolvedClassName(rule.leftHandSymbol)
+        return ClassName(rule.leftHandSymbol)
 
     def getStartClassName(self):
-        return ClassName('_Start')
+        return StrClassName('_Start')
 
     def getBaseClassName(self, rule):
         if not rule.leftHandSymbol.givenName:
             return None
         else:
-            return UnresolvedBaseClassName(rule.leftHandSymbol)
+            return BaseClassName(rule.leftHandSymbol)
 
     def makeFields(self, rule):
         fields = []
@@ -90,14 +90,14 @@ class AstClassGenerator:
         return fields
 
     def makeField(self, symbol):
-        n = UnresolvedVariableName(symbol)
-        t = UnresolvedTypeName(symbol)
+        n = VariableName(symbol)
+        t = TypeName(symbol)
         f = FieldDeclaration(name=n, type=t)
         return f
 
     def makeListField(self, symbol):
-        n = UnresolvedListVariableName(symbol)
-        t = UnresolvedListTypeName(symbol)
+        n = ListVariableName(symbol)
+        t = ListTypeName(symbol)
         f = FieldDeclaration(name=n, type=t)
         return f
 

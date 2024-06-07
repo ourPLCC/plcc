@@ -37,8 +37,8 @@ def test_single_empty_bnf_rule_returns_one_class(astGenerator):
     modules = astGenerator.generate(spec)
     assert len(modules) == 1
     c = modules[0].classes[0]
-    assert c.name == UnresolvedClassName(nonterminal('one'))
-    assert c.extends == ClassName('_Start')
+    assert c.name == ClassName(nonterminal('one'))
+    assert c.extends == StrClassName('_Start')
 
 
 def test_one_rule_with_one_nonterminal(astGenerator):
@@ -49,15 +49,15 @@ def test_one_rule_with_one_nonterminal(astGenerator):
 
     one = nonterminal('one')
     two = nonterminal('two')
-    twoName = UnresolvedVariableName(two)
-    twoType = UnresolvedTypeName(two)
+    twoName = VariableName(two)
+    twoType = TypeName(two)
 
     assert c.fields[0] == FieldDeclaration(
         name=twoName,
         type=twoType
     )
     assert c.constructor == Constructor(
-        className=UnresolvedClassName(one),
+        className=ClassName(one),
         parameters=[
             Parameter(
                 name=twoName,
@@ -82,12 +82,12 @@ def test_one_rule_with_uncaptured_nonterminal(astGenerator):
     one = nonterminal('one')
 
     alpha = nonterminal('alpha')
-    alphaName = UnresolvedVariableName(alpha)
-    alphaType = UnresolvedTypeName(alpha)
+    alphaName = VariableName(alpha)
+    alphaType = TypeName(alpha)
 
     BRAVO = terminal('BRAVO')
-    BRAVOName = UnresolvedVariableName(BRAVO)
-    BRAVOType = UnresolvedTypeName(BRAVO)
+    BRAVOName = VariableName(BRAVO)
+    BRAVOType = TypeName(BRAVO)
 
     assert c.fields[0] == FieldDeclaration(
         name=alphaName,
@@ -98,7 +98,7 @@ def test_one_rule_with_uncaptured_nonterminal(astGenerator):
         type=BRAVOType
     )
     assert c.constructor == Constructor(
-        className=UnresolvedClassName(one),
+        className=ClassName(one),
         parameters=[
             Parameter(
                 name=alphaName,
@@ -131,12 +131,12 @@ def test_one_repeating_rule(astGenerator):
     one = nonterminal('one')
 
     alpha = nonterminal('alpha')
-    alphaName = UnresolvedListVariableName(alpha)
-    alphaType = UnresolvedListTypeName(alpha)
+    alphaName = ListVariableName(alpha)
+    alphaType = ListTypeName(alpha)
 
     BRAVO = terminal('BRAVO')
-    BRAVOName = UnresolvedListVariableName(BRAVO)
-    BRAVOType = UnresolvedListTypeName(BRAVO)
+    BRAVOName = ListVariableName(BRAVO)
+    BRAVOType = ListTypeName(BRAVO)
 
     assert c.fields[0] == FieldDeclaration(
         name=alphaName,
@@ -147,7 +147,7 @@ def test_one_repeating_rule(astGenerator):
         type=BRAVOType
     )
     assert c.constructor == Constructor(
-        className=UnresolvedClassName(one),
+        className=ClassName(one),
         parameters=[
             Parameter(
                 name=alphaName,
@@ -197,23 +197,23 @@ def test_alternative_rules(astGenerator):
 
 
 def assertClass(class_, symbol):
-    assert class_.name == UnresolvedClassName(symbol)
+    assert class_.name == ClassName(symbol)
     assert class_.extends is None
 
 
 def assertBaseClass(class_, symbol):
-    assert class_.name == UnresolvedBaseClassName(symbol)
+    assert class_.name == BaseClassName(symbol)
     assert class_.extends is None
 
 
 def assertStartClass(class_, symbol):
-    assert class_.name == UnresolvedClassName(symbol)
-    assert class_.extends == ClassName(name='_Start')
+    assert class_.name == ClassName(symbol)
+    assert class_.extends == StrClassName(name='_Start')
 
 
 def assertSubclass(class_, symbol):
-    assert class_.name == UnresolvedClassName(symbol)
-    assert class_.extends == UnresolvedBaseClassName(symbol)
+    assert class_.name == ClassName(symbol)
+    assert class_.extends == BaseClassName(symbol)
 
 
 def nonterminal(name, given=''):
