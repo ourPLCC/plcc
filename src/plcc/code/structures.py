@@ -11,10 +11,17 @@ class Module:
 
 @dataclass(frozen=True)
 class Class:
-    name: UnresolvedClassName | ClassName
-    extends: UnresolvedBaseClassName = None
+    name: ClassName | StrClassName
+    extends: BaseClassName = None
     fields: [FieldDeclaration] = field(default_factory=list)
     constructor: Constructor = None
+
+    def renderWith(self, language):
+        name = self.name.renderWith(language)
+        extends = None if self.extends is None else self.extends.renderWith(language)
+        fields = [f.renderWith(language) for f in self.fields]
+        constructor = self.constructor.renderWith(language)
+        return language.renderClass(name=name, extends=extends, fields=fields, methods=[constructor])
 
 
 @dataclass(frozen=True)
@@ -27,8 +34,8 @@ class StrClassName:
 
 @dataclass(frozen=True)
 class FieldDeclaration:
-    name: UnresolvedVariableName
-    type: UnresolvedTypeName
+    name: VariableName
+    type: TypeName
 
     def renderWith(self, language):
         name = self.name.renderWith(language)
@@ -38,7 +45,7 @@ class FieldDeclaration:
 
 @dataclass(frozen=True)
 class Constructor:
-    className: UnresolvedClassName
+    className: ClassName
     parameters: [Parameter]
     assignments: [AssignVariableToField]
 
@@ -51,8 +58,8 @@ class Constructor:
 
 @dataclass(frozen=True)
 class Parameter:
-    name: UnresolvedVariableName | UnresolvedListVariableName
-    type: UnresolvedTypeName | UnresolvedListTypeName
+    name: VariableName | ListVariableName
+    type: TypeName | ListTypeName
 
     def renderWith(self, language):
         name = self.name.renderWith(language)
@@ -63,7 +70,7 @@ class Parameter:
 @dataclass(frozen=True)
 class AssignVariableToField:
     lhs: FieldReference
-    rhs: UnresolvedVariableName
+    rhs: VariableName
 
     def renderWith(self, language):
         field = self.lhs.renderWith(language)
@@ -73,7 +80,7 @@ class AssignVariableToField:
 
 @dataclass(frozen=True)
 class FieldReference:
-    name: UnresolvedVariableName
+    name: VariableName
 
     def renderWith(self, language):
         name = self.name.renderWith(language)

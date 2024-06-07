@@ -19,6 +19,52 @@ from plcc.code.structures import Parameter
 from plcc.code.structures import Constructor
 from plcc.code.structures import FieldDeclaration
 from plcc.code.structures import StrClassName
+from plcc.code.structures import Class
+
+
+@pytest.mark.focus
+def test_InJava_Class():
+    unrendered = givenClass(name='cat', fields=['tail', 'claws'])
+    rendered = whenRenderedWithJava(unrendered)
+    assert rendered == [
+        'public class Cat {',
+        '    public Tail tail;',
+        '    public Claws claws;',
+        '    ',
+        '    public Cat(Tail tail, Claws claws) {',
+        '        this.tail = tail;',
+        '        this.claws = claws;',
+        '    }',
+        '    ',
+        '}',
+    ]
+
+
+def test_InJava_Class_with_extends():
+    unrendered = givenClass(name='cat', fields=['tail', 'claws'], extends='animal')
+    rendered = whenRenderedWithJava(unrendered)
+    assert rendered == [
+        'public class Cat extends Animal {',
+        '    public Tail tail;',
+        '    public Claws claws;',
+        '    ',
+        '    public Cat(Tail tail, Claws claws) {',
+        '        this.tail = tail;',
+        '        this.claws = claws;',
+        '    }',
+        '    ',
+        '}',
+    ]
+
+
+def givenClass(name, fields, extends=None):
+    fieldDecls = [givenFieldDeclaration(f) for f in fields]
+    return Class(
+        name=givenClassName(name),
+        extends=None if extends is None else givenClassName(extends),
+        fields=fieldDecls,
+        constructor=givenConstructor(name, fields)
+    )
 
 
 def test_TypeName_resolves_to_capitalized_symbol_name():
@@ -144,7 +190,7 @@ def test_in_Python_list_Parameter():
 
 
 def test_in_Java_constructor():
-    constructor = givenSimpleConstructor('cat', ['fur', 'tail', 'claws'])
+    constructor = givenConstructor('cat', ['fur', 'tail', 'claws'])
     rendered = whenRenderedWithJava(constructor)
     assert rendered == [
         'public Cat(Fur fur, Tail tail, Claws claws) {',
@@ -156,7 +202,7 @@ def test_in_Java_constructor():
 
 
 def test_in_Python_constructor():
-    constructor = givenSimpleConstructor('cat', ['fur', 'tail', 'claws'])
+    constructor = givenConstructor('cat', ['fur', 'tail', 'claws'])
     rendered = whenRenderedWithPython(constructor)
     assert rendered == [
         'def __init__(self, fur: Fur, tail: Tail, claws: Claws):',
@@ -211,7 +257,7 @@ def givenListParameter(name):
     return param
 
 
-def givenSimpleConstructor(name, fields):
+def givenConstructor(name, fields):
     className = givenClassName(name=name)
     params = []
     for f in fields:
