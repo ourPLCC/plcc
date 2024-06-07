@@ -21,121 +21,129 @@ from plcc.code.structures import FieldDeclaration
 
 def test_TypeName_resolves_to_capitalized_symbol_name():
     unrendered = givenTypeName(name='cat', givenName='pet')
-    rendered = whenRenderedByDefault(unrendered)
+    rendered = whenRenderedWithDefault(unrendered)
     assert rendered == 'Cat'
 
 
 def test_VariableName_resolves_to_symbol_given_name():
     unrendered = givenVariableName(name='cat', givenName='pet')
-    rendered = whenRendered(unrendered, using=Default())
+    rendered = whenRenderedWithDefault(unrendered)
     assert rendered == 'pet'
 
 
 def test_VariableName_if_no_given_name_resolves_to_symbol_name():
     unrendered = givenVariableName(name='cat', givenName=None)
-    rendered = whenRendered(unrendered, using=Default())
+    rendered = whenRenderedWithDefault(unrendered)
     assert rendered == 'cat'
 
 
 def test_TypeName_if_terminal_resolves_to_Token():
     unrendered = givenTypeName(name='cat', givenName='pet', isTerminal=True)
-    rendered = whenRendered(unrendered, using=Default())
+    rendered = whenRenderedWithDefault(unrendered)
     assert rendered == 'Token'
 
 
 def test_ClassName_resolves_to_symbol_given_name():
     unrendered = givenClassName(name='cat', givenName='pet')
-    rendered = whenRendered(unrendered, using=Default())
+    rendered = whenRenderedWithDefault(unrendered)
     assert rendered == 'pet'
 
 
 def test_ClassName_resolves_to_capitalized_symbol_name_if_no_given_name():
     unrendered = givenClassName(name='cat', givenName=None)
-    rendered = whenRendered(unrendered, using=Default())
+    rendered = whenRenderedWithDefault(unrendered)
     assert rendered == 'Cat'
 
 
 def test_BaseClassName_resolves_to_capitalized_symbol_name():
     unrendered = givenBaseClassName(name='cat', givenName='Pet')
-    rendered = whenRendered(unrendered, using=Default())
+    rendered = whenRenderedWithDefault(unrendered)
     assert rendered == 'Cat'
 
 
 def test_ListVariableName_resolves_to_given_name():
     unrendered = givenListVariableName(name='cat', givenName='fluffy')
-    rendered = whenRendered(unrendered, using=Default())
+    rendered = whenRenderedWithDefault(unrendered)
     assert rendered == 'fluffy'
 
 
 def test_ListVariableName_if_no_given_name_resolves_to_symbol_name_appended_with_List():
     unrendered = givenListVariableName(name='cat', givenName='')
-    rendered = whenRendered(unrendered, using=Default())
+    rendered = whenRenderedWithDefault(unrendered)
     assert rendered == 'catList'
 
 
 def test_in_Java_ListTypeName_resolves_to_List_parameterized_by_its_rendered_type_name():
     unrendered = givenListTypeName(name='cat', givenName='fluffy')
-    rendered = whenRendered(unrendered, using=Java())
+    rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'List<Cat>'
 
 
 def test_in_Python_ListTypeName_resolves_to_square_brackets_containing_its_rendered_type_name():
     unrendered = givenListTypeName(name='cat', givenName='fluffy')
-    rendered = whenRendered(unrendered, using=Python())
+    rendered = whenRenderedWithPython(unrendered)
     assert rendered == '[Cat]'
+
+
+def test_ListTypeName_for_terminals_renders_to_list_of_Token():
+    unrendered = givenListTypeName(name='cat', givenName='fluffy', isTerminal=True)
+    rendered = whenRenderedWithJava(unrendered)
+    assert rendered == 'List<Token>'
+    rendered = whenRenderedWithPython(unrendered)
+    assert rendered == '[Token]'
 
 
 def test_in_Java_FieldReference_resolves_to_this_dot_variable_name():
     unrendered = givenFieldReference('cat')
-    rendered = whenRenderedByJava(unrendered)
+    rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'this.cat'
 
 
 def test_in_Python_FieldReference_resolves_to_self_dot_variable_name():
     unrendered = givenFieldReference('cat')
-    rendered = whenRenderedByPython(unrendered)
+    rendered = whenRenderedWithPython(unrendered)
     assert rendered == 'self.cat'
 
 
 def test_in_Java_FieldInitialization():
     unrendered = givenAssignVariableToField('cat')
-    rendered = whenRenderedByJava(unrendered)
+    rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'this.cat = cat;'
 
 
 def test_in_Python_FieldInitialization():
     unrendered = givenAssignVariableToField('cat')
-    rendered = whenRenderedByPython(unrendered)
+    rendered = whenRenderedWithPython(unrendered)
     assert rendered == 'self.cat = cat'
 
 
 def test_in_Java_Parameter():
     param = givenParameter('cat')
-    rendered = whenRenderedByJava(param)
+    rendered = whenRenderedWithJava(param)
     assert rendered == 'Cat cat'
 
 
 def test_in_Python_Parameter():
     param = givenParameter('cat')
-    rendered = whenRenderedByPython(param)
+    rendered = whenRenderedWithPython(param)
     assert rendered == 'cat: Cat'
 
 
 def test_in_Java_list_Parameter():
     param = givenListParameter('cat')
-    rendered = whenRenderedByJava(param)
+    rendered = whenRenderedWithJava(param)
     assert rendered == 'List<Cat> catList'
 
 
 def test_in_Python_list_Parameter():
     param = givenListParameter('cat')
-    rendered = whenRenderedByPython(param)
+    rendered = whenRenderedWithPython(param)
     assert rendered == 'catList: [Cat]'
 
 
 def test_in_Java_constructor():
     constructor = givenSimpleConstructor('cat', ['fur', 'tail', 'claws'])
-    rendered = whenRenderedByJava(constructor)
+    rendered = whenRenderedWithJava(constructor)
     assert rendered == [
         'public Cat(Fur fur, Tail tail, Claws claws) {',
         '    this.fur = fur;',
@@ -147,7 +155,7 @@ def test_in_Java_constructor():
 
 def test_in_Python_constructor():
     constructor = givenSimpleConstructor('cat', ['fur', 'tail', 'claws'])
-    rendered = whenRenderedByPython(constructor)
+    rendered = whenRenderedWithPython(constructor)
     assert rendered == [
         'def __init__(self, fur: Fur, tail: Tail, claws: Claws):',
         '    self.fur = fur',
@@ -158,13 +166,13 @@ def test_in_Python_constructor():
 
 def test_in_Java_FieldDeclaration():
     decl = givenFieldDeclaration('cat')
-    rendered = whenRenderedByJava(decl)
+    rendered = whenRenderedWithJava(decl)
     assert rendered == 'public Cat cat;'
 
 
 def test_in_Python_FieldDeclaration_is_done_in_constructor_so_empty():
     decl = givenFieldDeclaration('cat')
-    rendered = whenRenderedByPython(decl)
+    rendered = whenRenderedWithPython(decl)
     assert rendered == ''
 
 
@@ -253,17 +261,17 @@ def makeSymbol(name=None, given=None, isTerminal=None):
     )
 
 
-def whenRenderedByDefault(unrendered):
+def whenRenderedWithDefault(unrendered):
     return whenRendered(unrendered, Default())
 
 
-def whenRenderedByPython(unrendered):
+def whenRenderedWithPython(unrendered):
     return whenRendered(unrendered, Python())
 
 
-def whenRenderedByJava(unrendered):
+def whenRenderedWithJava(unrendered):
     return whenRendered(unrendered, Java())
 
 
-def whenRendered(unrendered, using):
-    return unrendered.renderWith(using)
+def whenRendered(unrendered, withLanguage):
+    return unrendered.renderWith(withLanguage)
