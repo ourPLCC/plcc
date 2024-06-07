@@ -20,67 +20,66 @@ from plcc.code.structures import FieldDeclaration
 
 
 def test_UnresolvedTypeName_resolves_to_capitalized_symbol_name():
-    unresolved = givenUnresolved(of=UnresolvedTypeName, name='cat', givenName='pet')
+    unresolved = givenUnresolvedTypeName(name='cat', givenName='pet')
     resolved = whenResolvedByDefault(unresolved)
     assert resolved == 'Cat'
 
-
 def test_UnresolvedVariableName_resolves_to_symbol_given_name():
-    unresolved = givenUnresolved(of=UnresolvedVariableName, name='cat', givenName='pet')
+    unresolved = givenUnresolvedVariableName(name='cat', givenName='pet')
     resolved = whenResolve(unresolved, using=DefaultTranslator())
     assert resolved == 'pet'
 
 
 def test_UnresolvedVariableName_if_no_given_name_resolves_to_symbol_name():
-    unresolved = givenUnresolved(of=UnresolvedVariableName, name='cat', givenName=None)
+    unresolved = givenUnresolvedVariableName(name='cat', givenName=None)
     resolved = whenResolve(unresolved, using=DefaultTranslator())
     assert resolved == 'cat'
 
 
 def test_UnresolvedTypeName_if_terminal_resolves_to_Token():
-    unresolved = givenUnresolved(of=UnresolvedTypeName, name='cat', givenName='pet', isTerminal=True)
+    unresolved = givenUnresolvedTypeName(name='cat', givenName='pet', isTerminal=True)
     resolved = whenResolve(unresolved, using=DefaultTranslator())
     assert resolved == 'Token'
 
 
 def test_UnresolvedClassName_resolves_to_symbol_given_name():
-    unresolved = givenUnresolved(of=UnresolvedClassName, name='cat', givenName='pet')
+    unresolved = givenUnresolvedClassName(name='cat', givenName='pet')
     resolved = whenResolve(unresolved, using=DefaultTranslator())
     assert resolved == 'pet'
 
 
 def test_UnresolvedClassName_resolves_to_capitalized_symbol_name_if_no_given_name():
-    unresolved = givenUnresolved(of=UnresolvedClassName, name='cat', givenName=None)
+    unresolved = givenUnresolvedClassName(name='cat', givenName=None)
     resolved = whenResolve(unresolved, using=DefaultTranslator())
     assert resolved == 'Cat'
 
 
 def test_UnresolvedBaseClassName_resolves_to_capitalized_symbol_name():
-    unresolved = givenUnresolved(of=UnresolvedBaseClassName, name='cat', givenName='Pet')
+    unresolved = givenUnresolvedBaseClassName(name='cat', givenName='Pet')
     resolved = whenResolve(unresolved, using=DefaultTranslator())
     assert resolved == 'Cat'
 
 
 def test_UnresolvedListVariableName_resolves_to_given_name():
-    unresolved = givenUnresolved(of=UnresolvedListVariableName, name='cat', givenName='fluffy')
+    unresolved = givenUnresolvedListVariableName(name='cat', givenName='fluffy')
     resolved = whenResolve(unresolved, using=DefaultTranslator())
     assert resolved == 'fluffy'
 
 
 def test_UnresolvedListVariableName_if_no_given_name_resolves_to_symbol_name_appended_with_List():
-    unresolved = givenUnresolved(of=UnresolvedListVariableName, name='cat', givenName='')
+    unresolved = givenUnresolvedListVariableName(name='cat', givenName='')
     resolved = whenResolve(unresolved, using=DefaultTranslator())
     assert resolved == 'catList'
 
 
 def test_in_Java_UnresolvedListTypeName_resolves_to_List_parameterized_by_its_resolved_type_name():
-    unresolved = givenUnresolved(of=UnresolvedListTypeName, name='cat', givenName='fluffy')
+    unresolved = givenUnresolvedListTypeName(name='cat', givenName='fluffy')
     resolved = whenResolve(unresolved, using=JavaTranslator())
     assert resolved == 'List<Cat>'
 
 
 def test_in_Python_UnresolvedListTypeName_resolves_to_square_brackets_containing_its_resolved_type_name():
-    unresolved = givenUnresolved(of=UnresolvedListTypeName, name='cat', givenName='fluffy')
+    unresolved = givenUnresolvedListTypeName(name='cat', givenName='fluffy')
     resolved = whenResolve(unresolved, using=PythonTranslator())
     assert resolved == '[Cat]'
 
@@ -170,8 +169,8 @@ def test_in_Python_FieldDeclaration_is_done_in_constructor_so_empty():
 
 def givenFieldDeclaration(name):
     return FieldDeclaration(
-        givenUnresolved(of=UnresolvedVariableName, name=name),
-        givenUnresolved(of=UnresolvedTypeName, name=name)
+        givenUnresolvedVariableName(name=name),
+        givenUnresolvedTypeName(name=name)
     )
 
 
@@ -196,7 +195,7 @@ def givenListParameter(name):
 
 
 def givenSimpleConstructor(name, fields):
-    className = givenUnresolved(of=UnresolvedClassName, name=name)
+    className = givenUnresolvedClassName(name=name)
     params = []
     for f in fields:
         p = givenParameter(f)
@@ -212,6 +211,30 @@ def givenAssignVariableToField(name):
     fieldRef = givenFieldReference(name)
     param = givenUnresolved(UnresolvedVariableName, name)
     return AssignVariableToField(fieldRef, param)
+
+
+def givenUnresolvedTypeName(name='', givenName='', isTerminal=False):
+    return givenUnresolved(of=UnresolvedTypeName, name=name, givenName=givenName, isTerminal=isTerminal)
+
+
+def givenUnresolvedVariableName(name='', givenName='', isTerminal=False):
+    return givenUnresolved(of=UnresolvedVariableName, name=name, givenName=givenName, isTerminal=isTerminal)
+
+
+def givenUnresolvedClassName(name='', givenName='', isTerminal=False):
+    return givenUnresolved(of=UnresolvedClassName, name=name, givenName=givenName, isTerminal=isTerminal)
+
+
+def givenUnresolvedBaseClassName(name='', givenName='', isTerminal=False):
+    return givenUnresolved(of=UnresolvedBaseClassName, name=name, givenName=givenName, isTerminal=isTerminal)
+
+
+def givenUnresolvedListVariableName(name='', givenName='', isTerminal=False):
+    return givenUnresolved(of=UnresolvedListVariableName, name=name, givenName=givenName, isTerminal=isTerminal)
+
+
+def givenUnresolvedListTypeName(name='', givenName='', isTerminal=False):
+    return givenUnresolved(of=UnresolvedListTypeName, name=name, givenName=givenName, isTerminal=isTerminal)
 
 
 def givenUnresolved(of, name, givenName='', isTerminal=False):
