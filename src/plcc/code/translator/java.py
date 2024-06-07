@@ -21,3 +21,5 @@ class JavaTranslator(DefaultTranslator):
         close = [ '}' ]
         return open + body + close
 
+    def toFieldDeclaration(self, name, type):
+        return f'public {type} {name};'

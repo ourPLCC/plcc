@@ -27,6 +27,11 @@ class FieldDeclaration:
     name: UnresolvedVariableName
     type: UnresolvedTypeName
 
+    def to(self, language):
+        name = self.name.to(language)
+        type = self.type.to(language)
+        return language.toFieldDeclaration(name=name, type=type)
+
 
 @dataclass(frozen=True)
 class Constructor:

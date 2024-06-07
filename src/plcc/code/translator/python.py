@@ -20,3 +20,6 @@ class PythonTranslator(DefaultTranslator):
         body = self.indentLines(assignments, 1)
         return open + body
 
+    def toFieldDeclaration(self, name, type):
+        return ''
+

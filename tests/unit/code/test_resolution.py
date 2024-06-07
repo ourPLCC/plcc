@@ -16,6 +16,7 @@ from plcc.code.structures import FieldReference
 from plcc.code.structures import AssignVariableToField
 from plcc.code.structures import Parameter
 from plcc.code.structures import Constructor
+from plcc.code.structures import FieldDeclaration
 
 
 def test_UnresolvedTypeName_resolves_to_capitalized_symbol_name():
@@ -108,16 +109,6 @@ def test_in_Python_FieldInitialization():
     assert resolved == 'self.cat = cat'
 
 
-def givenAssignVariableToField(name):
-    fieldRef = givenFieldReference(name)
-    param = givenUnresolved(UnresolvedVariableName, name)
-    return AssignVariableToField(fieldRef, param)
-
-
-def givenFieldReference(name):
-    return FieldReference(givenUnresolved(UnresolvedVariableName, name))
-
-
 def test_in_Java_Parameter():
     param = givenParameter('cat')
     resolved = whenResolvedByJava(param)
@@ -140,22 +131,6 @@ def test_in_Python_list_Parameter():
     param = givenListParameter('cat')
     resolved = whenResolvedByPython(param)
     assert resolved == 'catList: [Cat]'
-
-
-def givenParameter(name):
-    symbol = makeSymbol(name)
-    name = UnresolvedVariableName(symbol)
-    type = UnresolvedTypeName(symbol)
-    param = Parameter(name, type)
-    return param
-
-
-def givenListParameter(name):
-    symbol = makeSymbol(name)
-    name = UnresolvedListVariableName(symbol)
-    type = UnresolvedListTypeName(symbol)
-    param = Parameter(name, type)
-    return param
 
 
 def test_in_Java_constructor():
@@ -181,6 +156,45 @@ def test_in_Python_constructor():
     ]
 
 
+def test_in_Java_FieldDeclaration():
+    decl = givenFieldDeclaration('cat')
+    resolved = whenResolvedByJava(decl)
+    assert resolved == 'public Cat cat;'
+
+
+def test_in_Python_FieldDeclaration_is_done_in_constructor_so_empty():
+    decl = givenFieldDeclaration('cat')
+    resolved = whenResolvedByPython(decl)
+    assert resolved == ''
+
+
+def givenFieldDeclaration(name):
+    return FieldDeclaration(
+        givenUnresolved(of=UnresolvedVariableName, name=name),
+        givenUnresolved(of=UnresolvedTypeName, name=name)
+    )
+
+
+def givenFieldReference(name):
+    return FieldReference(givenUnresolved(UnresolvedVariableName, name))
+
+
+def givenParameter(name):
+    symbol = makeSymbol(name)
+    name = UnresolvedVariableName(symbol)
+    type = UnresolvedTypeName(symbol)
+    param = Parameter(name, type)
+    return param
+
+
+def givenListParameter(name):
+    symbol = makeSymbol(name)
+    name = UnresolvedListVariableName(symbol)
+    type = UnresolvedListTypeName(symbol)
+    param = Parameter(name, type)
+    return param
+
+
 def givenSimpleConstructor(name, fields):
     className = givenUnresolved(of=UnresolvedClassName, name=name)
     params = []
@@ -192,6 +206,12 @@ def givenSimpleConstructor(name, fields):
         a = givenAssignVariableToField(f)
         assignments.append(a)
     return Constructor(className, params, assignments)
+
+
+def givenAssignVariableToField(name):
+    fieldRef = givenFieldReference(name)
+    param = givenUnresolved(UnresolvedVariableName, name)
+    return AssignVariableToField(fieldRef, param)
 
 
 def givenUnresolved(of, name, givenName='', isTerminal=False):
