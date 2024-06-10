@@ -23,3 +23,24 @@ class Python(Default):
     def renderFieldDeclaration(self, name, type):
         return ''
 
+    def renderClass(self, name, extends, fields, methods):
+        open = self.makeClassOpen(extends, name)
+        body = self.makeClassBody(fields, methods)
+        return open + body
+
+    def makeClassOpen(self, extends, name):
+        ext = '' if extends is None else f'({extends})'
+        open = [f'class {name}{ext}:']
+        return open
+
+    def makeClassBody(self, fields, methods):
+        blankLine=''
+        body = []
+        fields = list(filter(lambda f: bool(f), fields))
+        body.extend(fields)
+        for m in methods:
+            body.extend(m)
+            body.append(blankLine)
+        body = self.indentLines(body, levels=1)
+        return body
+

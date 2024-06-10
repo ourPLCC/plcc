@@ -22,7 +22,30 @@ from plcc.code.structures import StrClassName
 from plcc.code.structures import Class
 
 
-@pytest.mark.focus
+def test_InPython_Class():
+    unrendered = givenClass(name='cat', fields=['tail', 'claws'])
+    rendered = whenRenderedWithPython(unrendered)
+    assert rendered == [
+        'class Cat:',
+        '    def __init__(self, tail: Tail, claws: Claws):',
+        '        self.tail = tail',
+        '        self.claws = claws',
+        '    ',
+    ]
+
+
+def test_InPython_Class_with_extends():
+    unrendered = givenClass(name='cat', fields=['tail', 'claws'], extends='animal')
+    rendered = whenRenderedWithPython(unrendered)
+    assert rendered == [
+        'class Cat(Animal):',
+        '    def __init__(self, tail: Tail, claws: Claws):',
+        '        self.tail = tail',
+        '        self.claws = claws',
+        '    ',
+    ]
+
+
 def test_InJava_Class():
     unrendered = givenClass(name='cat', fields=['tail', 'claws'])
     rendered = whenRenderedWithJava(unrendered)
