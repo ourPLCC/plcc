@@ -34,18 +34,18 @@ def test_generate_empty_returns_empty(astGenerator):
 
 def test_single_empty_bnf_rule_returns_one_class(astGenerator):
     spec = givenBnfSpec('<one> ::=')
-    modules = astGenerator.generate(spec)
-    assert len(modules) == 1
-    c = modules[0].classes[0]
+    classes = astGenerator.generate(spec)
+    assert len(classes) == 1
+    c = classes[0]
     assert c.name == ClassName(nonterminal('one'))
     assert c.extends == StrClassName('_Start')
 
 
 def test_one_rule_with_one_nonterminal(astGenerator):
     spec = givenBnfSpec('<one> ::= <two>')
-    modules = astGenerator.generate(spec)
-    assert len(modules) == 1
-    c = modules[0].classes[0]
+    classes = astGenerator.generate(spec)
+    assert len(classes) == 1
+    c = classes[0]
 
     one = nonterminal('one')
     two = nonterminal('two')
@@ -75,9 +75,9 @@ def test_one_rule_with_one_nonterminal(astGenerator):
 
 def test_one_rule_with_uncaptured_nonterminal(astGenerator):
     spec = givenBnfSpec('<one> ::= <alpha> IGNORE <BRAVO>')
-    modules = astGenerator.generate(spec)
-    assert len(modules) == 1
-    c = modules[0].classes[0]
+    classes = astGenerator.generate(spec)
+    assert len(classes) == 1
+    c = classes[0]
 
     one = nonterminal('one')
 
@@ -124,9 +124,9 @@ def test_one_rule_with_uncaptured_nonterminal(astGenerator):
 
 def test_one_repeating_rule(astGenerator):
     spec = givenBnfSpec('<one> **= <alpha> IGNORE <BRAVO> +IGNORE')
-    modules = astGenerator.generate(spec)
-    assert len(modules) == 1
-    c = modules[0].classes[0]
+    classes = astGenerator.generate(spec)
+    assert len(classes) == 1
+    c = classes[0]
 
     one = nonterminal('one')
 
@@ -176,9 +176,9 @@ def test_multiple_rules(astGenerator):
         <one> ::= <two>
         <two> ::=
     ''')
-    modules = astGenerator.generate(spec)
-    assertStartClass(modules[0].classes[0], nonterminal('one'))
-    assertClass(modules[1].classes[0], nonterminal('two'))
+    classes = astGenerator.generate(spec)
+    assertStartClass(classes[0], nonterminal('one'))
+    assertClass(classes[1], nonterminal('two'))
 
 
 def test_alternative_rules(astGenerator):
@@ -187,13 +187,13 @@ def test_alternative_rules(astGenerator):
         <one>:Some ::= <two>
         <one>:None ::=
     ''')
-    modules = astGenerator.generate(spec)
+    classes = astGenerator.generate(spec)
     oneSome = nonterminal('one', 'Some')
     oneNone = nonterminal('one', 'None')
-    assertBaseClass(modules[0].classes[0], oneSome)
-    assertStartClass(modules[1].classes[0], nonterminal('firstRuleCannotHaveAlternative'))
-    assertSubclass(modules[2].classes[0], oneSome)
-    assertSubclass(modules[3].classes[0], oneNone)
+    assertBaseClass(classes[0], oneSome)
+    assertStartClass(classes[1], nonterminal('firstRuleCannotHaveAlternative'))
+    assertSubclass(classes[2], oneSome)
+    assertSubclass(classes[3], oneNone)
 
 
 def assertClass(class_, symbol):

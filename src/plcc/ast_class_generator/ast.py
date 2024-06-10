@@ -1,4 +1,3 @@
-from plcc.code.structures import Module
 from plcc.code.structures import Class
 from plcc.code.structures import StrClassName
 from plcc.code.structures import ClassName
@@ -40,18 +39,15 @@ class AstClassGenerator:
                 extends=None,
                 fields=[]
             )
-            m = Module(classes=[c])
-            modules.append(m)
+            modules.append(c)
         return modules
 
     def makeClasses(self, bnfspec, firstRule, symsWithAlts):
-        modules = []
+        classes = []
         for rule in bnfspec.getRules():
-            m = Module()
             c = self.makeClass(rule, rule == firstRule, symsWithAlts)
-            m.classes.append(c)
-            modules.append(m)
-        return modules
+            classes.append(c)
+        return classes
 
     def makeClass(self, rule, isFirstRule, alternatives):
         className = self.getClassNameForRule(rule)

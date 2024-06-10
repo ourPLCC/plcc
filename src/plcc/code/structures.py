@@ -5,11 +5,6 @@ from ..spec.bnfrule import BnfRule
 
 
 @dataclass(frozen=True)
-class Module:
-    classes: [Class] = field(default_factory=list)
-
-
-@dataclass(frozen=True)
 class Class:
     name: ClassName | StrClassName
     extends: BaseClassName = None
