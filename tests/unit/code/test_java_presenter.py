@@ -4,9 +4,10 @@ import pytest
 from plcc.spec.symbol import Symbol
 
 
-from plcc.code.render.default import Default
-from plcc.code.render.java import Java
-from plcc.code.render.python import Python
+from plcc.code.presenter import JavaPresenter
+from plcc.code.presenter import PythonPresenter
+
+
 from plcc.code.structures import BaseClassName
 from plcc.code.structures import ClassName
 from plcc.code.structures import TypeName
@@ -22,125 +23,111 @@ from plcc.code.structures import StrClassName
 from plcc.code.structures import Class
 
 
-def test_InPython_Class():
-    unrendered = givenClass(name='cat', fields=['tail', 'claws'])
-    rendered = whenRenderedWithPython(unrendered)
-    assert rendered == [
-        'class Cat:',
-        '    def __init__(self, tail: Tail, claws: Claws):',
-        '        self.tail = tail',
-        '        self.claws = claws',
-        '    ',
-    ]
-
-
-def test_InPython_Class_with_extends():
-    unrendered = givenClass(name='cat', fields=['tail', 'claws'], extends='animal')
-    rendered = whenRenderedWithPython(unrendered)
-    assert rendered == [
-        'class Cat(Animal):',
-        '    def __init__(self, tail: Tail, claws: Claws):',
-        '        self.tail = tail',
-        '        self.claws = claws',
-        '    ',
-    ]
-
-
 def test_InJava_Class():
     unrendered = givenClass(name='cat', fields=['tail', 'claws'])
     rendered = whenRenderedWithJava(unrendered)
-    assert rendered == [
-        'public class Cat {',
-        '    public Tail tail;',
-        '    public Claws claws;',
-        '    ',
-        '    public Cat(Tail tail, Claws claws) {',
-        '        this.tail = tail;',
-        '        this.claws = claws;',
-        '    }',
-        '    ',
-        '}',
-    ]
+    assert rendered == '''\
+public class Cat {
+    public Tail tail;
+    public Claws claws;
+
+    public Cat(Tail tail, Claws claws) {
+        this.tail = tail;
+        this.claws = claws;
+    }
+}
+'''
 
 
 def test_InJava_Class_with_extends():
     unrendered = givenClass(name='cat', fields=['tail', 'claws'], extends='animal')
     rendered = whenRenderedWithJava(unrendered)
-    assert rendered == [
-        'public class Cat extends Animal {',
-        '    public Tail tail;',
-        '    public Claws claws;',
-        '    ',
-        '    public Cat(Tail tail, Claws claws) {',
-        '        this.tail = tail;',
-        '        this.claws = claws;',
-        '    }',
-        '    ',
-        '}',
-    ]
+    assert rendered == '''\
+public class Cat extends Animal {
+    public Tail tail;
+    public Claws claws;
+
+    public Cat(Tail tail, Claws claws) {
+        this.tail = tail;
+        this.claws = claws;
+    }
+}
+'''
 
 
-def givenClass(name, fields, extends=None):
-    fieldDecls = [givenFieldDeclaration(f) for f in fields]
-    return Class(
-        name=givenClassName(name),
-        extends=None if extends is None else givenClassName(extends),
-        fields=fieldDecls,
-        constructor=givenConstructor(name, fields)
-    )
+def test_InPython_Class():
+    unrendered = givenClass(name='cat', fields=['tail', 'claws'])
+    rendered = whenRenderedWithPython(unrendered)
+    assert rendered == '''\
+class Cat:
+    def __init__(self, tail: Tail, claws: Claws):
+        self.tail = tail
+        self.claws = claws
+'''
+
+
+def test_InPython_Class_with_extends():
+    unrendered = givenClass(name='cat', fields=['tail', 'claws'], extends='animal')
+    rendered = whenRenderedWithPython(unrendered)
+    assert rendered == '''\
+class Cat(Animal):
+    def __init__(self, tail: Tail, claws: Claws):
+        self.tail = tail
+        self.claws = claws
+'''
 
 
 def test_TypeName_resolves_to_capitalized_symbol_name():
     unrendered = givenTypeName(name='cat', givenName='pet')
-    rendered = whenRenderedWithDefault(unrendered)
+    rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'Cat'
 
 
 def test_VariableName_resolves_to_symbol_given_name():
     unrendered = givenVariableName(name='cat', givenName='pet')
-    rendered = whenRenderedWithDefault(unrendered)
+    rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'pet'
 
 
 def test_VariableName_if_no_given_name_resolves_to_symbol_name():
     unrendered = givenVariableName(name='cat', givenName=None)
-    rendered = whenRenderedWithDefault(unrendered)
+    rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'cat'
 
 
 def test_TypeName_if_terminal_resolves_to_Token():
     unrendered = givenTypeName(name='cat', givenName='pet', isTerminal=True)
-    rendered = whenRenderedWithDefault(unrendered)
+    rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'Token'
 
 
 def test_ClassName_resolves_to_symbol_given_name():
     unrendered = givenClassName(name='cat', givenName='pet')
-    rendered = whenRenderedWithDefault(unrendered)
+    rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'pet'
 
 
 def test_ClassName_resolves_to_capitalized_symbol_name_if_no_given_name():
     unrendered = givenClassName(name='cat', givenName=None)
-    rendered = whenRenderedWithDefault(unrendered)
+    rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'Cat'
 
 
 def test_BaseClassName_resolves_to_capitalized_symbol_name():
     unrendered = givenBaseClassName(name='cat', givenName='Pet')
-    rendered = whenRenderedWithDefault(unrendered)
+    rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'Cat'
 
 
 def test_ListVariableName_resolves_to_given_name():
     unrendered = givenListVariableName(name='cat', givenName='fluffy')
-    rendered = whenRenderedWithDefault(unrendered)
+    rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'fluffy'
 
 
 def test_ListVariableName_if_no_given_name_resolves_to_symbol_name_appended_with_List():
     unrendered = givenListVariableName(name='cat', givenName='')
-    rendered = whenRenderedWithDefault(unrendered)
+    rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'catList'
 
 
@@ -156,7 +143,7 @@ def test_in_Python_ListTypeName_resolves_to_square_brackets_containing_its_rende
     assert rendered == '[Cat]'
 
 
-def test_ListTypeName_for_terminals_renders_to_list_of_Token():
+def test_inJava_ListTypeName_for_terminals_renders_to_list_of_Token():
     unrendered = givenListTypeName(name='cat', givenName='fluffy', isTerminal=True)
     rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'List<Token>'
@@ -215,24 +202,24 @@ def test_in_Python_list_Parameter():
 def test_in_Java_constructor():
     constructor = givenConstructor('cat', ['fur', 'tail', 'claws'])
     rendered = whenRenderedWithJava(constructor)
-    assert rendered == [
-        'public Cat(Fur fur, Tail tail, Claws claws) {',
-        '    this.fur = fur;',
-        '    this.tail = tail;',
-        '    this.claws = claws;',
-        '}'
-    ]
+    assert rendered == '''\
+public Cat(Fur fur, Tail tail, Claws claws) {
+    this.fur = fur;
+    this.tail = tail;
+    this.claws = claws;
+}
+'''
 
 
 def test_in_Python_constructor():
     constructor = givenConstructor('cat', ['fur', 'tail', 'claws'])
     rendered = whenRenderedWithPython(constructor)
-    assert rendered == [
-        'def __init__(self, fur: Fur, tail: Tail, claws: Claws):',
-        '    self.fur = fur',
-        '    self.tail = tail',
-        '    self.claws = claws'
-    ]
+    assert rendered == '''\
+def __init__(self, fur: Fur, tail: Tail, claws: Claws):
+    self.fur = fur
+    self.tail = tail
+    self.claws = claws
+'''
 
 
 def test_in_Java_FieldDeclaration():
@@ -249,9 +236,18 @@ def test_in_Python_FieldDeclaration_is_done_in_constructor_so_empty():
 
 def test_StrClassName_renders_to_its_name():
     unrendered = StrClassName('cat')
-    rendered = whenRenderedWithDefault(unrendered)
+    rendered = whenRenderedWithJava(unrendered)
     assert rendered == 'cat'
 
+
+def givenClass(name, fields, extends=None):
+    fieldDecls = [givenFieldDeclaration(f) for f in fields]
+    return Class(
+        name=givenClassName(name),
+        extends=None if extends is None else givenClassName(extends),
+        fields=fieldDecls,
+        constructor=givenConstructor(name, fields)
+    )
 
 def givenFieldDeclaration(name):
     return FieldDeclaration(
@@ -343,12 +339,12 @@ def whenRenderedWithDefault(unrendered):
 
 
 def whenRenderedWithPython(unrendered):
-    return whenRendered(unrendered, Python())
+    return whenRendered(unrendered, PythonPresenter())
 
 
 def whenRenderedWithJava(unrendered):
-    return whenRendered(unrendered, Java())
+    return whenRendered(unrendered, JavaPresenter())
 
 
 def whenRendered(unrendered, withLanguage):
-    return unrendered.renderWith(withLanguage)
+    return withLanguage.present(unrendered)

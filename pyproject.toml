@@ -6,7 +6,8 @@ authors = [
     {name = "Tim Fossum", email = "fossum@halsum.org"},
     {name = "Stoney Jackson", email = "dr.stoney@gmail.com"}
 ]
-dependencies = []
+dependencies = [
+]
 requires-python = ">=3.9"
 readme = "README.md"
 license = {text = "GPL-3.0-or-later"}
