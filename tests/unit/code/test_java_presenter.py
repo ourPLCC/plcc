@@ -8,19 +8,19 @@ from plcc.code.presenter import JavaPresenter
 from plcc.code.presenter import PythonPresenter
 
 
-from plcc.code.structures import BaseClassName
-from plcc.code.structures import ClassName
-from plcc.code.structures import TypeName
-from plcc.code.structures import VariableName
-from plcc.code.structures import ListVariableName
-from plcc.code.structures import ListTypeName
-from plcc.code.structures import FieldReference
-from plcc.code.structures import AssignVariableToField
-from plcc.code.structures import Parameter
-from plcc.code.structures import Constructor
-from plcc.code.structures import FieldDeclaration
-from plcc.code.structures import StrClassName
-from plcc.code.structures import Class
+from plcc.code import BaseClassName
+from plcc.code import ClassName
+from plcc.code import TypeName
+from plcc.code import VariableName
+from plcc.code import ListVariableName
+from plcc.code import ListTypeName
+from plcc.code import FieldReference
+from plcc.code import AssignVariableToField
+from plcc.code import Parameter
+from plcc.code import Constructor
+from plcc.code import FieldDeclaration
+from plcc.code import StrClassName
+from plcc.code import Class
 
 
 def test_InJava_Class():

@@ -10,7 +10,7 @@ from plcc.spec.parser.specreader import SpecReader
 
 from plcc.ast_class_generator.ast import AstClassGenerator
 
-from plcc.code.structures import *
+from plcc.code import *
 
 
 @pytest.fixture
