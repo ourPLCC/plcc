@@ -21,6 +21,17 @@ class Line:
     number: int
     file: Path
 
+    @staticmethod
+    def asLines(obj):
+        if isinstance(obj, str):
+            return [Line(s, i, None) for i, s in enumerate(obj.splitlines(), start=1)]
+        elif isinstance(obj, list):
+            if isinstance(obj[0], str):
+                return [Line(s, i, None) for i, s in enumerate(obj, start=1)]
+            elif isinstance(obj[0], Line):
+                return obj
+        raise TypeError(f'Unsupported type: {type(obj)}')
+
 
 def read_sections(file):
     file = str(Path(file).resolve())
