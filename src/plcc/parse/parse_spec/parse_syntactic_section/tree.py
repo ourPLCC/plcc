@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass
 
 
@@ -6,22 +7,22 @@ class SyntacticTree:
     rules: [RepeatingRule|StandardRule]
 
 
-@dataclass(frozen=True)
+@dataclass
 class RepeatingRule:
-    nonterminal: Defining
-    symbols: [Capturing|NonCapturing]
+    defined: Defined
+    symbols: [Captured|Uncaptured]
     separator: Terminal
 
 
 @dataclass(frozen=True)
 class StandardRule:
-    nonterminal: Defining
-    symbols: [Capturing|NonCapturing]
+    defined: Defined
+    symbols: [Captured|Uncaptured]
 
 
 @dataclass(frozen=True)
-class Defining:
-    sybmol: Nonterminal
+class Defined:
+    symbol: Nonterminal
     disambiguation: str
     line: Line
     column: int
@@ -38,14 +39,14 @@ class Nonterminal:
 
 
 @dataclass(frozen=True)
-class NonCapturing:
+class Uncaptured:
     symbol: Terminal|Nonterminal
     line: Line
     column: int
 
 
 @dataclass(frozen=True)
-class Capturing:
+class Captured:
     symbol: Terminal|Nonterminal
     disambiguation: str
     line: Line

@@ -1,5 +1,9 @@
 import re
 
+from .builder import SyntacticTreeBuilder
+from .tree import SyntacticTree
+from ...read_sections import Line
+
 
 class UnrecognizedError(Exception):
     def __init__(self, line, column):
@@ -7,63 +11,80 @@ class UnrecognizedError(Exception):
         self.column = column
 
 
-def parse_syntactic_section(builder, section):
-    blank_line = re.compile(r'^\s*$')
-    comment = re.compile(r'\s*#.*')
-    define = re.compile(r'\s*(?P<angle><)?(?P<name>\w+)(?(angle)>:?(?P<dis>\w*)|)\s*(?P<op>::=|\*\*=)')
-    separator = re.compile(r'\s*\+\s*(?P<name>[A-Z_]+)')
-    terminal = re.compile(r'\s*(?P<name>[A-Z_]+)')
-    capturing_terminal = re.compile(r'\s*(?P<angle><)?(?P<name>\w+)(?(angle)>:?(?P<dis>\w*)|)')
-    nonterminal = re.compile(r'\s*(?P<angle><)?(?P<name>\w+)(?(angle)>:?(?P<dis>\w*)|)')
-    comment = re.compile(r'\s*#.*')
+def parse(lines):
+    builder = SyntacticTreeBuilder()
+    _parse(builder, lines)
+    tree = builder.result
+    return tree
 
+
+def getColumn(i, m):
+    return i + (len(m[0]) - len(m[1])) + 1
+
+
+def _parse(builder, lines):
+    blank_line = re.compile(r'^\s*$')
+    comment = re.compile(r'\s*(#.*)')
+    define = re.compile(r'\s*(<(?P<name>\w+)>(?::?(?P<dis>\w+)|)\s*(?P<op>::=|\*\*=))')
+    separator = re.compile(r'\s*(\+\s*(?P<name>[A-Z_]+))')
+    terminal = re.compile(r'\s*(?P<name>[A-Z_]+)')
+    capturing_terminal = re.compile(r'\s*(<(?P<name>[A-Z_]+)>(?::?(?P<dis>\w+)|))')
+    nonterminal = re.compile(r'\s*(<(?P<name>\w+)>(?::?(?P<dis>\w+)|))')
+
+    lines = [] if lines is None else Line.asLines(lines)
     builder.begin()
     k = 1 # skip divider line (%)
-    lines = section.lines
     while k < len(lines):
         line = lines[k]
         string = line.string
         i = 0
         while i < len(string):
             string = line.string
-            m = blank_line.match(string)
+            m = blank_line.match(string, i)
             if m:
                 i += len(m[0])
                 continue
 
-            m = comment.match(string)
+            m = comment.match(string, i)
             if m:
                 i += len(m[0])
                 continue
 
-            m = define.match(string)
+            m = define.match(string, i)
             if m:
+                column = getColumn(i, m)
                 if m['op'] == '**=':
-                    self.builder.startRepeatingRule(m['name'], m['dis'], line, i+1)
+                    builder.startRepeatingRule(m['name'], m['dis'], line, column)
                 else:
-                    self.builder.startStandardRule(m['name'], m['dis'], line, i+1)
+                    builder.startStandardRule(m['name'], m['dis'], line, column)
+                i += len(m[0])
+                continue
 
             m = separator.match(string, i)
             if m:
-                self.builder.setSeparator(m['name'], line, i+1)
+                column = getColumn(i, m)
+                builder.setSeparator(m['name'], line, column)
                 i += len(m[0])
                 continue
 
             m = terminal.match(string, i)
             if m:
-                self.builder.addTerminal(m['name'], line, i+1)
+                column = getColumn(i, m)
+                builder.addTerminal(m['name'], line, column)
                 i += len(m[0])
                 continue
 
             m = capturing_terminal.match(string, i)
             if m:
-                self.builder.addCapturingTerminal(m['name'], m['dis'], line, i+1)
+                column = getColumn(i, m)
+                builder.addCapturedTerminal(m['name'], m['dis'], line, column)
                 i += len(m[0])
                 continue
 
             m = nonterminal.match(string, i)
             if m:
-                self.builder.addNonterminal(m['name'], m['dis'], line, i+1)
+                column = getColumn(i, m)
+                builder.addNonterminal(m['name'], m['dis'], line, column)
                 i += len(m[0])
                 continue
 

@@ -12,7 +12,7 @@ class ParseError(Exception):
 
 def parse(lines):
     builder = LexicalTreeBuilder()
-    _parse_lines(builder, lines)
+    _parse(builder, lines)
     tree = builder.result
     return tree
 
@@ -20,7 +20,7 @@ def parse(lines):
 def toLines(string):
     return string.splitlines()
 
-def _parse_lines(builder, lines):
+def _parse(builder, lines):
     rule_pat = re.compile(r'^\s*(?:(?P<type>skip|token)\s+)?(?P<name>[A-Z_]+)\s+(?P<quote>[\'"])(?P<pattern>[^(?P=quote)]*)(?P=quote)(?:\s*(?:#.*)?)$')
     blank_pat = re.compile(r'^\s*$')
     comment_pat = re.compile(r'^\s*#.*$')

@@ -26,6 +26,8 @@ class Line:
         if isinstance(obj, str):
             return [Line(s, i, None) for i, s in enumerate(obj.splitlines(), start=1)]
         elif isinstance(obj, list):
+            if len(obj) == 0:
+                return obj
             if isinstance(obj[0], str):
                 return [Line(s, i, None) for i, s in enumerate(obj, start=1)]
             elif isinstance(obj[0], Line):
