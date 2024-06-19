@@ -1,6 +1,8 @@
-from .parser import parse
-from .tree import Defined
+from .maker import make_syntactic_tree
+from .parser import ParseError
+
 from .tree import Captured
+from .tree import Defined
 from .tree import Uncaptured
 from .tree import Nonterminal
 from .tree import RepeatingRule

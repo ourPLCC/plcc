@@ -1,12 +1,12 @@
 from pytest import fixture, mark, raises
 
 
-from . import parse, LexicalTree, SkipRule, TokenRule
+from . import make_lexical_tree, LexicalTree, SkipRule, TokenRule
 from ...read_sections import Line
 
 
 def assertParse(given, expect):
-    assert parse(given) == expect
+    assert make_lexical_tree(given) == expect
 
 
 def test_None():

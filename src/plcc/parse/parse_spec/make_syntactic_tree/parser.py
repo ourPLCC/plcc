@@ -1,28 +1,14 @@
+from __future__ import annotations
+
+
+from abc import ABC, abstractmethod
 import re
 
-from .builder import SyntacticTreeBuilder
-from .tree import SyntacticTree
+
 from ...read_sections import Line
 
 
-class UnrecognizedError(Exception):
-    def __init__(self, line, column):
-        self.line = line
-        self.column = column
-
-
-def parse(lines):
-    builder = SyntacticTreeBuilder()
-    _parse(builder, lines)
-    tree = builder.result
-    return tree
-
-
-def getColumn(i, m):
-    return i + (len(m[0]) - len(m[1])) + 1
-
-
-def _parse(builder, lines):
+def parse(builder, lines):
     blank_line = re.compile(r'^\s*$')
     comment = re.compile(r'\s*(#.*)')
     define = re.compile(r'\s*(<(?P<name>\w+)>(?::?(?P<dis>\w+)|)\s*(?P<op>::=|\*\*=))')
@@ -31,7 +17,7 @@ def _parse(builder, lines):
     capturing_terminal = re.compile(r'\s*(<(?P<name>[A-Z_]+)>(?::?(?P<dis>\w+)|))')
     nonterminal = re.compile(r'\s*(<(?P<name>\w+)>(?::?(?P<dis>\w+)|))')
 
-    lines = [] if lines is None else Line.asLines(lines)
+    lines = Line.asLines(lines)
     builder.begin()
     k = 1 # skip divider line (%)
     while k < len(lines):
@@ -88,8 +74,52 @@ def _parse(builder, lines):
                 i += len(m[0])
                 continue
 
-            raise UnrecognizedError(line, i+1)
+            raise ParseError(line, i+1)
 
         k += 1
 
     builder.end()
+
+
+class ParseError(Exception):
+    def __init__(self, line, column):
+        self.line = line
+        self.column = column
+
+
+def getColumn(i, m):
+    return i + (len(m[0]) - len(m[1])) + 1
+
+
+class Builder(ABC):
+    @abstractmethod
+    def begin(self) -> None:
+        ...
+
+    @abstractmethod
+    def startRepeatingRule(self, name: str, disambiguation: str, line: Line, column: int) -> None:
+        ...
+
+    @abstractmethod
+    def startStandardRule(self, name: str, disambiguation: str, line: Line, column: int) -> None:
+        ...
+
+    @abstractmethod
+    def setSeparator(self, name: str, line: Line, column: int) -> None:
+        ...
+
+    @abstractmethod
+    def addTerminal(self, name: str, line: Line, column: int) -> None:
+        ...
+
+    @abstractmethod
+    def addCapturedTerminal(self, name: str, disambiguation: str, line: Line, column: int) -> None:
+        ...
+
+    @abstractmethod
+    def addNonterminal(self, name: str, disambiguation: str, line: Line, column: int) -> None:
+        ...
+
+    @abstractmethod
+    def end(self):
+        ...

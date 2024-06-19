@@ -1,7 +1,7 @@
 from pytest import fixture, mark, raises
 
 
-from . import parse
+from . import make_syntactic_tree
 from . import SyntacticTree
 from . import Defined
 from . import Captured
@@ -12,11 +12,12 @@ from . import StandardRule
 from . import SyntacticTree
 from . import Terminal
 
+
 from ...read_sections import Line
 
 
 def assertParse(given, expect):
-    assert parse(given) == expect
+    assert make_syntactic_tree(given) == expect
 
 
 @mark.focus
