@@ -20,22 +20,18 @@ def assertParse(given, expect):
     assert make_syntactic_tree(given) == expect
 
 
-@mark.focus
 def test_None():
     assertParse(None, SyntacticTree(rules=[]))
 
 
-@mark.focus
 def test_empty():
     assertParse(r'', SyntacticTree(rules=[]))
 
 
-@mark.focus
 def test_comment():
     assertParse(r'# comment', SyntacticTree(rules=[]))
 
 
-@mark.focus
 def test_blank_lines():
     given = r'''
 
@@ -44,7 +40,6 @@ def test_blank_lines():
     assertParse(given, SyntacticTree(rules=[]))
 
 
-@mark.focus
 def test_standard():
     given =r'''
 
@@ -75,7 +70,6 @@ def test_standard():
     assertParse(given, expect)
 
 
-@mark.focus
 def test_standard_disambiguation():
     given =r'''
 
@@ -106,7 +100,6 @@ def test_standard_disambiguation():
     assertParse(given, expect)
 
 
-@mark.focus
 def test_standard_colon_disambiguation():
     given =r'''
 
@@ -137,7 +130,6 @@ def test_standard_colon_disambiguation():
     assertParse(given, expect)
 
 
-@mark.focus
 def test_standard_terminal():
     given =r'''
 
@@ -180,7 +172,6 @@ def test_standard_terminal():
     assertParse(given, expect)
 
 
-@mark.focus
 def test_standard_captured_terminal():
     given =r'''
 
@@ -224,7 +215,6 @@ def test_standard_captured_terminal():
     assertParse(given, expect)
 
 
-@mark.focus
 def test_standard_nonterminal():
     given =r'''
 
@@ -268,7 +258,6 @@ def test_standard_nonterminal():
     assertParse(given, expect)
 
 
-@mark.focus
 def test_standard_integration():
     given =r'''
 
@@ -336,8 +325,6 @@ def test_standard_integration():
     assertParse(given, expect)
 
 
-
-@mark.focus
 def test_repeating_empty():
     given =r'''
 
@@ -370,7 +357,6 @@ def test_repeating_empty():
     assertParse(given, expect)
 
 
-@mark.focus
 def test_repeating_separator():
     given =r'''
 

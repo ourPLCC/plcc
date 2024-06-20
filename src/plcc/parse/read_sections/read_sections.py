@@ -5,6 +5,9 @@ from pathlib import Path
 import re
 
 
+from dataclasses import dataclass
+
+
 @dataclass
 class Section:
     content: [Line|Block]
