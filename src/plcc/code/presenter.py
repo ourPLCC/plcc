@@ -1,6 +1,6 @@
 from dataclasses import is_dataclass, fields
 
-from plcc.visitor import Visitor
+from plcc.visitor_pattern import Transformer
 
 
 class BottomUp:
@@ -55,7 +55,7 @@ class Indenter:
         return lines
 
 
-class CodePresenter(Visitor):
+class CodePresenter(Transformer):
     def __init__(self, indenter=None):
         self.indenter = indenter if indenter else Indenter()
 

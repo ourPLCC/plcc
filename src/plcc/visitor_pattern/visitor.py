@@ -22,7 +22,7 @@
 class Visitor(object):
     """Base class for visitors."""
 
-    def visit(self, node, **kws):
+    def visit(self, node):
         """Visit a node.
 
         Calls ``visit_CLASSNAME`` on itself passing ``node``, where
@@ -44,7 +44,7 @@ class Visitor(object):
         for cls in mro:
             meth = getattr(self, 'visit_' + cls.__name__, None)
             if meth is not None:
-                return meth(node, **kws)
+                return meth(node)
 
         raise NotImplementedError('No visitation method visit_{}'
                                   .format(node.__class__.__name__))
