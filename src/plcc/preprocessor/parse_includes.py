@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import re
 
 
-from .lines import Line
+from .parse_lines import Line
 
 
 @dataclass(frozen=True)

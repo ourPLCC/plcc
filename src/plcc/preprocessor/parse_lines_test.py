@@ -1,7 +1,7 @@
 from pytest import raises, mark, fixture
 
 
-from .lines import parse_lines, Line
+from .parse_lines import parse_lines, Line
 
 
 def test_None_yields_nothing():

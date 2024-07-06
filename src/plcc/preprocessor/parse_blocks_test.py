@@ -1,8 +1,8 @@
 from pytest import raises, mark, fixture
 
 
-from .lines import parse_lines, Line
-from .blocks import parse_blocks, Block, UnclosedBlockError
+from .parse_lines import parse_lines, Line
+from .parse_blocks import parse_blocks, Block, UnclosedBlockError
 
 
 def test_None_yields_nothing():

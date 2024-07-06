@@ -1,20 +1,20 @@
 from pytest import raises, mark, fixture
 
 
-from .lines import parse_lines, Line
-from .blocks import parse_blocks, Block, UnclosedBlockError
-from .includes import parse_includes, Include
+from .parse_lines import parse_lines, Line
+from .parse_blocks import parse_blocks, Block, UnclosedBlockError
+from .parse_includes import parse_includes, Include
 
 
-def test_parse_includes_None_yields_nothing():
+def test_None_yields_nothing():
     assert list(parse_includes(None)) == []
 
 
-def test_parse_includes_empty_yields_nothing():
+def test_empty_yields_nothing():
     assert list(parse_includes([])) == []
 
 
-def test_parse_includes_non_includes_pass_through():
+def test_non_includes_pass_through():
     lines = list(parse_blocks(parse_lines('''\
 one
 %%%
@@ -25,7 +25,7 @@ three
     assert list(parse_includes(lines)) == lines
 
 
-def test_parse_includes_include():
+def test_include():
     lines = list(parse_lines('''\
 %include file
 '''))
@@ -37,7 +37,7 @@ def test_parse_includes_include():
     ]
 
 
-def test_parse_includes_ignore_includes_in_blocks():
+def test_ignores_includes_in_blocks():
     lines = list(parse_blocks(parse_lines('''\
 %%%
 %include file

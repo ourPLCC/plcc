@@ -1,2 +1,2 @@
-from .lines import parse_lines, Line
+from .parse_lines import parse_lines, Line
 
