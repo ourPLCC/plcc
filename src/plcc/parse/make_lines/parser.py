@@ -9,8 +9,8 @@ def parse(builder, strings: str|[str], file: str = None) -> None:
         strings = strings.splitlines()
     builder.begin()
     builder.setFile(file)
-    for i, s in enumerate(strings, start=1):
-        builder.line(s.rstrip('\n'), i)
+    for s in strings:
+        builder.line(s.rstrip('\n'))
 
 
 class Builder(ABC):
@@ -23,7 +23,7 @@ class Builder(ABC):
         ...
 
     @abstractmethod
-    def line(self, string: str, number: int) -> None:
+    def line(self, string: str) -> None:
         ...
 
     @abstractmethod
