@@ -4,7 +4,8 @@ version = "8.0.0"
 description = "Programming Languages Compiler Compiler"
 authors = [
     {name = "Tim Fossum", email = "fossum@halsum.org"},
-    {name = "Stoney Jackson", email = "dr.stoney@gmail.com"}
+    {name = "Stoney Jackson", email = "dr.stoney@gmail.com"},
+    {name = "James Heliotis", email = "jehics@rit.edu"}
 ]
 dependencies = [
     "overrides>=7.7.0",
