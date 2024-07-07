@@ -30,3 +30,4 @@ def test_circular_include_errors(fs):
     fs.create_file('/f', contents='%include /f')
     with raises(CircularIncludeError):
         list(process_includes(parse_includes(parse_lines('%include /f'))))
+

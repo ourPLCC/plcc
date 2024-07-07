@@ -48,7 +48,10 @@ class IncludeProcessor():
     def process_include(self, include):
         p = Path(include.file)
         if not p.is_absolute():
-            p = (Path(include.line.file).parent/p).resolve()
+            if include.file.line is not None:
+                p = (Path(include.line.file).parent/p).resolve()
+            else:
+                p = (Path.cwd()/p).resolve()
         p = str(p)
         if p in self.seen:
             raise CircularIncludeError(include.line)
