@@ -1,10 +1,10 @@
 from pytest import raises, mark, fixture
 
 
-from . import preprocess_file, Line, Block
+from .preparse_file import preparse_file, Line, Block
 
 
-def test_preprocessor(fs):
+def test_preparse_file(fs):
     fs.create_file('/a', contents='''\
 one
 %include f/b
@@ -19,7 +19,7 @@ three
 %%%
 ''')
 
-    assert list(preprocess_file('/a')) == [
+    assert list(preparse_file('/a')) == [
         Line('one', 1, '/a'),
         Line('two', 1, '/f/b'),
         Block([

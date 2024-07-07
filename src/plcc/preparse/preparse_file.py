@@ -11,7 +11,7 @@ from .process_includes import process_includes, CircularIncludeError
 from pathlib import Path
 
 
-def preprocess_file(file):
+def preparse_file(file):
 
     PPP = re.compile(r'^%%%(?:\s*#.*)?$')
     PPLC = re.compile(r'^%%{(?:\s*#.*)?$')
