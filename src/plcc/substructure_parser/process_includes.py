@@ -1,7 +1,6 @@
 from pathlib import Path
 
 
-from .read_file import read_file
 from .parse_lines import parse_lines
 from .parse_blocks import parse_blocks
 from .parse_includes import parse_includes, Include
@@ -12,7 +11,23 @@ class CircularIncludeError(Exception):
         self.line = line
 
 
-def process_includes(lines, parse_file=lambda f: parse_includes(parse_blocks(parse_lines(read_file(f), file=f)))):
+def parse_file(file):
+    return parse_includes(
+        parse_blocks(
+            parse_lines(
+                read_file(file),
+                file=file
+            )
+        )
+    )
+
+
+def read_file(file):
+    with open(file, 'r') as f:
+        return f.read()
+
+
+def process_includes(lines, parse_file=parse_file):
     return IncludeProcessor(parse_file).process(lines)
 
 
