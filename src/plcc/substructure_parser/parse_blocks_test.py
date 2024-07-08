@@ -23,7 +23,7 @@ def test_unclosed_block_is_an_error():
     with raises(UnclosedBlockError) as info:
         list(parse_blocks(parse_lines(OPEN)))
     exception = info.value
-    exception.line = Line('%%%', 1, None)
+    assert exception.line == Line('%%%', 1, None)
 
 
 def test_tripple_percent_block():
