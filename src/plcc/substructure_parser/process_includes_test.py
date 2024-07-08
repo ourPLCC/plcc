@@ -2,9 +2,8 @@ from pytest import raises, mark, fixture
 
 
 from .parse_lines import parse_lines, Line
-from .parse_blocks import parse_blocks, Block, UnclosedBlockError
-from .parse_includes import parse_includes, Include
-from .process_includes import process_includes, CircularIncludeError
+from .parse_includes import parse_includes
+from .load_substructure import process_includes, CircularIncludeError
 
 
 def test_None_yields_nothing():

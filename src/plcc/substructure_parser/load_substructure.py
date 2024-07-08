@@ -1,9 +1,8 @@
 from pathlib import Path
 
 
-from .parse_lines import parse_lines
-from .parse_blocks import parse_blocks
-from .parse_includes import parse_includes, Include
+from .parse_substructure import parse_substructure
+from .parse_includes import Include
 
 
 class CircularIncludeError(Exception):
@@ -11,23 +10,24 @@ class CircularIncludeError(Exception):
         self.line = line
 
 
-def parse_file(file):
-    return parse_includes(
-        parse_blocks(
-            parse_lines(
-                read_file(file),
-                file=file
-            )
-        )
+def load_substructure(file):
+    return process_includes(
+        load_substructure_without_processing_includes(file)
     )
 
 
-def read_file(file):
-    with open(file, 'r') as f:
-        return f.read()
+def load_substructure_without_processing_includes(file):
+    def read_file(file):
+        with open(file, 'r') as f:
+            return f.read()
+
+    return parse_substructure(
+        string=read_file(file),
+        file=file
+    )
 
 
-def process_includes(lines, parse_file=parse_file):
+def process_includes(lines, parse_file=load_substructure_without_processing_includes):
     return IncludeProcessor(parse_file).process(lines)
 
 
@@ -56,7 +56,5 @@ class IncludeProcessor():
         if p in self.seen:
             raise CircularIncludeError(include.line)
         self.seen.append(p)
-        for line in self.process(self.parse_file(p)):
-            yield line
+        yield from self.process(self.parse_file(p))
         self.seen.pop()
-
