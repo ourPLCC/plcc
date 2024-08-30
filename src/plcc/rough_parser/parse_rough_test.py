@@ -1,7 +1,7 @@
 from pytest import fixture, raises, mark
 
 
-from .parse_substructure import parse_substructure
+from .parse_rough import parse_rough
 from .parse_lines import Line
 from .parse_blocks import Block
 from .parse_dividers import Divider
@@ -9,7 +9,7 @@ from .parse_includes import Include
 
 
 def test_():
-    assert list(parse_substructure('''\
+    assert list(parse_rough('''\
 one
 %
 two
