@@ -4,7 +4,7 @@ from .parse_dividers import parse_dividers
 from .parse_includes import parse_includes
 
 
-def parse_substructure(string, file=None):
+def parse_rough(string, file=None):
     return parse_dividers(parse_includes(parse_blocks(parse_lines(
         string,
         file=file

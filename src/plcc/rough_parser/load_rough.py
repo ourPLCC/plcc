@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-from .parse_substructure import parse_substructure
+from .parse_rough import parse_rough
 from .parse_includes import Include
 
 
@@ -10,24 +10,24 @@ class CircularIncludeError(Exception):
         self.line = line
 
 
-def load_substructure(file):
+def load_rough(file):
     return process_includes(
-        load_substructure_without_processing_includes(file)
+        load_rough_without_processing_includes(file)
     )
 
 
-def load_substructure_without_processing_includes(file):
+def load_rough_without_processing_includes(file):
     def read_file(file):
         with open(file, 'r') as f:
             return f.read()
 
-    return parse_substructure(
+    return parse_rough(
         string=read_file(file),
         file=file
     )
 
 
-def process_includes(lines, parse_file=load_substructure_without_processing_includes):
+def process_includes(lines, parse_file=load_rough_without_processing_includes):
     return IncludeProcessor(parse_file).process(lines)
 
 
