@@ -3,6 +3,7 @@ from pathlib import Path
 
 from .parse_rough import parse_rough
 from .parse_includes import Include
+from .split_rough_spec import split_rough_spec
 
 
 class CircularIncludeError(Exception):
@@ -10,13 +11,14 @@ class CircularIncludeError(Exception):
         self.line = line
 
 
-def load_rough(file):
-    return process_includes(
-        load_rough_without_processing_includes(file)
-    )
+def load_rough_spec(file):
+    return split_rough_spec(
+        process_includes(
+            load_rough_spec_without_processing_includes(file)
+    ))
 
 
-def load_rough_without_processing_includes(file):
+def load_rough_spec_without_processing_includes(file):
     def read_file(file):
         with open(file, 'r') as f:
             return f.read()
@@ -27,7 +29,7 @@ def load_rough_without_processing_includes(file):
     )
 
 
-def process_includes(lines, parse_file=load_rough_without_processing_includes):
+def process_includes(lines, parse_file=load_rough_spec_without_processing_includes):
     return IncludeProcessor(parse_file).process(lines)
 
 
