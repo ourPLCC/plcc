@@ -11,13 +11,29 @@ tasks:
       echo 'export PATH="$GITPOD_REPO_ROOT/src/plcc/bin:$PATH"' >> "$HOME/.bashrc"
       echo ""
       echo "INSTALLING reuse (for licenses: https://reuse.software/)"
-      pip install --upgrade pip
-      pip install pipx
-      pipx install reuse
+      echo "
+        reuse() {
+          if ! which reuse 2>&1 >/dev/null
+          then
+            pip install --upgrade pip
+            pip install pipx
+            pipx install reuse
+          fi
+          command reuse "$@"
+        }
+      " >> ~/.bashrc
       echo ""
       echo "INSTALLING ag (for searching: https://github.com/ggreer/the_silver_searcher)"
-      sudo apt-get update
-      sudo apt-get --no-install-recommends install silversearcher-ag
+      echo "
+        ag() {
+          if ! which ag 2>&1 >/dev/null
+          then
+            sudo apt-get update
+            sudo apt-get --no-install-recommends install silversearcher-ag
+          fi
+          command ag "$@"
+        }
+      " >> ~/.bashrc
       echo ""
       echo "INSTALLING bats (for testing: https://bats-core.readthedocs.io/en/latest/index.html)"
       export BATS_VERSION=v1.11.0 \
