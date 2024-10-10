@@ -6,3 +6,5 @@ from ..load_rough_spec.parse_blocks import Block, parse_blocks, UnclosedBlockErr
 from ..load_rough_spec.parse_includes import Include, parse_includes
 from ..load_rough_spec.parse_dividers import Divider, parse_dividers
 from ..load_rough_spec.parse_rough import parse_rough
+
+from .parse_semantic_spec import parse_semantic_spec, SemanticSpec, CodeFragment, TargetLocator

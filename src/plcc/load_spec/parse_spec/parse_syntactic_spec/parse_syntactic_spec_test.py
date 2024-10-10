@@ -12,7 +12,7 @@ from .structs import (
     Symbol,
 )
 from plcc.load_spec.load_rough_spec.parse_lines import Line
-from plcc.load_spec.load_rough_spec.parse_dividers import Divider
+from plcc.load_spec.load_rough_spec.parse_dividers import Divider, parse_dividers
 
 
 def test_None_yields_nothing():
@@ -372,7 +372,7 @@ def test_malformed_bnf_raises():
 
 
 def makeDivider(string="%", lineNumber=0, file=""):
-    return Divider(makeLine(string, lineNumber, file))
+    return parse_dividers([makeLine(string, lineNumber, file)])
 
 
 def makeLine(string, lineNumber=0, file: str = ""):

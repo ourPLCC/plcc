@@ -28,16 +28,33 @@ three
 def test_one_divider():
     lines = list(parse_lines('%'))
     assert list(parse_dividers(lines)) == [
-        Divider(Line('%', 1, None)),
+        make_divider(tool='Java', language='Java', line=lines[0])
     ]
 
 
-def test_one_divider_with_trailing_content():
+def test_one_divider_with_same_language_tool():
     lines = list(parse_lines('% trailing'))
     assert list(parse_dividers(lines)) == [
-        Divider(Line('% trailing', 1, None)),
+        make_divider(tool='trailing', language='trailing', line=lines[0]),
     ]
 
+def test_one_divider_with_different_language_tool():
+    lines = list(parse_lines('% linter python '))
+    assert list(parse_dividers(lines)) == [
+        make_divider(tool='linter', language='python', line=lines[0]),
+    ]
+
+def test_one_divider_with_different_but_same_language_tool():
+    lines = list(parse_lines('% python python'))
+    assert list(parse_dividers(lines)) == [
+        make_divider(tool='python', language='python', line=lines[0]),
+    ]
+
+def test_one_divider_only_takes_first_two_lines():
+    lines = list(parse_lines('% java python c++'))
+    assert list(parse_dividers(lines)) == [
+        make_divider(tool='java', language='python', line=lines[0])
+    ]
 
 def test_two_percents_does_not_match():
     lines = list(parse_lines('%%'))
@@ -50,9 +67,12 @@ def test_blocks_mask_dividers():
     lines = list(parse_blocks(parse_lines('%%%\n%\n%%%')))
     assert list(parse_dividers(lines)) == [
         Block([
-            Line('%%%', 1, None),
-            Line('%', 2, None),
-            Line('%%%', 3, None)
+            lines[0].lines[0],
+            lines[0].lines[1],
+            lines[0].lines[2]
         ])
     ]
+
+def make_divider(tool, language, line):
+    return Divider(tool=tool, language=language, line=line)
 

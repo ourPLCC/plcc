@@ -1,7 +1,7 @@
 from pytest import raises, mark, fixture
 
 from .parse_lines import Line
-from .parse_dividers import Divider
+from .parse_dividers import Divider, parse_dividers
 from .load_rough_spec import load_rough_spec
 from .split_rough_spec import RoughSpec, split_rough_spec
 
@@ -101,7 +101,7 @@ def makeLineList(string):
 
 
 def makeDivider(string):
-    return Divider(makeLine(string))
+    return next(parse_dividers([makeLine(string)]))
 
 
 def makeLine(string):
