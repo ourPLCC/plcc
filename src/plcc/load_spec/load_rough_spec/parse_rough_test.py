@@ -24,13 +24,13 @@ two
 %%%
 ''')) == [
     Line('one', 1, None),
-    Divider(Line('%', 2, None)),
+    Divider(tool='Java', language='Java', line=Line('%', 2, None)),
     Line('two', 3, None),
-    Divider(Line('% java', 4, None)),
+    Divider(tool='java', language='java', line=Line('% java', 4, None)),
     Include(file='/A.java', line=Line('%include /A.java', 5, None)),
-    Divider(Line('% python', 6, None)),
+    Divider(tool='python', language='python', line=Line('% python', 6, None)),
     Include(file='/B.py', line=Line('%include /B.py', 7, None)),
-    Divider(Line('% c++', 8, None)),
+    Divider(tool='c++', language='c++', line=Line('% c++', 8, None)),
     Block([
         Line('%%%', 9, None),
         Line('%include nope', 10, None),
