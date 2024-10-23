@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from .parse_target_locator import TargetLocator, parse_target_locator, InvalidTargetLocatorError
+from .parse_target_locator import TargetLocator, parse_target_locator
 from plcc.load_spec.load_rough_spec.parse_lines import Line
 from plcc.load_spec.load_rough_spec.parse_blocks import Block
 from plcc.load_spec.load_rough_spec.parse_dividers import Divider
@@ -19,7 +19,7 @@ class CodeFragmentParser:
         self.lines_and_blocks = lines_and_blocks
         self.codeFragmentList = []
         self.targetLocator = None
-        self.targetLocator_regex = r'^(\w+)(?::([a-z]+))?\s*(?:#.*)?$'
+        self.targetLocator_regex = r'^(.+?)(?::([a-z]+))?\s*(?:#.*)?$'
 
     def parse(self):
         for obj in self.lines_and_blocks:
@@ -53,10 +53,7 @@ class CodeFragmentParser:
         if self.targetLocator != None:
             raise DuplicateTargetLocatorError(line.string)
         else:
-            if re.match(self.targetLocator_regex, line.string):
-                self.targetLocator = parse_target_locator(line, self.targetLocator_regex)
-            else:
-                raise InvalidTargetLocatorError(line)
+            self.targetLocator = parse_target_locator(line, self.targetLocator_regex)
 
 
     def _isCommentOrBlank(self, obj_str):

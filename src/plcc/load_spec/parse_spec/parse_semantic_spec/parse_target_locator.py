@@ -8,7 +8,7 @@ class TargetLocator:
     className: str
     modifier: str = None
 
-def parse_target_locator(line, regex=r'^(\w+)(?::([a-z]+))?\s*(?:#.*)?$'):
+def parse_target_locator(line, regex=r'^(.+?)(?::([a-z]+))?\s*(?:#.*)?$'):
     match = re.match(regex, line.string)
     if match:
         name, modifier = match.group(1), match.group(2) or None

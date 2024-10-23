@@ -15,11 +15,6 @@ def test_consecutive():
         CodeFragment(make_target_locator(lines_and_blocks[0], 'Class', 'init'), make_block()),
         CodeFragment(make_target_locator(lines_and_blocks[2], 'Main', None), make_block())]
 
-def test_invalid_target_locator_syntax():
-    lines_and_blocks = [make_line('`'), make_block()]
-    with raises(InvalidTargetLocatorError):
-        parse_code_fragments(lines_and_blocks)
-
 def test_input_must_be_Lines_and_Blocks():
     invalid_input = ["Only Lines and Dividers Work!", make_line('Class'), make_block()]
     with raises(TypeError):
