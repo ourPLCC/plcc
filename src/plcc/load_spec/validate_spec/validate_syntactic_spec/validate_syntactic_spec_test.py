@@ -3,6 +3,7 @@ from typing import List
 
 from ...load_rough_spec.parse_lines import Line
 from .validate_syntactic_spec import validate_syntactic_spec
+from ...parse_spec.parse_lexical_spec import LexicalSpec
 from ...parse_spec.parse_syntactic_spec import (
     SyntacticRule,
     SyntacticSpec,
@@ -19,22 +20,23 @@ from .errors import (
 
 def test_empty_no_errors():
     syntacticSpec = makeSyntacticSpec([])
-    errors = validate_syntactic_spec(syntacticSpec)
+    errors = validate(syntacticSpec)
     assert len(errors) == 0
 
 
 def test_None_no_errors():
     syntacticSpec = makeSyntacticSpec(None)
-    errors = validate_syntactic_spec(syntacticSpec)
+    errors = validate(syntacticSpec)
     assert len(errors) == 0
 
 
 def test_valid_line_no_errors():
     valid_line = makeLine("<sentence> ::= WORD")
-    errors = validate_syntactic_spec(
+    errors = validate(
         [
             makeSyntacticRule(
-                valid_line, makeLhsNonTerminal("sentence"), [makeTerminal("WORD")]
+                valid_line, makeLhsNonTerminal("sentence"), [
+                    makeTerminal("WORD")]
             )
         ]
     )
@@ -52,13 +54,13 @@ def test_distinct_resolved_name():
         makeLhsNonTerminal("sentence", "Question"),
         [makeTerminal("WORD")],
     )
-    errors = validate_syntactic_spec([line_answer, line_question])
+    errors = validate([line_answer, line_question])
     assert len(errors) == 0
 
 
 def test_valid_lhs_alt_name():
     valid_line = makeLine("<sentence>:Name_Version_1 ::= WORD")
-    errors = validate_syntactic_spec(
+    errors = validate(
         [
             makeSyntacticRule(
                 valid_line,
@@ -74,10 +76,11 @@ def test_number_lhs_terminal():
     invalid_nonterminal = makeLine("<1sentence> ::= WORD")
     spec = [
         makeSyntacticRule(
-            invalid_nonterminal, makeLhsNonTerminal("1sentence"), [makeTerminal("WORD")]
+            invalid_nonterminal, makeLhsNonTerminal(
+                "1sentence"), [makeTerminal("WORD")]
         )
     ]
-    errors = validate_syntactic_spec(spec)
+    errors = validate(spec)
     assert len(errors) == 1
     assert errors[0] == makeInvalidLhsNameFormatError(spec[0])
 
@@ -86,10 +89,11 @@ def test_capital_lhs_terminal():
     capital_lhs_name = makeLine("<Sentence> ::= WORD")
     spec = [
         makeSyntacticRule(
-            capital_lhs_name, makeLhsNonTerminal("Sentence"), [makeTerminal("WORD")]
+            capital_lhs_name, makeLhsNonTerminal(
+                "Sentence"), [makeTerminal("WORD")]
         )
     ]
-    errors = validate_syntactic_spec(spec)
+    errors = validate(spec)
     assert len(errors) == 1
     assert errors[0] == makeInvalidLhsNameFormatError(spec[0])
 
@@ -103,7 +107,7 @@ def test_undercase_lhs_alt_name():
             [makeTerminal("WORD")],
         )
     ]
-    errors = validate_syntactic_spec(spec)
+    errors = validate(spec)
     assert len(errors) == 1
     assert errors[0] == makeInvalidLhsAltNameFormatError(spec[0])
 
@@ -117,7 +121,7 @@ def test_underscore_lhs_alt_name():
             [makeTerminal("WORD")],
         )
     ]
-    errors = validate_syntactic_spec(spec)
+    errors = validate(spec)
     assert len(errors) == 1
     assert errors[0] == makeInvalidLhsAltNameFormatError(spec[0])
 
@@ -135,7 +139,7 @@ def test_duplicate_lhs_name():
         [makeTerminal("WORD")],
     )
     spec = [rule_1, rule_2]
-    errors = validate_syntactic_spec(spec)
+    errors = validate(spec)
     assert len(errors) == 1
     assert errors[0] == makeDuplicateLhsError(spec[1])
 
@@ -152,7 +156,7 @@ def test_duplicate_lhs_alt_name():
         [makeTerminal("WORD")],
     )
     spec = [rule_1, rule_2]
-    errors = validate_syntactic_spec(spec)
+    errors = validate(spec)
     assert len(errors) == 1
     assert errors[0] == makeDuplicateLhsError(spec[1])
 
@@ -169,9 +173,13 @@ def test_duplicate_resolved_name():
         [makeTerminal("WORD")],
     )
     spec = [alt_name, non_terminal_name]
-    errors = validate_syntactic_spec(spec)
+    errors = validate(spec)
     assert len(errors) == 1
     assert errors[0] == makeDuplicateLhsError(spec[1])
+
+
+def validate(syntacticSpec: SyntacticSpec, lexicalSpec: LexicalSpec = []):
+    return validate_syntactic_spec(syntacticSpec, lexicalSpec)
 
 
 def makeSyntacticSpec(ruleList=None):
