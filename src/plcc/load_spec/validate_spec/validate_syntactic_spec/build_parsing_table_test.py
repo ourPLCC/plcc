@@ -9,32 +9,24 @@ def test_first_set_placement():
     table = build_parsing_table(firstSets, followSets, rules)
     assert table.get('s', 'C') == [{"b C"}, {'d b'}]
     assert table.get('s', 'A') == [{"b C"}, {'d b'}]
-
-    assert table.get('s', 'C') == [{'b C'}, {'d b'}]
-
-    # assert table.get('b', 'C') == [{"C s"}]
-    # assert table.get('d', 'D') == [{"D"}]
-
-    # assert table.get('d', 'D') == [{"D", ""}]
-    # assert table.get('d', '') == [{"D", ""}]
-    # assert table.get('d', 'A') == [{""}]
-
-
-
-
-
+    assert table.get('s', 'D') == [{"d b"}]
+    assert table.get('b', 'A') == [{"A B"}]
+    assert table.get('b', 'C') == [{"C s"}]
+    assert table.get('d', 'A') == [{""}]
+    assert table.get('d', 'C') == [{""}]
+    assert table.get('d', 'D') == [{"D"}]
 
 def buildBasicFirstSet():
     firstSets = defaultdict(set)
     firstSets['d'] = {"D", ""}
-    firstSets['b C'] = {"A", "C"}
-    firstSets['s'] = {"A", "C", "D"}
     firstSets['b'] = {"A", "C"}
+    firstSets['s'] = {"A", "C", "D"}
+    firstSets['b C'] = {"A", "C"}
     firstSets['d b'] = {"D", "A", "C"}
     firstSets['A B'] = {"A"}
     firstSets['C s'] = {"C"}
-    firstSets['d'] = {"d"}
-    firstSets[''] = {""}
+    firstSets['D'] = {"D"}
+    firstSets[""] = {""}
 
     return firstSets
 
@@ -50,7 +42,7 @@ def buildBasicRules():
     rules = defaultdict(list)
     rules["s"] = [["b C", "d b"]]
     rules["b"] = [["A B", 'C s']]
-    rules["d"] = [["D"],[]]
+    rules["d"] = [["D"],[""]]
 
     return rules
 

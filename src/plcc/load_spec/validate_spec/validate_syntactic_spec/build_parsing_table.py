@@ -27,7 +27,7 @@ class ParsingTableBuilder:
     def build(self):
         self._addFirstSetRules()
         return self.table
-# [('d', {'d'}), ('b', {'A', 'C'}), ('s', {'A', 'C', 'D'}), ('b C', {'A', 'C'}), ('d b', {'A', 'C', 'D'}), ('A B', {'A'}), ('C s', {'C'}), ('', {''})]
+
     def _addFirstSetRules(self):
         for nonterminal in self.rules.keys():
             for productionLists in self.rules[nonterminal]:
@@ -37,12 +37,26 @@ class ParsingTableBuilder:
                     for t in self.first[production]:
                         self.table.add(nonterminal, t, production)
 
+                    if self._isEpsilonInSet(self.first[production]):
+                        for t in self.follow[nonterminal]:
+                            self.table.add(nonterminal, t, production)
+
+# epsilon is both a production and t
+
+    def _addFollowSetRules(self, nonterminal, production):
+        for t in self.follow[production]:
+            self.table.add(nonterminal, t, production)
+
+
     def _isNonterminalOnly(self, production):
         return True if production in self.rules.keys() else False
 
 
     def _isProductionInNonterminalsRule(self, production, nonterminal):
         return True if production in self.rules[nonterminal] else False
+
+    def _isEpsilonInSet(self, production):
+        return True if '' in production else False
 
 
 
