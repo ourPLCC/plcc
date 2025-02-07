@@ -116,7 +116,7 @@ def main():
     lex(nxt)    # lexical analyzer generation
     par(nxt)    # LL(1) check and parser generation
     sem(nxt, stubs, **java_spec)
-    sem(nxt, python_stubs, **python_spec)
+    # sem(nxt, python_stubs, **python_spec)
     done()
 
 def plccInit():
