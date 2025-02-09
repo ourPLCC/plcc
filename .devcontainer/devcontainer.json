@@ -1,0 +1,24 @@
+{
+	"name": "Docker in Docker",
+	"image": "mcr.microsoft.com/devcontainers/base:bullseye",
+
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"version": "latest",
+			"enableNonRootDocker": "true",
+			"moby": "true"
+		},
+		"ghcr.io/devcontainers/features/java:1": {},
+		"ghcr.io/devcontainers/features/python:1": {},
+		"ghcr.io/edouard-lopez/devcontainer-features/bats:0": {},
+		"ghcr.io/brokenpip3/devcontainers-bats/bats-libs:0": {},
+		"ghcr.io/devcontainers-extra/features/pdm:2": {}
+	},
+
+	"remoteEnv": {
+   		"PATH": "${containerEnv:PATH}:/workspaces/plcc/src/plcc/bin"
+	},
+
+	"postCreateCommand": "pdm install && pipx install reuse"
+
+}
