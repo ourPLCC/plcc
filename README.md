@@ -22,11 +22,11 @@ may help you determine which option is best for you and your class.
 
 | Option | Software Requirements | Non-Software Requirements | Consistent, Pre-configured Environment |
 | ------ | ------------------- | ----------------------- | ---------- |
-| GitPod |  Web Browser | * Account on GitPod <br> * Account on hosting service (GitLab/GitHub/Bitbucket) <br> * Knowledge of above and Git | Yes |
+| Codespace |  Web Browser | GitHub Account | Yes |
 | Docker | Docker Desktop | Minimal understanding of Docker | Yes |
 | Native | * Bash/Linux-like environment <br> * Java >= 11 <br> * Python >= 3.9 | System administration knowledge | No |
 
-The advantages of GitPod or Docker are (1) few or no software dependencies
+The advantages of Codespace or Docker are (1) few or no software dependencies
 and (2) the ability to provide your class/developers a consistent development
 environment with no installation necessary.
 
@@ -37,27 +37,25 @@ IT staff install PLCC on a shared server or into a computer lab and having
 your students/developers use those if their native install stops working
 for them for some strange, inexplicable reason.
 
-## Install PLCC for Use in GitPod
+## Install PLCC for Use in a Codespace
 
-Add the following to `.gitpod.yml` in the root of
-your GitLab/GitHub/Bitbucket repository.
+This is probably the easiest way to get started.
 
-```yaml
-image: gitpod/workspace-full:latest
-tasks:
-  - name: Install PLCC
-    command: |
-        # To pin to a specific version of PLCC,
-        # in the next line, change main to something like v8.0.1
-        PLCC_GIT_BRANCH=main \
-          /bin/bash -c \
-          "$(\curl -fsSL https://github.com/ourPLCC/plcc/raw/main/installers/plcc/install.bash)" \
-          >> ~/.bashrc
-        exec bash
+To any project hosted on GitHub, add `.devcontainer/devcontainer.json`
+with the following contents:
+
+```json
+{
+  "name": "your-repository-name",
+  "image": "ghcr.io/ourplcc/plcc-devcontainer:1"
+}
 ```
 
-When the project is edited in a GitPod workspace, PLCC will be installed and
-available in the environments terminal.
+Create a Codespace on that repository, and PLCC, Java, and Python will
+be installed and ready for use within the Codespace.
+
+See [plcc-devcontainer](https://github.com/ourPLCC/plcc-devcontainer) for
+more information about the devcontainer.
 
 ## Install for Use in Docker
 
