@@ -12,7 +12,8 @@
 		"ghcr.io/devcontainers/features/python:1": {},
 		"ghcr.io/edouard-lopez/devcontainer-features/bats:0": {},
 		"ghcr.io/brokenpip3/devcontainers-bats/bats-libs:0": {},
-		"ghcr.io/devcontainers-extra/features/pdm:2": {}
+		"ghcr.io/devcontainers-extra/features/pdm:2": {},
+		"ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
 	},
 
 	"remoteEnv": {

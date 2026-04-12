@@ -1,3 +1,5 @@
+.claude/settings.local.json
+
 # See https://pdm-project.org/latest/usage/project/#working-with-version-control
 .pdm-python
 
