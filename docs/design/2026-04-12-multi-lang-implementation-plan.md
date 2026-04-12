@@ -109,7 +109,7 @@ The sequence of operations:
 1. Create the `v8` support branch from current `plcc` main tip (per §3.1).
 2. Add plcc-ng as a remote to the `plcc` repo and fetch its refs. Delete plcc-ng's experimental `0.0.1`–`0.0.5` tags from the local ref store before the merge so they do not pollute the unified tag namespace.
 3. Create the `multi-lang` branch from current `plcc` main tip.
-4. Merge `ng/main` into `multi-lang`. Resolve conflicts on overlapping files (README, LICENSE, devcontainer, `.gitignore`, etc.) in favor of a clean starting state for v9 development. The merge commit preserves both lineages' history.
+4. Merge `ng/main` into `multi-lang`. Resolve conflicts on overlapping files (README, LICENSE, devcontainer, `.gitignore`, etc.) according to the conflict policy set during the Phase 0 brainstorm — this plan does not pre-decide which side wins for which file. The merge commit preserves both lineages' history.
 5. Immediately after the merge commit, a follow-up commit removes v8's source files from the `multi-lang` working tree. The files remain accessible via the `v8` branch and via history; they simply no longer appear at `multi-lang`'s tip.
 6. Verify CI builds green on the new `multi-lang` tip. plcc-ng's existing test suite is the relevant signal here — it's what's running on `multi-lang` right now.
 7. Push `multi-lang` and `v8` to the remote.
@@ -293,7 +293,9 @@ By the start of this phase, the hard architectural work is done: the pipeline ru
 
 `plcc-scan` and `plcc-parse` are the visualizer commands that let students watch the pipeline's intermediate outputs: tokens and parse trees in human-readable form. They reuse the Level 0 primitives directly, format the output for terminals, and handle the same file+stdin input model as `plcc-rep`. They are small additions on top of infrastructure that already exists.
 
-PyPI publication requires `pyproject.toml` polish: correct metadata, classifiers, dependency declarations (including the three built-in emitter plugins), console-script entry points for every Level 0 and Level 2 command, the `plcc.emitters` entry-point group declaration, README rendering on PyPI, and a release workflow.
+PyPI publication requires `pyproject.toml` polish: correct metadata, classifiers, console-script entry points for every Level 0 and Level 2 command, the `plcc.emitters` entry-point group declaration (populated from built-in emitter modules inside the `plcc` package), README rendering on PyPI, and a release workflow.
+
+**Built-in emitter packaging decision:** the three built-in emitters (Java, Python, PlantUML) are bundled inside the `plcc` package itself for v9.0.0, not published as separate PyPI packages. They live as submodules (e.g. `plcc.emit.java`, `plcc.emit.python`, `plcc.emit.plantuml`) and register themselves under the `plcc.emitters` entry-point group from within `plcc`'s own `pyproject.toml`. A plain `pip install plcc` installs all three. If there is later demand to extract them into separate `plcc-emit-<lang>` PyPI packages, that extraction can happen in a future release without breaking the plugin contract — third-party emitters already have a proven path via the entry-point mechanism.
 
 The first prerelease is tagged `9.0.0a1` and published. The prerelease tag signals that v9 is not yet considered stable and that API changes are possible. Early adopters install with `pip install --pre plcc` and provide feedback.
 
@@ -328,14 +330,15 @@ Iterate on prereleases based on early-adopter feedback, coordinate the update of
 
 Phase 5 is the least mechanical of the phases. It is about iteration, coordination, and cutover timing. The work is:
 
-- **Prerelease iteration.** Additional alphas (`9.0.0a2`, `9.0.0a3`, …) and betas (`9.0.0b1`, …) respond to feedback from pilot users. Each prerelease is cut from `multi-lang` with a version bump and a PyPI publish.
-- **Learning materials update.** The parallel effort to update course materials, example grammars, and documentation to match v9's commands and output. A named maintainer owns this (per spec §17 open risk). The cutover is gated on this work being sufficiently complete.
+- **Prerelease iteration.** Additional alphas (`9.0.0a2`, `9.0.0a3`, …) and betas (`9.0.0b1`, …) respond to feedback from the two pilot faculty. Each prerelease is cut from `multi-lang` with a version bump and a PyPI publish.
+- **Pilot evaluation with the two faculty users.** The known PLCC user population consists of two faculty: the project maintainer and one colleague who meets with the maintainer weekly. Prereleases are evaluated through those weekly conversations and any ad-hoc testing either faculty chooses to do against their own course materials. The exact test cadence and criteria are decided during the Phase 5 brainstorm — which may be as informal as "does it work for the next semester's course?" — but the small user population means pilot testing is a deliberate conversation, not a public beta program.
+- **Learning materials update.** The parallel effort to update course materials, example grammars, and documentation to match v9's commands and output. The maintainer owns this directly (answering spec §17's open question about maintainer identity). The cutover is gated on this work being sufficiently complete for at least one of the two faculty's courses.
 - **Deprecation timeline.** A public announcement names the dates on which (a) v8 transitions to security-fix-only support, (b) v8 is frozen. These dates give existing users a known runway.
 - **Cutover.** Tag `main` with `v8-final`. Merge `multi-lang` into `main` (normal git merge, possibly through a review PR). Publish `plcc==9.0.0` stable to PyPI from the merged `main`. Archive the `plcc-ng` repository with a README pointing to the unified history in `plcc`.
 
 ### 10.3 Acceptance criteria
 
-- At least one pilot user has run v9 on a real course workflow and reported no blocking issues.
+- At least one of the two pilot faculty has run v9 against their own course workflow (or an approximation of it) and reported no blocking issues.
 - Learning materials are updated to match v9 commands and behavior.
 - `v8-final` tag exists on `main`'s pre-cutover tip.
 - `multi-lang` has been merged into `main`.
@@ -450,8 +453,11 @@ These are deliberately deferred. Forcing them now would either produce speculati
 
 ## 14. Open Questions for Review
 
-- **Phase 0 merge conflict resolution policy.** When the merge of `ng/main` into `multi-lang` produces conflicts on files like `README.md`, `LICENSE`, `.gitignore`, and the devcontainer config, the default is "favor a clean starting state for v9 development." Is there any file where plcc's current version should be preferred over plcc-ng's?
 - **Phase 3 red CI duration.** The `languages` CI job is expected to be red for the entire Phase 3 duration. Is that acceptable, or does it warrant a separate CI configuration until it turns green?
-- **Phase 4 built-in emitter packaging.** Are the three built-in emitters (Java, Python, PlantUML) true external dependencies of `plcc` on PyPI, or are they bundled inside the `plcc` package itself? The architectural spec §10.4 is ambiguous on this. It affects the release workflow.
-- **Phase 5 pilot user identification.** Who are the pilot users? Are they named maintainers, self-selected early adopters from a public announcement, or a mix?
 - **Maintainer capacity.** This plan assumes single-developer bandwidth with AI assistance. If additional maintainers join any phase, their onboarding is the responsibility of the phase-level design doc, not this roadmap.
+
+### 14.1 Questions resolved during roadmap review
+
+- **Phase 0 merge conflict resolution policy.** Resolved: the conflict policy is decided during the Phase 0 brainstorm, not pre-decided in this roadmap. §5.2 now reflects this.
+- **Phase 4 built-in emitter packaging.** Resolved: the three built-in emitters (Java, Python, PlantUML) are bundled inside the `plcc` package itself for v9.0.0. They live as submodules and register under the `plcc.emitters` entry-point group from `plcc`'s own `pyproject.toml`. Extraction into separate `plcc-emit-<lang>` packages can happen in a future release if demand emerges. §9.2 captures this.
+- **Phase 5 pilot user identification.** Resolved: the known PLCC user population is the maintainer and one colleague who meets with the maintainer weekly. Pilot evaluation happens through that existing conversation cadence; the exact mechanics are decided during the Phase 5 brainstorm. §10.2 captures this.
