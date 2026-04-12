@@ -41,14 +41,13 @@ Level 1 (intermediate compositions) is deliberately unoccupied in v9. It may eme
                      └───────────────────┬──────────────────────────┘
                                          │ orchestrates
                                          ▼
-         ┌────────────┬──────────────┬──────────┬──────────────┬─────────┐
-         │ plcc-spec  │ plcc-tokens  │ plcc-tree│ plcc-model   │plcc-emit│
-         │            │              │          │              │         │
-         │ grammar    │ text stream  │ tokens   │ spec JSON    │ model   │
-         │   ↓        │   ↓          │   ↓      │   ↓          │   ↓     │
-         │ spec JSON  │ token JSONL  │ tree JSON│ code model   │ source  │
-         │            │              │          │              │ files   │
-         └────────────┴──────────────┴──────────┴──────────────┴─────────┘
+         ┌────────────┬──────────────┬─────────────┬────────────┬──────────┐
+         │ plcc-spec  │ plcc-tokens  │ plcc-tree   │ plcc-model │plcc-emit │
+         │            │              │             │            │          │
+         │ grammar    │ text stream  │ token JSONL │ spec JSON  │model JSON│
+         │   ↓        │   ↓          │   ↓         │   ↓        │   ↓      │
+         │ spec JSON  │ token JSONL  │ tree JSONL  │ model JSON │ files    │
+         └────────────┴──────────────┴─────────────┴────────────┴──────────┘
                                                                    │
                                                                    ▼
                                                   ┌──────────────────────────┐
@@ -63,11 +62,11 @@ Each primitive is a pip console-script entry point provided by the `plcc` packag
 
 | Command | Input | Output | Role |
 |---|---|---|---|
-| `plcc-spec` | grammar file path | spec JSON (stdout) | Parse a `.plcc` grammar file into a structured spec. Already exists in plcc-ng as `spec`; renamed for namespace hygiene. |
-| `plcc-tokens` | text stream (stdin) + spec JSON path | token JSONL (stdout) | Tokenize a character stream into a line-delimited JSON stream of tokens. Stateless; runs until EOF. |
-| `plcc-tree` | token JSONL (stdin) + spec JSON path | tree JSON (stdout) | Parse tokens into an abstract syntax tree. Knows program boundaries from the grammar's start symbol. Long-running; emits one tree per completed program. |
-| `plcc-model` | spec JSON (stdin or path) | code model JSON (stdout) | Transform a language spec into a language-neutral OO code model: classes, inheritance, attributes, constructors, method slots, and opaque semantic blocks. |
-| `plcc-emit` | code model JSON (stdin or path) + `--target=<lang>` + `--output=<dir>` | source files in `<dir>` | Dispatch to an emitter plugin. The plugin writes generated source files and copies its bundled runtime into `<dir>`. The only primitive with side effects other than stdout. |
+| `plcc-spec` | grammar file path | spec JSON (stdout) | Parse a `.plcc` grammar file into a structured spec. One-shot; single JSON document. Already exists in plcc-ng as `spec`; renamed for namespace hygiene. |
+| `plcc-tokens` | text stream (stdin) + spec JSON path | token JSONL (stdout) | Tokenize a character stream into a line-delimited JSON stream of tokens. Streaming; stateless; runs until EOF. |
+| `plcc-tree` | token JSONL (stdin) + spec JSON path | tree JSONL (stdout) | Parse tokens into abstract syntax trees. Knows program boundaries from the grammar's start symbol. Long-running; emits one JSON tree per line, one per completed program. |
+| `plcc-model` | spec JSON (stdin or path) | model JSON (stdout) | Transform a language spec into a language-neutral OO code model: classes, inheritance, attributes, constructors, method slots, and opaque semantic blocks. One-shot; single JSON document. |
+| `plcc-emit` | model JSON (stdin or path) + `--target=<lang>` + `--output=<dir>` | source files in `<dir>` | Dispatch to an emitter plugin. The plugin writes generated source files and copies its bundled runtime into `<dir>`. The only primitive with side effects other than stdout. |
 
 Naming rationale: the four pure filters (`spec`, `tokens`, `tree`, `model`) are named after their output. `emit` is a verb because it is the one primitive that writes files — the asymmetry is a signal, not a bug. `tree` is preferred over `ast` because it is approachable without jargon; `tokens` is preferred over `lex` or `tokenize` because it is a noun and matches the output. `model` is preferred over `code-model` for brevity and because `plcc-code` would be confusable with `plcc-emit`.
 
@@ -92,6 +91,19 @@ Students or instructors who want to run the primitives by hand from a Unix shell
 
 This section describes the shape of data flowing between stages at a high level. Exact schemas are the implementation plan's responsibility; this spec establishes only the contract and the error-record discipline.
 
+**One-shot vs. streaming.** Two of the primitives run as streaming pipeline stages and use JSONL (one JSON document per line) so they can emit output incrementally as input arrives:
+
+- `plcc-tokens` — token JSONL
+- `plcc-tree` — tree JSONL
+
+The other three primitives run once per invocation and produce a single JSON document (or, for `plcc-emit`, files on disk):
+
+- `plcc-spec` — spec JSON (single document)
+- `plcc-model` — model JSON (single document)
+- `plcc-emit` — files
+
+The distinction matters for the REPL: tokens and trees flow through the pipe continuously as the student types programs, while spec and model are built once at `plcc-make` time and reused.
+
 ### 7.1 Spec JSON
 
 Output of `plcc-spec`. Contains lexical rules, syntactic rules, semantic sections (one per `% <tool> <language>` divider), and metadata needed by downstream primitives. Already produced by plcc-ng's existing `spec` command; the shape of the v9 spec JSON starts from whatever plcc-ng emits today and is refined as downstream primitives require.
@@ -100,13 +112,13 @@ Output of `plcc-spec`. Contains lexical rules, syntactic rules, semantic section
 
 Output of `plcc-tokens`. One JSON object per line, each describing a single token: kind, lexeme, source position. A final line marks end-of-stream. Error tokens are in-band records per §8.
 
-### 7.3 Tree JSON
+### 7.3 Tree JSONL
 
-Output of `plcc-tree`. One JSON object per completed program, each describing an abstract syntax tree rooted at the grammar's start symbol. Long-running: `plcc-tree` emits one tree and resumes reading tokens for the next program.
+Output of `plcc-tree`. One JSON object per line, each describing an abstract syntax tree rooted at the grammar's start symbol for one completed program. Long-running: `plcc-tree` emits one tree line and resumes reading tokens for the next program.
 
-### 7.4 Code Model JSON
+### 7.4 Model JSON
 
-Output of `plcc-model`. A language-neutral description of the OO class hierarchy that an emitter will realize in its target language:
+Output of `plcc-model`. A single JSON document — a language-neutral description of the OO class hierarchy that an emitter will realize in its target language:
 
 - **Classes** with inheritance relationships
 - **Attributes** with types described abstractly (primitive, reference, optional, list-of)
@@ -114,7 +126,7 @@ Output of `plcc-model`. A language-neutral description of the OO class hierarchy
 - **Method slots** — named methods with parameter lists and opaque bodies
 - **Semantic blocks** — opaque strings carrying target-language code from the grammar's `%%%` sections, tagged with the source language
 
-The code model is the retargeting pivot. Every emitter consumes this format; adding a new target language means writing an emitter that reads code model JSON and produces source files. The code model does not know anything about any specific target language.
+The code model is the retargeting pivot. Every emitter consumes this format; adding a new target language means writing an emitter that reads model JSON and produces source files. The code model does not know anything about any specific target language.
 
 ### 7.5 Error Records
 
@@ -139,14 +151,14 @@ Downstream stages pass error records through unchanged unless they consume them 
 
 ```
 build/
-├── spec.json           # output of plcc-spec
-├── code-model.json     # output of plcc-model
-├── Java/               # output of plcc-emit for the first semantic section
+├── spec.json         # output of plcc-spec
+├── model.json        # output of plcc-model
+├── Java/             # output of plcc-emit for the first semantic section
 │   ├── <generated .java files>
-│   └── plcc_runtime/   # runtime library copied from the Java emitter plugin
-├── py/                 # output of plcc-emit for a second semantic section
+│   └── runtime/      # runtime library copied from the Java emitter plugin
+├── py/               # output of plcc-emit for a second semantic section
 │   ├── <generated .py files>
-│   └── plcc_runtime/   # runtime library copied from the Python emitter plugin
+│   └── runtime/      # runtime library copied from the Python emitter plugin
 └── ...
 ```
 
@@ -154,7 +166,7 @@ Key properties:
 
 - **Single directory to clean.** `plcc-make` always runs `rm -rf build/` before rebuilding. There is no `-c` flag in v9; clean-and-rebuild is the default and only behavior. (A future option to skip cleaning can be added if a concrete need arises.)
 - **Single `.gitignore` line.** `build/` in the project's `.gitignore` excludes every generated artifact.
-- **Intermediate files are visible.** `spec.json` and `code-model.json` live at the top of `build/` where students can `cat` them. This supports the pedagogy: the pipeline is inspectable, not magical.
+- **Intermediate files are visible.** `spec.json` and `model.json` live at the top of `build/` where students can `cat` them. This supports the pedagogy: the pipeline is inspectable, not magical.
 - **One output subdirectory per semantic section.** Each `% <tool> <language>` divider in the grammar produces one subdirectory named `<tool>`, emitted by the plugin for `<language>`.
 - **Generated output is disposable.** Students are expected to regenerate frequently. Source (the grammar file) is what persists; `build/` is ephemeral.
 
@@ -162,8 +174,8 @@ Key properties:
 
 1. **Clean:** `rm -rf build/`
 2. **Spec:** `plcc-spec grammar > build/spec.json`
-3. **Model:** `plcc-model build/spec.json > build/code-model.json`
-4. **Emit:** for each semantic section, look up the emitter plugin for that section's language, call `emit()` to produce files in `build/<tool>/`, and copy the plugin's bundled runtime into `build/<tool>/plcc_runtime/`.
+3. **Model:** `plcc-model build/spec.json > build/model.json`
+4. **Emit:** for each semantic section, look up the emitter plugin for that section's language, call `emit()` to produce files in `build/<tool>/`, and copy the plugin's bundled runtime into `build/<tool>/runtime/`.
 5. **Build:** for each semantic section, if the emitter plugin defines a `build()` hook, call it to compile or prepare the emitted code (e.g. run `javac` for Java).
 
 If any phase fails, `plcc-make` reports the error and stops; subsequent phases do not run.
@@ -203,7 +215,7 @@ Each emitter plugin package bundles its own runtime library. A reference layout:
 plcc_emit_python/
 ├── __init__.py          # defines emit() and optionally build()
 ├── templates/           # generation templates (Jinja or equivalent)
-└── runtime/             # copied verbatim into build/<tool>/plcc_runtime/
+└── runtime/             # copied verbatim into build/<tool>/runtime/
     ├── __init__.py
     ├── token.py
     ├── node.py
@@ -213,7 +225,7 @@ plcc_emit_python/
 The runtime lives inside the plugin so that:
 
 - **Plugin authors own their runtime.** A plugin for a new language defines both the generated code shape and the base classes those generated classes inherit from. No coordination with plcc core required.
-- **Output is self-contained.** A student running `cd build/py && python main.py` needs nothing beyond their target language's interpreter. No `plcc_runtime` PyPI dependency, no Maven Central lookup, no crates.io.
+- **Output is self-contained.** A student running `cd build/py && python main.py` needs nothing beyond their target language's interpreter. No separate runtime package on PyPI, no Maven Central lookup, no crates.io.
 - **One install per language.** `pip install plcc-emit-rust` brings in emission logic, templates, and runtime in a single unit. Runtime bugs are fixed by releasing a new version of the plugin package.
 - **Regeneration is cheap.** Students regenerate frequently (source is what persists, `build/` is disposable), so "runtime is copied into every rebuild" is not a cost.
 
