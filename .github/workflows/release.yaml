@@ -16,15 +16,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       -
-        uses: codfish/semantic-release-action@v3
+        uses: cycjimmy/semantic-release-action@v4
         id: semantic
         with:
           branches: |
             [
               'main'
             ]
-          additional-packages: |
-            ['conventional-changelog-conventionalcommits@7']
+          extra_plugins: |
+            conventional-changelog-conventionalcommits@7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
@@ -43,15 +43,15 @@ jobs:
       -
         name: Build and push
         uses: docker/build-push-action@v3
-        if: steps.semantic.outputs.new-release-published == 'true'
+        if: steps.semantic.outputs.new_release_published == 'true'
         with:
           context: .
           file: ./containers/plcc/Dockerfile
           push: true
           # yamllint disable-line rule:line-length
           tags: |
-            ghcr.io/ourplcc/plcc:${{ steps.semantic.outputs.release-version }}
-            ghcr.io/ourplcc/plcc:${{ steps.semantic.outputs.release-major }}.${{ steps.semantic.outputs.release-minor }}
-            ghcr.io/ourplcc/plcc:${{ steps.semantic.outputs.release-major }}
+            ghcr.io/ourplcc/plcc:${{ steps.semantic.outputs.new_release_version }}
+            ghcr.io/ourplcc/plcc:${{ steps.semantic.outputs.new_release_major_version }}.${{ steps.semantic.outputs.new_release_minor_version }}
+            ghcr.io/ourplcc/plcc:${{ steps.semantic.outputs.new_release_major_version }}
             ghcr.io/ourplcc/plcc:latest
           platforms: linux/amd64,linux/arm64
